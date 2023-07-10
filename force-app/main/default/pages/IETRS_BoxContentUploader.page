@@ -1,0 +1,75 @@
+<!--
+  @File Name          : IETRS_BoxContentUploader.page
+  @Description        : 
+  @Author             : Kevin Lu
+  @Group              : 
+  @Last Modified By   : Kevin Lu
+  @Last Modified On   : 6/8/2020, 3:30:24 PM
+  @Modification Log   : 
+  Ver       Date            Author      		    Modification
+  1.0       03/30/2020      Kevin Lu                Initial Version
+  2.0       04/21/2020      Kevin Lu                Added showHeader=false
+  3.0       05/18/2020      Kevin Lu                Added more messages for error handling
+-->
+<apex:page showHeader="false" standardStylesheets="false" sidebar="false" applyHtmlTag="false" applyBodyTag="false">
+    <!--SCRIPT START-->
+    <apex:includeScript value="https://cdn01.boxcdn.net/platform/elements/11.0.2/en-US/uploader.js" />
+    <apex:stylesheet value="https://cdn01.boxcdn.net/platform/elements/11.0.2/en-US/uploader.css" />
+    <!--SCRIPT END-->
+    
+    <div class="upload-container" />
+    <script>
+        window.addEventListener("message", function(event) {
+            console.log('event data below: ');
+            console.log(event.data + '|' + event.origin);
+            var dataArray = event.data.split("|");
+            var accessToken = dataArray[0];
+            var folderId = dataArray[1];
+            var auraSourceURL = dataArray[2];
+            var uploader = new Box.ContentUploader();
+
+            var reqInterceptProhibitFiles = (config) => {
+                var method = config.method;
+                console.log(config.url);
+                if (method == "post" && config.url.includes("https://upload")) {
+                    var jsonRep = JSON.parse(config.data.attributes);
+                    console.log(config.data.attributes);
+					if (jsonRep.name.toUpperCase().endsWith(".EXE") || jsonRep.name.toUpperCase().endsWith(".MSG")) {
+                    console.log("No msgs or exes allowed");
+                    var diffURL = "https://api.box.com/2.0/files/badextension";
+                    config.method = "get";
+                    config.url = diffURL;
+                    alert("Please upload anything other than MSG or EXE files.");
+                    }
+                }
+                return config;
+            };
+            
+            uploader.show(folderId, accessToken, {
+                container: '.upload-container',
+                fileLimit: 1,
+                requestInterceptor: reqInterceptProhibitFiles
+
+            });
+            uploader.on('error', (data) => {
+                console.log(`Error uploading file with name "${data.file.name}". The error was: "${data.error}"`);
+                console.log(data);
+                if('message' in data.error) {
+                    parent.postMessage(data.error.message, auraSourceURL);
+                } else if('statusText' in data.error) { //Can occur if token expires mid-upload
+                    parent.postMessage(data.error.statusText, auraSourceURL);
+                }
+                
+            });
+            uploader.on('upload', (data) => {
+                console.log(`Successfully uploaded file with name "${data.name}" to Box File ID ${data.id}`);
+                parent.postMessage(data, auraSourceURL);
+            });
+            uploader.on('close', (data) => {
+                console.log('Close button pressed');
+                parent.postMessage('CLOSE', auraSourceURL);
+            });
+        }, false);
+        
+    </script>
+</apex:page>

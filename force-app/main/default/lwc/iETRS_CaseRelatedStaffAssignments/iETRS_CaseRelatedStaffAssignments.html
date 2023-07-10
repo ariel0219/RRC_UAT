@@ -1,0 +1,65 @@
+<template>
+    <lightning-card title={strListTitle}>
+        <div class="slds-card__body_inner">
+            <template if:true={staffAssignments}>
+                <lightning-layout multiple-rows="true" pull-to-boundary="small">
+                    <template for:each={staffAssignments} for:item="staffAssignment">
+                        <lightning-layout-item key={staffAssignment.Id} size="11" flexibility="auto" class="slds-card_boundary slds-m-around_x-small">
+                            <lightning-card>
+                                <h3 slot="title">
+                                    <lightning-icon icon-name="custom:custom15" size="small" ></lightning-icon>
+                                    <lightning-formatted-url class="slds-p-horizontal_x-small" value={staffAssignment.hrefSA} label={staffAssignment.Name}></lightning-formatted-url>
+                                </h3>
+                                <p class="slds-p-horizontal_small slds-m-bottom_xxx-small slds-truncate">
+                                    <lightning-formatted-url value={staffAssignment.hrefUser} label={staffAssignment.IETRS_Staff_Name_form__c}></lightning-formatted-url>
+                                </p>
+                                <div class="slds-media__body slds-p-horizontal_small slds-grid slds-gutters">
+                                    <div class="slds-col slds-size_5-of-12">
+                                        <p class="slds-m-bottom_xxx-small slds-truncate">Start Date:</p>
+                                        <p class="slds-m-bottom_xxx-small slds-truncate">Role:</p>
+                                        <template if:false={blnHearings}>
+                                            <p class="slds-m-bottom_xxx-small slds-truncate">Lead?</p>
+                                        </template>
+                                        <template if:true={blnHearings}>
+                                            <p class="slds-m-bottom_xxx-small slds-truncate">Chair:</p>
+                                        </template>
+                                    </div>
+                                    <div class="slds-col slds-size_7-of-12">
+                                        <template if:true={staffAssignment.IETRS_Assignment_Start_Date__c}>
+                                            <p class="slds-m-bottom_xxx-small">
+                                                <lightning-formatted-date-time value={staffAssignment.IETRS_Assignment_Start_Date__c}></lightning-formatted-date-time>
+                                            </p>
+                                        </template>
+                                        <template if:false={staffAssignment.IETRS_Assignment_Start_Date__c}>
+                                                <br class="slds-m-bottom_xxx-small">
+                                        </template>
+                                        <p class="slds-m-bottom_xxx-small">{staffAssignment.IETRS_Role__c}</p>
+                                        <template if:false={blnHearings}>
+                                            <span class="uiImage uiOutputCheckbox" data-aura-class="uiImage UiOutputCheckbox">
+                                                <template if:true={staffAssignment.IETRS_Lead__c}>
+                                                    <img class="checked" src="/auraFW/resources/aura/s.gif"/>
+                                                </template>
+                                                <template if:false={staffAssignment.IETRS_Lead__c}>
+                                                    <img class="unchecked" src="/auraFW/resources/aura/s.gif"/>
+                                                </template>  
+                                            </span>
+                                        </template>
+                                        <template if:true={blnHearings}>
+                                            <lightning-formatted-text value={staffAssignment.IETRS_First_Second_Chair__c}></lightning-formatted-text>
+                                        </template>
+                                    </div>
+                                </div>
+                            </lightning-card>
+                        </lightning-layout-item>
+                    </template>
+                </lightning-layout>
+            </template>
+            <template if:true={error}>
+                <div class="slds-text-color_error">
+                        An error occurred while loading the Staff Assignments
+                        {error}
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+</template>

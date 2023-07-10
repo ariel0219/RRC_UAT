@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+	<apiVersion>55.0</apiVersion>
+	<isExposed>true</isExposed>
+	<targets>
+		<target>lightningCommunity__Page</target>
+		<target>lightningCommunity__Default</target>
+		<target>lightning__FlowScreen</target>
+	</targets>
+	<targetConfigs>
+		<targetConfig targets="lightning__FlowScreen">
+			<property name="supplyChainConnectionList" label="List of Supply Chain Connection" type="@salesforce/schema/CIIS_Supply_Chain_Connection__c[]"/>
+		</targetConfig>
+	</targetConfigs>
+</LightningComponentBundle>

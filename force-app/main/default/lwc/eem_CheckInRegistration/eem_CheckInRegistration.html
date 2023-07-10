@@ -1,0 +1,96 @@
+<!-- sldsValidatorIgnore -->
+<template>
+     
+    <lightning-card title="CheckIn Registrations" icon-name="custom:custom18">
+    <div  style=" display: flex; justify-content: center;">
+        <b> Event Title:&nbsp;</b><b class="slds-text-align_right"> {wireEventTitle.data}</b>
+    </div>
+    <div style="width:25%" class="slds-progress-bar slds-progress-bar_circular slds-progress-bar_large"
+    aria-valuemin="0" aria-valuemax={wireTotalCount.data} aria-valuenow={wireCheckInCount.data} role="progressbar">
+    <span class="slds-progress-bar__value" style={totalWidth}></span>
+</div>
+<div>
+    <b>&nbsp;&nbsp;</b> 
+    <b>Total of Check-In Registrations :</b>
+    <b class="slds-text-align_right"> {wireCheckInCount.data}/{wireTotalCount.data}</b>
+</div>
+<div  style="float: right;">
+    <b class="slds-text-align_right">
+        Total Registrations:&nbsp; 
+        </b>
+        <b class="slds-text-align_right">{wireTotalCount.data}</b>
+        <b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b>
+    <b class="slds-text-align_right">
+    Registered:&nbsp; 
+    </b>
+    <b class="slds-text-align_right">{wireRegisteredCount.data}</b>
+    <b>&nbsp;&nbsp;</b>
+    <b class="slds-text-align_right">
+        (Checked In:&nbsp; 
+        </b>
+        <b class="slds-text-align_right">{wireCheckInCount.data}</b>  
+        <b>&nbsp;&nbsp;</b>
+        <b class="slds-text-align_right">
+           Not Checked In:&nbsp; 
+            </b>
+            <b class="slds-text-align_right">{wireNotCheckedInCount.data})</b>  
+            <b>&nbsp;&nbsp;</b>
+            <b class="slds-text-align_right">
+                On Hold:&nbsp; 
+                 </b>
+                 <b class="slds-text-align_right">{wireOnholdCount.data}</b>  
+                 <b>&nbsp;&nbsp;&nbsp;&nbsp;</b>
+                 <b>&nbsp;&nbsp;</b>                 
+</div>
+<template if:true={isUpdating}>
+    <lightning-spinner alternative-text="Updating..." size="medium" variant="brand"></lightning-spinner>
+</template>
+       <div class="slds-var-m-around_medium">
+        <lightning-input
+            type="search"
+            onchange={handleKeyChange}
+            class="searchbar"
+            label="Search"
+            value={keySearch}
+        ></lightning-input>
+        <lightning-datatable
+                key-field="Id"
+                data={recordsToDisplay}
+                columns={columns}
+                hide-checkbox-column="true"  
+                onrowaction={handleRowAction}
+                sorted-by={sortBy}
+                sorted-direction={sortDirection}
+                onsort={doSorting}
+                >
+        </lightning-datatable>
+
+        </div>
+
+        <div class="slds-col">
+            <div class="slds-list_inline slds-p-bottom_xx-small">
+                <label class="slds-text-color_weak slds-p-horizontal_x-small" for="recordsPerPage">Page Size:</label>
+                <div class="slds-select_container">
+                    <select class="slds-select" id="recordsPerPage" onchange={handleRecordsPerPage}>
+                        <template for:each={pageSizeOptions} for:item="option">
+                            <option key={option} value={option}>{option}</option>
+                        </template>
+                    </select>
+                </div>
+            </div>
+        </div>  
+    
+        <!--PAGE NAVIGATION-->
+        <div class="slds-align_absolute-center" style="height:5rem">
+            <lightning-button disabled={bDisableFirst} icon-name="utility:jump_to_left" label="First" class="slds-p-horizontal_x-small"  onclick={firstPage}></lightning-button>
+
+            <lightning-button disabled={bDisableFirst} icon-name="utility:chevronleft" label="Previous"  onclick={previousPage}></lightning-button>
+            &nbsp;
+            <span class="slds-badge">Showing {pageNumber} &nbsp;of&nbsp; {totalPages} &nbsp;&nbsp;Page(s)</span>
+            &nbsp;
+            <lightning-button disabled={bDisableLast} icon-name="utility:chevronright" label="Next"  onclick={nextPage} class="slds-p-horizontal_x-small" icon-position="right"></lightning-button>
+
+            <lightning-button disabled={bDisableLast} icon-name="utility:jump_to_right" label="Last"  onclick={lastPage} icon-position="right"></lightning-button>
+        </div>
+    </lightning-card>
+</template>

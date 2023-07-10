@@ -1,0 +1,67 @@
+<template>
+    <td class="slds-cell-buffer_left slds-cell-wrap ">
+        <a
+            onclick={handleSObjectClick}
+            class="slds-m-bottom_x-small slds-text-link"
+            data-record-id={inspectionResult.inspRec.Id}
+            data-object-api-name="IETRS_Insp_Inspection_Result__c"
+            target="_blank"
+        >
+            {inspectionResult.inspRec.IETRS_Program_Code__c}
+        </a>
+    </td>
+
+    <td class="slds-cell-buffer_left slds-cell-wrap ">
+        <c-ietrs-sobject-lookup
+            object-name="IETRS_Regulatory_Codes__c"
+            placeholder="Search Regulatory Codes..."
+            persist-record
+            onrecordchange={handleRegCodeChange}
+        ></c-ietrs-sobject-lookup>
+    </td>
+    <td class="slds-cell-buffer_left slds-cell-wrap ">
+        <div
+            class="slds-truncate slds-cell-wrap slds-m-bottom_x-small"
+            title={inspectionResult.inspRec.IETRS_Checklist_Item_text__c}
+        >
+            {inspectionResult.inspRec.IETRS_Checklist_Item_Text__c}
+        </div>
+    </td>
+    <td class="slds-cell-buffer_left slds-cell-wrap ">
+        <lightning-combobox
+            name="dependentFld"
+            class="slds-m-vertical_x-small"
+            value={inspectionResult.inspRec.IETRS_Result__c}
+            label="Result"
+            options={inspectionResult.resultOptions}
+            variant="label-hidden"
+            data-field-name="IETRS_Result__c"
+            onchange={handleChange}
+        >
+            <!-- <aura:iteration items={inspectionResult.results} var="val">
+                <option value={!val}>{!val}</option>
+            </aura:iteration> -->
+        </lightning-combobox>
+    </td>
+    <td class="slds-cell-buffer_left slds-cell-wrap">
+        <div class="slds-m-vertical_x-small textarea-container">
+            <lightning-textarea
+                value={inspectionResult.inspRec.IETRS_Note__c}
+                data-field-name="IETRS_Note__c"
+                onblur={handleChange}
+            ></lightning-textarea>
+        </div>
+    </td>
+
+    <td class="slds-cell-buffer_left slds-cell-wrap ">
+        <lightning-input
+            type="checkbox"
+            checked={inspectionResult.inspRec.IETRS_Create_Violation__c}
+            name={inspectionResult.inspRec.Id}
+            label="Create Violation"
+            variant="label-hidden"
+            disabled={isViolationReadOnly}
+            onchange={handleCreateViolationChange}
+        ></lightning-input>
+    </td>
+</template>

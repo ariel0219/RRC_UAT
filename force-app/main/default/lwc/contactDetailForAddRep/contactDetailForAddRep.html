@@ -1,0 +1,196 @@
+<template>
+
+    <lightning-card >
+        <lightning-layout>
+
+            <lightning-layout-item class="slds-var-p-around_xx-small" flexibility="auto">
+                <div class="header-column slds-align_absolute-center slds-text-heading_small slds-var-p-horizontal_large slds-var-p-top_large">
+                    <b> Organization: </b>
+                </div>
+                <div class="header-column slds-align_absolute-center slds-text-heading_small slds-var-p-horizontal_large slds-var-p-bottom_large">
+                    <b>{OrgName} </b>
+                </div>
+
+
+                <template iterator:it={contactsUnderOrganization}>
+
+                    <div key={it.value.Id} class="slds-var-p-around_large">
+
+                        <lightning-card>
+                            <table>
+                                <!-- ROW 1 -->
+                                <tr>
+                                    <td class="slds-size_4-of-5 slds-var-p-right_xx-small">
+                                        <b> Representative :</b> {it.value.FirstName} {it.value.LastName}
+                                    </td>
+                                    <td class="slds-size_1-of-5" style="vertical-align:top">
+                                        <b> Send To</b>
+                                    </td>
+                                </tr>
+                                <!-- ROW 2 -->
+                                <tr>
+                                    <td class="slds-size_4-of-5 slds-var-p-right_xx-small">
+                                        <b> Email Address :</b> {it.value.Email}
+                                    </td>
+                                    <td class="slds-size_1-of-5" style="vertical-align:top">
+                                        <template if:true={it.value.Email}>
+                                            <lightning-input type="checkbox" name="inputToOrg" label="To"
+                                                value={it.value.Id} class="orgTo" data-id={it.value.Id}
+                                                onchange={handleToCheckBox_Org}>
+                                            </lightning-input>
+                                        </template>
+                                    </td>
+                                </tr>
+                                <!-- ROW 3 -->
+                                <tr>
+                                    <td class="slds-size_4-of-5 slds-var-p-right_xx-small">
+                                        <b> CC Email Address :</b> {it.value.IETRS_Email_CC__c}
+                                    </td>
+                                    <td class="slds-size_1-of-5" style="vertical-align:top">
+                                        <template if:true={it.value.IETRS_Email_CC__c}>
+                                            <lightning-input type="checkbox" name="inputCCOrg" label="CC"
+                                                value={it.value.Id} class="orgcc" data-id={it.value.Id}
+                                                onchange={handleCCCheckBox_Org}>
+                                            </lightning-input>
+                                        </template>
+                                    </td>
+                                </tr>
+                            </table>
+                        </lightning-card>
+                    </div>
+
+                </template>
+
+            </lightning-layout-item>
+            <br />
+            <lightning-layout-item class="slds-var-p-around_xx-small" flexibility="auto">
+                <div class="header-column slds-align_absolute-center slds-text-heading_small slds-var-p-horizontal_large slds-var-p-top_large">
+                    <b> Unit: </b>
+                </div>
+                <div class="header-column slds-align_absolute-center slds-text-heading_small slds-var-p-horizontal_large slds-var-p-bottom_large">
+                    <b>{UnitName} </b>
+                </div>
+                <!--<div class="slds-scrollable_y" style="height:15rem;width:30rem">-->
+
+                <template iterator:it={contactsUnderUnit}>
+
+                    <div key={it.value.Id} class="slds-var-p-around_large">
+
+                        <lightning-card>
+                            <table>
+                                <!-- ROW 1 -->
+                                <tr>
+                                    <td class="slds-size_4-of-5 slds-var-p-right_xx-small">
+                                        <b> Representative :</b> {it.value.FirstName} {it.value.LastName}
+                                    </td>
+                                    <td class="slds-size_1-of-5" style="vertical-align:top">
+                                        <b> Send To</b>
+                                    </td>
+                                </tr>
+                                <!-- ROW 2 -->
+                                <tr>
+                                    <td class="slds-size_4-of-5 slds-var-p-right_xx-small">
+                                        <b> Email Address :</b> {it.value.Email}
+                                    </td>
+                                    <td class="slds-size_1-of-5" style="vertical-align:top">
+                                        <template if:true={it.value.Email}>
+                                            <lightning-input type="checkbox" name="input1" label="To"
+                                                value={it.value.Id} data-id={it.value.Id}
+                                                onchange={handleToCheckBox_Unit}></lightning-input>
+                                        </template>
+                                    </td>
+                                </tr>
+                                <!-- ROW 3 -->
+                                <tr>
+                                    <td class="slds-size_4-of-5 slds-var-p-right_xx-small">
+                                        <b> CC Email Address :</b> {it.value.IETRS_Email_CC__c}
+                                    </td>
+                                    <td class="slds-size_1-of-5" style="vertical-align:top">
+                                        <!-- checkbox CC-->
+                                        <template if:true={it.value.IETRS_Email_CC__c}>
+                                            <lightning-input type="checkbox" name="input1" label="CC"
+                                                value={it.value.Id} data-id={it.value.Id}
+                                                onchange={handleCCCheckBox_Unit}></lightning-input>
+                                        </template>
+                                    </td>
+                                </tr>
+                            </table>
+                        </lightning-card>
+                    </div>
+                </template>
+            </lightning-layout-item>
+            <br />
+            <lightning-layout-item class="slds-var-p-around_xx-small" flexibility="auto">
+                <div class="header-column slds-align_absolute-center slds-text-heading_small slds-var-p-horizontal_large slds-var-p-top_large">
+                    <b> Inspection Package: </b>
+                </div>
+                <div class="header-column slds-align_absolute-center slds-text-heading_small slds-var-p-horizontal_large slds-var-p-bottom_large">
+                    <b>{IpName} </b>
+                </div>
+                <!--<div class="slds-scrollable_y" style="height:15rem;width:30rem">-->
+
+                <template iterator:it={contactsUnderInspectionPackage}>
+
+                    <div key={it.value.IETRS_Contact__c} class="slds-var-p-around_large">
+
+                        <lightning-card>
+                            <table>
+                                <!-- ROW 1 -->
+                                <tr>
+                                    <td class="slds-size_4-of-5 slds-var-p-right_xx-small">
+                                        <b> Representative :</b> {it.value.IETRS_Contact__r.FirstName}
+                                        {it.value.IETRS_Contact__r.LastName}
+                                    </td>
+                                    <td class="slds-size_1-of-5" style="vertical-align:top">
+                                        <b> Send To</b>
+                                    </td>
+                                </tr>
+                                <!-- ROW 2 -->
+                                <tr>
+                                    <td class="slds-size_4-of-5 slds-var-p-right_xx-small">
+                                        <b> Email Address :</b> {it.value.IETRS_Contact__r.Email}
+                                    </td>
+                                    <td class="slds-size_1-of-5" style="vertical-align:top">
+                                        <template if:true={it.value.IETRS_Contact__r.Email}>
+                                            <lightning-input type="checkbox" name="input1" label="To"
+                                                value={it.value.IETRS_Contact__c} data-id={it.value.IETRS_Contact__c}
+                                                onchange={handleToCheckBox_IP}></lightning-input>
+                                        </template>
+                                    </td>
+                                </tr>
+                                <!-- ROW 3 -->
+                                <tr>
+                                    <td class="slds-size_4-of-5 slds-var-p-right_xx-small">
+                                        <b> CC Email Address :</b> {it.value.IETRS_Contact__r.IETRS_Email_CC__c}
+                                    </td>
+                                    <td class="slds-size_1-of-5" style="vertical-align:top">
+                                        <!-- checkbox CC-->
+                                        <template if:true={it.value.IETRS_Contact__r.IETRS_Email_CC__c}>
+                                            <lightning-input type="checkbox" name="input1" label="CC"
+                                                value={it.value.IETRS_Contact__c} data-id={it.value.IETRS_Contact__c}
+                                                onchange={handleCCCheckBox_IP}></lightning-input>
+                                        </template>
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </lightning-card>
+                    </div>
+
+                </template>
+            </lightning-layout-item>
+
+        </lightning-layout>
+
+       <!-- <lightning-button variant="brand" label="Save" title="Save" onclick={handleSaveClick}
+            class="slds-m-left_x-small slds-float_right"></lightning-button>
+
+        <lightning-button variant="brand" label="Cancel" title="Cancel" onclick={closeQuickAction}
+            class="slds-m-left_x-small slds-float_right"></lightning-button>-->
+
+
+
+
+    </lightning-card>
+
+</template>

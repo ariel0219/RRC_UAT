@@ -1,0 +1,238 @@
+<template>
+    <div class="slds-theme_default">
+        <article class="slds-card">
+            <div class="slds-card__header slds-grid">
+                <div class="slds-align_absolute-center">
+                    <lightning-button label="Mass Add Secondary Accounts" variant="brand" onclick={openmodal}></lightning-button>
+                </div>
+            </div>
+        </article>
+        <template if:true={openmodel}>
+            <div class="demo-only" style="height: 640px;width:60%">
+                <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+                    <div class="slds-modal__container" style="width: 70% !important;max-width: none;!important;">
+                        
+                        <header class="slds-modal__header">
+                            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                                <lightning-icon icon-name="utility:close" size="medium">
+                                </lightning-icon>
+                                <span class="slds-assistive-text">Close</span>
+                            </button>
+                            <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Mass Add Secondary Accounts</h2>
+                        </header>
+                        <div class="slds-is-relative" if:true={isLoading}>
+                            <lightning-spinner
+                                alternative-text="Loading"
+                            ></lightning-spinner>
+                        </div>
+                        <div class="slds-modal__content slds-p-left_medium slds-p-right_medium" id="modal-content-id-1" style="overflow-y: hidden;">
+                            <template if:true={searchVisible}>
+                                <div style="min-height:250px;">
+                                <h2><b>Populate fields to assist search</b></h2>
+                                <!--
+                                <div>
+                                    <lightning-input type="text" name="input1" value={leaseNumberValue} label="Lease Number" onchange={handleChange1}></lightning-input>
+                                </div>
+                                -->
+                                <!-- START
+                                //@bray : 10 Nov 2022 : RRC-1980 : WO 04 | Mass add Secondary Accounts District Search for Leases
+                                //@bray : 10 Nov 2022 : RRC-1981 : WO 05 | Add search type for lease number or Permit number    
+                                -->
+                                <lightning-layout multiple-rows="true">
+                                    <lightning-layout-item size="3" padding="around-medium">
+                                        <lightning-combobox
+                                                    name="searchtype"
+                                                    label="Search By"
+                                                    placeholder="Search By"
+                                                    value={searchBy}
+                                                    options={searchbyoptions}
+                                                    required="true" 
+                                                    onchange={displaySearchTemplate}></lightning-combobox>                                        
+                                    </lightning-layout-item>
+                                    <template if:true={searchByLease}>
+                                        <lightning-layout-item size="4" padding="around-medium">
+                                            <lightning-input type="text" name="input1" 
+                                            value={leaseNumberValue} required={searchByLease}
+                                            label="Lease Number" onchange={handleChange1}></lightning-input>                                       
+                                        </lightning-layout-item>
+                                        <lightning-layout-item size="5" padding="around-medium">
+                                            <div class="slds-form-element__label slds-no-flex">
+                                                District <span style="font-size:10px;color:red">(Enter a minimum of 3 characters to return search results)</span>
+                                            </div>
+                                            <lightning-record-edit-form object-api-name="Account">
+                                                <lightning-input-field field-name="IETRS_District__c" variant="label-hidden" onchange={handleDistrictChange}></lightning-input-field>
+                                            </lightning-record-edit-form>                                        
+                                        </lightning-layout-item>
+                                    </template>
+                                    <template if:true={searchByPermit}>
+                                        <lightning-layout-item size="4" padding="around-medium">
+                                            <lightning-input type="text" name="permitnumber" 
+                                                value={permitNumberValue} required={searchByPermit}
+                                                label="Permit Number" onchange={handlePermitChange}></lightning-input>    
+                                        </lightning-layout-item>
+                                    </template>
+                                </lightning-layout>
+                                <!--
+                                <div class="slds-grid slds-gutters">                                    
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning-combobox
+                                                    name="searchtype"
+                                                    label="Search By"
+                                                    placeholder="Search By"
+                                                    value={searchBy}
+                                                    options={searchbyoptions}
+                                                    required="true" 
+                                                    onchange={displaySearchTemplate}></lightning-combobox>                                    
+                                    </div>
+                                    <template if:true={searchByLease}>                           
+                                        <div class="slds-col slds-size_1-of-2">
+                                            <lightning-input type="text" name="input1" 
+                                            value={leaseNumberValue} required={searchByLease}
+                                            label="Lease Number" onchange={handleChange1}></lightning-input>
+                                        </div>
+                                    </template>
+                                    <template if:true={searchByPermit}>                           
+                                        <div class="slds-col slds-size_1-of-2">
+                                            <lightning-input type="text" name="permitnumber" 
+                                            value={permitNumberValue} required={searchByPermit}
+                                            label="Permit Number" onchange={handlePermitChange}></lightning-input>
+                                        </div>
+                                    </template>  
+                                </div>
+                                <template if:true={searchByLease}>
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <lightning-record-edit-form object-api-name="Account">
+                                            <lightning-input-field field-name="IETRS_District__c" label="District" onchange={handleDistrictChange}></lightning-input-field>
+                                        </lightning-record-edit-form>                                           
+                                    </div>
+                                </template>
+                                -->
+                                </div>
+                                <!-- FINISH -->                                
+                            </template>
+                        </div>
+                        <div class="slds-modal__content slds-p-around_medium" >
+                            <template if:true={resultsVisible}>
+                                <div class="slds-m-around_xx-large" if:true={noData}>
+                                    <div class="slds-text-align_center">Account(s) searched are already assigned to this Case or do not exist.</div>
+                                </div>
+                                <div class="slds-m-around_medium" if:false={noData}>                             
+                                    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-m-top_small" if:false={isLoading}>
+                                        <thead>
+                                            <tr class="slds-line-height_reset">
+                                                <th class="" scope="col">
+                                                    <div class="slds-truncate" title="Selected">Select All</div>
+                                                    <lightning-input type="checkbox" onchange={selectAllCheckboxes} ></lightning-input>
+                                                </th>
+                                                <th class="" scope="col">
+                                                <div class="slds-truncate" title="Account">Account Name</div>
+                                                </th>
+                                                <template if:true={searchByLease}> 
+                                                    <th class="" scope="col">
+                                                        <div class="slds-truncate" title="Well Number">Well Number</div>
+                                                    </th>
+                                                    <th class="" scope="col">
+                                                        <div class="slds-truncate" title="Lease Number">Lease Number</div>
+                                                    </th>
+                                                </template>
+                                                <template if:true={searchByPermit}>
+                                                    <th class="" scope="col">
+                                                        <div class="slds-truncate" title="Permit Number">Permit Number</div>
+                                                    </th> 
+                                                    <th class="" scope="col">
+                                                        <div class="slds-truncate" title="Permit Number">Parent Account</div>
+                                                    </th> 
+                                                    <th class="" scope="col">
+                                                        <div class="slds-truncate" title="Permit Number">Parent Permit Number</div>
+                                                    </th> 
+                                                </template>
+                                                <th class="" scope="col">
+                                                    <div class="slds-truncate" title="District Name">District</div>
+                                                </th>                                                                                                                                                                                             
+                                            </tr>
+                                        </thead>
+                                        <tbody>   
+                                            <template for:each={displayAccounts} for:item="Account">
+                                                <tr class="slds-hint-parent" key={Account.Id}>
+                                                    <td> 
+                                                        <div>
+                                                            <lightning-input class="recCheckboxes" type="checkbox" value={Account.Id}></lightning-input>
+                                                        
+                                                        </div>
+                                                    </td>    
+                                                    <td>
+                                                        <div class="slds-truncate" title={Account.Name}>{Account.Name}</div> 
+                                                    </td>
+                                                    <template if:true={searchByLease}> 
+                                                        <td>
+                                                            <div class="slds-truncate" title={Account.IETRS_Well_Number__c}>{Account.IETRS_Well_Number__c}</div>
+                                                        </td>                                                                                                      
+                                                        <td>
+                                                            <div class="slds-truncate" title={Account.IETRS_Lease_Number__c}>{Account.IETRS_Lease_Number__c}</div>
+                                                        </td>
+                                                    </template>
+                                                    <template if:true={searchByPermit}>
+                                                        <td>
+                                                            <div class="slds-truncate" title={Account.IETRS_Drilling_Permit_Number__c}>{Account.IETRS_Drilling_Permit_Number__c}</div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="slds-truncate" title={Account.IETRS_Drilling_Permit_Number__c}>{Account.ParentName}</div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="slds-truncate" title={Account.IETRS_Drilling_Permit_Number__c}>{Account.ParentPermitNumber}</div>
+                                                        </td>
+                                                    </template>
+                                                    <td>
+                                                        <div class="slds-truncate" title={Account.DistrictName}>{Account.DistrictName}</div>
+                                                    </td>                                                    
+
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </template> 
+                            <template if:true={sAsNotChildren}>
+                                <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_warning" role="alert">
+                                    <span class="slds-assistive-text">warning, these accounts are not children of your case's primary account</span>
+                                    <span class="slds-icon_container slds-icon-utility-warning slds-m-right_x-small" title="Description of icon when needed">
+                                            <svg class="slds-icon slds-icon_x-small" aria-hidden="true">
+                                              <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#warning"></use>
+                                            </svg>
+                                          </span>
+                                    <h2>The following selected Accounts are not children of your Case's Primary Account:
+                                        </br>{warningList} 
+                                    </h2>
+                                    
+                                </div>
+                            </template>       
+                        </div>
+                        <footer class="slds-modal__footer">
+                            <div class="slds-float_left" if:true={resultsVisible}>
+                                <lightning-button
+                                  label="Back"
+                                  variant="neutral"
+                                  onclick={handleBackClick}
+                                ></lightning-button>
+                            </div>
+                            
+                            <template if:true={searchVisible}>
+                                    <lightning-button label="Cancel" variant="neutral" onclick={closeModal}></lightning-button>&nbsp;&nbsp;&nbsp;&nbsp;
+                                    <lightning-button label="Search" variant="brand" onclick={handleSearch}></lightning-button>
+                            </template>
+                            <template if:true={resultsVisible}>
+                                    <lightning-button label="Cancel" variant="neutral" onclick={closeModal}></lightning-button>&nbsp;&nbsp;&nbsp;&nbsp;
+                                <lightning-button if:false={noData} label="Add Records" variant="brand" onclick={createRecordsAction}></lightning-button>
+                            </template>
+                            <template if:true={sAsNotChildren}>
+                                    <lightning-button label="Go Back" variant="neutral" onclick={returnResults}></lightning-button>&nbsp;&nbsp;&nbsp;&nbsp;
+                                    <lightning-button label="Okay, Add Records" variant="brand" onclick={createRecordsAction}></lightning-button>
+                            </template>
+                        </footer>
+                    </div>
+                </section>
+                <div class="slds-backdrop slds-backdrop_open"></div>
+            </div>
+        </template>
+    </div>
+</template>

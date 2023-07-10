@@ -1,0 +1,36 @@
+<!--
+  @Page Name          : IETRS_boxUIPreview.page
+  @Description        : 
+  @Author             : Kevin Lu
+  @Group              : 
+  @Last Modified By   : Kevin Lu
+  @Last Modified On   : 5/30/2019, 10:11:53 AM
+  @Modification Log   : 
+  ==============================================================================
+  Ver         Date                     Author                 Modification
+  ==============================================================================
+  1.0    5/30/2019, 9:38:51 AM   Kevin Lu     Initial Version
+-->
+<apex:page standardController="IETRS_Files_Correspondence__c" extensions="IETRS_boxUIPreviewController" action="{!initalizeToken}">
+    <!-- 
+        only show confidential files to internal users (siteId is an empty string for internal users)
+    -->
+    <apex:outputPanel rendered="{!
+        (IETRS_Files_Correspondence__c.IETRS_Confidential__c && $Site.SiteId == '') ||
+        !IETRS_Files_Correspondence__c.IETRS_Confidential__c
+    }" layout="none">
+        <!--SCRIPT START-->
+        <apex:includeScript value="https://cdn01.boxcdn.net/platform/preview/2.10.0/en-US/preview.js" />
+        <apex:includeScript value="https://cdn.polyfill.io/v2/polyfill.min.js?features=Promise" />
+        <apex:stylesheet value="https://cdn01.boxcdn.net/platform/preview/2.10.0/en-US/preview.css" />
+        <!--SCRIPT END-->
+        <div class="preview-container" style="height:300px; width:100%;"></div>
+        <script>
+            var preview=new Box.Preview();
+            preview.show('{!IETRS_Files_Correspondence__c.IETRS_Box_File_ID__c}', '{!DownscopeToken}', {
+                container: '.preview-container',
+                showDownload: 'true'
+            });
+        </script>
+    </apex:outputPanel>
+</apex:page>

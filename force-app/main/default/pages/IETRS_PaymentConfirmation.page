@@ -1,0 +1,29 @@
+<!--
+  @File Name          : IETRS_PaymentConfirmation.page
+  @Description        : 
+  @Author             : Kevin Lu
+  @Group              : 
+  @Last Modified By   : Kevin Lu
+  @Last Modified On   : 5/20/2020, 2:25:33 PM
+  @Modification Log   : 
+  Ver       Date            Author      		    Modification
+  1.0    4/2/2020   Kevin Lu     Initial Version
+-->
+<apex:page lightningStylesheets="true" standardController="IETRS_Transaction__c" extensions="IETRS_PaymentControllerExt" action="{!checkStatus}" showHeader="false" applyHtmlTag="true" applyBodyTag="false">
+    <head>
+        <apex:slds />
+    </head>
+    <body style="background-color: transparent;">
+        <div class="slds-scope">
+            <p class="slds-text-align_center slds-text-heading_large">
+                Thank you for your payment!
+            </p>
+        </div>
+    </body>
+    <!-- 
+    <style>
+        .payment-confirmation-message {text-align: center; font-family: Ek Mukta;}
+    </style>
+    -->
+    
+</apex:page>

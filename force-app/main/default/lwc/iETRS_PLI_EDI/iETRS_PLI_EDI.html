@@ -1,0 +1,263 @@
+<template>
+    <template if:true={isInitalPS95Displayed}>
+        <lightning-card title="PS-95 EDI Submission">
+            <p class="slds-p-horizontal_small">
+            To submit your PS-95 by EDI, please search for your operator using the query on the left.    
+            </p>     
+            </br>
+        </lightning-card>
+    </template>
+    <!--Will show on screen when Search button is selected in Query -->
+    <template if:true={isDataCreated}>
+        <lightning-card title="PS-95 EDI Submission" style="font-weight: bold;">
+            <p class="slds-p-horizontal_small" style="font-weight: normal;">Click begin to submit your PS-95 in bulk by EDI.</p>
+            </br>       
+            <lightning-layout-item flexibility="auto" padding="around-small" onchange={handleEvent}>
+                </br>          
+            </lightning-layout-item>        
+            <div class="slds-float_right" >
+                <lightning-button 
+                    variant="brand" 
+                    label="Begin"
+                    title="PS-95 Submission" 
+                    onclick={openModal} 
+                    class="slds-m-left_x-small">
+                </lightning-button>            
+            </div>
+            </br>
+        </lightning-card>
+    </template>
+
+
+    <!--Use template if:true to display/hide popup based on isModalOpen value--> 
+    <template if:true={isModalOpen}>
+        <!-- Modal/Popup Box LWC starts here -->
+        <section id="beginModal" role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <!-- Modal/Popup Box LWC header here -->
+                <header class="slds-modal__header">
+                    <!--Close/Cancel button at top of modal -->
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                        <lightning-icon 
+                            icon-name="utility:close"
+                            alternative-text="close"
+                            variant="inverse"
+                            size="small" >
+                        </lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">PS-95 EDI File Upload</h2>
+                </header>
+                <!-- Modal body starts here -->
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                    <p><b>Submit the PS-95 for Organization, {operatorName}, in Filing Period, {ReportPeriod}:</b></p>
+                    <br/>
+                    <b>1.</b>  Click Upload Files.<br/><b>​2.</b>  Select your file from the explorer prompt.​<br/><b>3.</b>  Click Upload.<br/><br/>                   
+                    <!-- Modal File Selector-->
+                    <div class="slds-form-element modal-file-upload">
+                        <div class="slds-form-element__control">
+                            <lightning-file-upload
+                                label="Attachment"
+                                name="fileUploader"
+                                accept={acceptedFormats}
+                                record-id={recordId}
+                                onuploadfinished={handleUploadFinished}>                                     
+                            </lightning-file-upload>       
+                        </div>
+                    </br>
+                        File: <b>{ediFileName}</b>
+                    </div>
+                </div>               
+                <!-- Modal footer starts here -->
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" onclick={closeModal}>Cancel</button>
+                    <lightning-button variant="brand" onclick={nextmodal} label="Next" disabled={isNextBtnDisabled} class="slds-p-around_small">Next</lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>    
+    <!--Second modal after save and next button--> 
+    <template if:true={isNextModalOpen}>
+        <!-- Modal/Popup Box LWC starts here -->
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-02" aria-modal="true" aria-describedby="modal-content-id-2" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <!-- Modal/Popup Box LWC header here -->
+                <header class="slds-modal__header">
+                    <!--Close/Cancel button at top of modal -->
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                        <lightning-icon 
+                            icon-name="utility:close"
+                            alternative-text="close"
+                            variant="inverse"
+                            size="small" >
+                        </lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 id="modal-heading-02" class="slds-text-heading_medium slds-hyphenate">PS-95 EDI File Upload</h2>
+                </header>
+                <!-- Modal/Popup Box LWC body starts here -->
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-2">
+                    <p>Organization Name: <b>{operatorName}</b></p>
+                    <p>Filing Period: <b>{ReportPeriod}</b></p>
+                    <p>File: <b>{ediFileName}</b></p> <!--maybe make this a URL link to the file-->
+
+                    <p>Thank you for uploading your PS-95 EDI file. Please choose one of the following options:</p>​
+                    <p><b>Validate</b> - If you would like to validate the format of your EDI file.​</p>
+                    <p><b>Submit</b> - If you are ready to submit your PS-95 to RRC.*​</p>
+                    <br/>
+                    <p>* A validation will still be performed, and the file may be rejected if errors are found.</p>
+                    <!-- <div if:true={isLoaded} class="slds-is-relative"> -->
+                    <br/>
+                    <div if:true={isLoaded} class="slds-is-relative">
+                        <p>Validating: {numValidationCount} of {numTotalRepairedLeaks}</p>
+                        <lightning-progress-bar value={numValidationPercent} size="large"></lightning-progress-bar>
+                    </div>
+                </div>
+                <!-- Modal/Popup Box LWC footer starts here -->
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" onclick={closeModal}>Cancel</button>
+                    <button class="slds-button slds-button_brand" onclick={backmodal} title="Back">Back</button>
+                    <button class="slds-button slds-button_brand" onclick={validateBtn} title="validate">Validate</button>
+                    <button class="slds-button slds-button_brand" onclick={handleSubmit} title="submit">Submit</button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+    <!--Validation -->
+    <template if:true={isValidationModalPassed}>
+        <!-- Modal/Popup Box LWC starts here -->
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-03" aria-modal="true" aria-describedby="modal-content-id-3" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <!-- Modal/Popup Box LWC header here -->
+                <header class="slds-modal__header">
+                    <!--Close/Cancel button at top of modal -->
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                        <lightning-icon 
+                            icon-name="utility:close"
+                            alternative-text="close"
+                            variant="inverse"
+                            size="small" >
+                        </lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 id="modal-heading-03" class="slds-text-heading_medium slds-hyphenate">PS-95 EDI File Upload</h2>
+                </header>
+                <!-- Modal/Popup Box LWC body starts here -->
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-3">
+                    <div if:true={loadingSpinner} class="slds-spinner_inline spinner-padding">
+                        <lightning-spinner variant="brand" 
+                                           alternative-text="Loading file"     
+                                           size="medium">
+                        </lightning-spinner>
+                    </div>    
+                        <p>Organization Name: <b>{operatorName}</b></p>
+                        <p>Filing Period: <b>{ReportPeriod}</b></p>
+                        <p>File: <b>{ediFileName}</b></p>
+                        <p>Errors: <b>None</b></p>
+                        <br/>
+                        <p>Your PS-95 file has been validated and no errors were found. If you also wish to submit your PS-95, you may click the submit button to send your PS-95 to RRC.</p>
+                        <br/>
+                        
+                </div>
+                <!-- Modal/Popup Box LWC footer starts here -->
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" onclick={closeModal}>Cancel</button>
+                    <button class="slds-button slds-button_brand" onclick={handleSubmit} title="submit">Submit</button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+    <!-- Modal window opened during Batch Save -->
+    <template if:true={isBatchSaving}>
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-05" aria-modal="true" aria-describedby="modal-content-id-5" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <!--
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeBatchModal} disabled="True">
+                        <lightning-icon 
+                            icon-name="utility:close"
+                            alternative-text="close"
+                            variant="inverse"
+                            size="small" >
+                        </lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                -->
+                    <h2 id="modal-heading-05" class="slds-text-heading_medium slds-hyphenate">PS-95 EDI File Upload</h2>
+                </header>
+
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-5">
+                    <p>Organization Name: <b>{operatorName}</b></p>
+                    <p>Filing Period: <b>{ReportPeriod}</b></p>
+                    <br/>
+                    <p><strong>Your PS-95 file is currently saving. This window will close when the save is complete.</strong></p>
+                    <div class="slds-is-relative">
+                        <br><br><br>
+                        <lightning-spinner variant="brand" size="medium"> </lightning-spinner>
+                    </div>
+                    
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- If error is given during validation -->
+    <template if:true={validationFailed}>
+       
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-04" aria-modal="true" aria-describedby="modal-content-id-4" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                
+                <header class="slds-modal__header">
+                    
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                        <lightning-icon 
+                            icon-name="utility:close"
+                            alternative-text="close"
+                            variant="inverse"
+                            size="small" >
+                        </lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 id="modal-heading-04" class="slds-text-heading_medium slds-hyphenate">PS-95 EDI File Upload</h2>
+                </header>
+                
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-4">
+                    <div if:true={loadingSpinner} class="slds-spinner_inline spinner-padding">
+                        <lightning-spinner variant="brand" 
+                                           alternative-text="Loading file"     
+                                           size="medium">
+                        </lightning-spinner>
+                    </div>    
+                    <p>Organization Name: <b>{operatorName}</b></p>
+                    <p>Filing Period: <b>{ReportPeriod}</b></p>
+                    <p>File: <b>{ediFileName}</b></p>
+                    <p>Errors: <b>Please review below</b></p>
+                    <br/>
+                    <p>Your PS-95 file has been validated and one or more errors were found. Please see the list of errors below. Once you have addressed these errors in your EDI file, please try the EDI submission again.​</p>
+                    <br/>
+                    <div class="slds-box">
+                        <div class="slds-scrollable-y slds-size_full" style="height:15rem">
+                            <div class="slds-text-color_error" style="width:100%">
+                                <template iterator:it={arrErrorMessages}>                                
+                                    <li key={it.value.Id}>
+                                        {it.value}
+                                    </li>
+                                </template>
+                            </div>                           
+                        </div>           
+                    </div>                  
+                    <br/>                          
+                </div>
+                
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" onclick={closeModal}>Close</button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template> 
+</template>

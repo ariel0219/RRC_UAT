@@ -1,0 +1,28 @@
+.under{
+position:fixed;
+bottom:0;
+padding: 20;
+cursor: pointer;
+}
+ .pointer{
+    cursor: pointer;
+}
+.slds-modal__container{
+    
+    min-width: 95vw !important;
+}
+.red {
+    outline: 1px solid red;
+}
+.row-format{
+    text-align:left;
+    padding:4px;
+    padding-top: 25px;
+}
+.template{
+    counter-reset: my-row-counter;
+}
+.div::before{
+    counter-increment: my-row-counter;
+    content: counter(my-row-counter);
+}

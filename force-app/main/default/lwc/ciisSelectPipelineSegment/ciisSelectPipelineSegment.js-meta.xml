@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>57.0</apiVersion>
+    <isExposed>true</isExposed>
+    <targets>
+        <target>lightning__FlowScreen</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig
+            targets="lightning__FlowScreen"
+        >
+            <property
+                name="receiverLatitude"
+                type="String"
+                label="Receiver Latitude"
+                role="inputOnly"
+            />
+            <property
+                name="receiverLongitude"
+                type="String"
+                label="Receiver Longitude"
+                role="inputOnly"
+            />
+            <property
+                name="receiverName"
+                type="String"
+                label="Receiver Name"
+                role="inputOnly"
+            />
+            <property
+                name="endpoint"
+                type="String"
+                label="Web Service Endpoint"
+                role="inputOnly"
+            />
+
+            <property
+                name="operatorId"
+                type="String"
+                label="P5 Org Id"
+                role="inputOnly"
+            />
+
+            <property
+                name="supplyChainType"
+                type="String"
+                label="Suppply Chain Type (Direct Connect or Pipeline Tap)"
+                role="inputOnly"
+            />
+
+            <property
+                name="p5Number"
+                type="String"
+                label="P5_NUM"
+                role="inputOnly"
+            />
+            <property
+                name="t4PermitNumber"
+                type="String"
+                label="T4PERMIT"
+                role="inputOnly"
+            />
+            <property
+                name="gasCommodity"
+                type="String"
+                label="COMMODITY1"
+                role="inputOnly"
+            />
+            <property
+                name="systemName"
+                type="String"
+                label="SYS_NM"
+                role="inputOnly"
+            />
+            <property
+                name="subSystemName"
+                type="String"
+                label="SUBSYS_NM"
+                role="inputOnly"
+            />
+            <property
+                name="pipesSystemName"
+                type="String"
+                label="PLS_SYSNM"
+                role="inputOnly"
+            />
+            <property
+                name="pipelineStatus"
+                type="String"
+                label="TX_REG"
+                role="inputOnly"
+            />
+            <property
+                name="pipelineId"
+                type="String"
+                label="PLINE_ID"
+                role="inputOnly"
+            />
+            <property
+                name="diameter"
+                type="String"
+                label="DIAMETER"
+                role="inputOnly"
+            />
+            <property
+                name="county"
+                type="String"
+                label="COUNTY"
+                role="inputOnly"
+            />
+
+            <property
+                name="selectedPipelineSegment"
+                type="@salesforce/schema/Account"
+                label="Selected Pipeline Segment"
+                role="outputOnly"
+            />
+
+            <property
+                name="selectedSegmentWithDetails"
+                type="@salesforce/schema/Account[]"
+                label="Selected Pipeline Segments With Details"
+                role="outputOnly"
+            />
+
+            <property
+                name="segmentLatitude"
+                type="String"
+                label="Segment Latitude"
+                role="outputOnly"
+            />
+
+            <property
+                name="segmentLongitude"
+                type="String"
+                label="Segment Longitude"
+                role="outputOnly"
+            />
+
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

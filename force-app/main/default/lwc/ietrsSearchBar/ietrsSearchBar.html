@@ -1,0 +1,31 @@
+<template>
+    <form autocomplete="off" class={baseClass} onclick={onSearchBarClick} onsubmit={handleSubmit}>
+        <div class="pos-a h100 dif top0">
+            <lightning-icon
+                class="z2 slds-m-left_x-small dif as-center"
+                icon-name={icon}
+                size="x-small"
+            ></lightning-icon>
+        </div>
+        <input
+            type="text"
+            class={textInputClass}
+            placeholder={placeholder}
+            value={value}
+            readonly={readOnly}
+            onkeyup={onInputChange}
+            onpaste={onInputChange}
+            onfocus={onInputFocus}
+            onblur={onInputBlur}
+        />
+        <div class="pos-a h100 dif top0 right0">
+            <lightning-icon
+                if:true={showClearIcon}
+                class="js-clear-icon z2 slds-m-right_x-small dif as-center cptr"
+                icon-name="utility:close"
+                size="xx-small"
+                onclick={onClearIconClick}
+            ></lightning-icon>
+        </div>
+    </form>
+</template>

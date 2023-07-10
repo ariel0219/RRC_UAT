@@ -1,0 +1,18 @@
+<!-- sldsValidatorIgnore -->
+<template>
+   
+    <template if:true={events}>
+        <lightning-datatable
+                key-field="Id"
+                data={events}
+                columns={columns}
+                onrowselection={handleRowSelection}
+                max-row-selection={maxRowSelection}
+                
+                >
+        </lightning-datatable>
+        <!-- max-row-selection={maxRowSelection}-->
+    </template>
+   <!--<lightning-button label="Next" variant="brand" onclick={handleNext} disabled={checkBool}></lightning-button>-->
+
+</template>

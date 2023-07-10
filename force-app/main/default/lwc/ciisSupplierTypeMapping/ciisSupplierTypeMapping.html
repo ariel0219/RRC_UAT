@@ -1,0 +1,14 @@
+<template>
+    <div class="slds-text-heading_small">Gas Supplier Type.</div>
+    <template if:false={isFound}>
+        <div class="slds-text-color_error">Supplier type not found matching with receiver.</div>
+    </template>
+    <template if:true={isFound}>
+    <lightning-combobox
+            name="supplierType"
+            value={value}
+            placeholder="Select Supplier Type"
+            options={options}
+            onchange={handleChange} ></lightning-combobox>
+    </template>
+</template>

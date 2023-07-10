@@ -1,0 +1,14 @@
+<template>
+    <div if:true={error} class="slds-box slds-theme_error">{error}</div>
+    <div class="slds-var-m-bottom_medium">
+        <lightning-datatable
+            if:true={isReady}
+            columns={columns}
+            data={_records}
+            key-field={keyField}
+            hide-checkbox-column={hideCheckboxColumn}
+            max-row-selection={maxRowSelection}
+            onrowselection={handleRowSelection}
+        ></lightning-datatable>
+    </div>
+</template>

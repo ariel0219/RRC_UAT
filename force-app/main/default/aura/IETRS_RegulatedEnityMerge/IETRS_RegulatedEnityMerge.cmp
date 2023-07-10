@@ -1,0 +1,390 @@
+<aura:component
+    implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction"
+    access="global"
+    controller="IETRS_Account_Merge"
+>
+    <ltng:require styles="{!$Resource.AccountTransfer}" />
+    <aura:attribute name="recordId" type="Id" />
+    <aura:attribute name="accountId" type="Id" />
+    <aura:attribute name="filterString" type="string" />
+    <aura:attribute name="countiNumber" type="Integer" default="0" />
+    <aura:attribute name="sourceUnit" type="string" />
+    <aura:attribute name="targetUnit" type="string" />
+    <aura:attribute name="totalInspec" type="string" default="0" />
+    <aura:attribute name="regulatedEntitiesIds" type="string" />
+    <aura:attribute name="unitsIds" type="string" />
+    <aura:attribute name="totalMiles" type="string" />
+    <aura:attribute name="selectedIds" type="list" />
+    <aura:attribute name="recordTypName" type="string" />
+    <aura:attribute name="accountVar" type="IETRS_AccountTransfer.AccountTypes" default="" />
+    <aura:attribute name="paramTypes" type="IETRS_AccountTransfer.SearchParams" default="" />
+    <aura:attribute name="isLoading" type="boolean" default="false" />
+    <aura:attribute name="hasRecords" type="boolean" default="true" />
+    <aura:attribute name="continuePopup" type="boolean" default="false" />
+    <aura:attribute name="selectedSourceRegulatedEntity" type="Object" />
+    <aura:attribute name="selectedTargetRegulatedEntity" type="Object" />
+    <aura:attribute name="selectedSourceUnitRegulatedEntity" type="Object" />
+    <aura:attribute name="selectedTargetUnitRegulatedEntity" type="Object" />
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+    <aura:attribute name="isOpen" type="boolean" default="false" />
+    <aura:attribute name="accountsList" type="list" />
+    <aura:attribute name="reaccList" type="list" />
+    <aura:attribute name="regionsList" type="list" />
+    <aura:attribute name="isSelectAll" type="boolean" default="false" />
+    <aura:attribute
+        name="options"
+        type="List"
+        default="[
+                                                        {'label': 'Units', 'value': 'Units'},
+                                                        {'label': 'Regulated Entities', 'value': 'Regulated Entities'}
+                                                        ]"
+    />
+    <aura:attribute name="radioValue" type="Integer" default="" />
+
+    <aura:attribute name="showButton" type="boolean" default="false" />
+    <aura:attribute name="isFirstPage" type="boolean" default="true" />
+    <aura:attribute name="isSecondPage" type="boolean" default="false" />
+    <aura:attribute name="isThirdPage" type="boolean" default="false" />
+    <aura:attribute name="regulatedEntityCheck" type="boolean" default="true" />
+
+    <lightning:card class="slds-is-relative">
+        <aura:if isTrue="{!v.isLoading}">
+            <div aura:id="spinnerId" class="slds-spinner_container">
+                <div class="slds-spinner--brand  slds-spinner slds-spinner--large slds-is-relative" role="alert">
+                    <span class="slds-assistive-text">Loading</span>
+                    <div class="slds-spinner__dot-a"></div>
+                    <div class="slds-spinner__dot-b"></div>
+                </div>
+            </div>
+        </aura:if>
+        <aura:renderIf isTrue="{!v.isFirstPage}">
+            <lightning:layout>
+                <lightning:layoutItem padding="around-small" size="2"> </lightning:layoutItem>
+                <lightning:layoutItem padding="around-small" size="8">
+                    <div class="c-container">
+                        <div class="custom-box">
+                            <lightning:layout>
+                                <lightning:layoutItem padding="around-small" flexibility="auto">
+                                    <div class="custom-box">
+                                        &nbsp;
+                                        <div style="float: left;color:cadetblue"
+                                            ><b>Name of the Regulated Entity to Merge </b></div
+                                        >
+                                        <p>
+                                            <aura:renderIf isTrue="{! v.regulatedEntitiesIds.size > 0}">
+                                                <c:IETRS_Lookup
+                                                    objectName="Account"
+                                                    fieldSet="['Name','Id','IETRS_County__c','IETRS_Entity_Code__c','IETRS_Product_Class__c',
+                                                            'IETRS_Product_Sub_Class__c','IETRS_Status__c','IETRS_Jurisdiction__c','IETRS_OrganizationName__c','IETRS_P5_Number__c',
+                                                            'IETRS_T4_Permit__c','IETRS_Total_Miles__c','IETRS_Intra_Interstate__c',	
+                                                            'IETRS_Install_Year__c','IETRS_Region__c',	'IETRS_On_Offshore__c','IETRS_Region__r.Name', 'Org_P5_Number__c',
+                                                           ' Type','IETRS_Entity_Sub_Type__c','Parent.Name','Parent.IETRS_Unit_ID__c','(Select Id,Name,IETRS_Regulated_Entity__c,IETRS_Inspection_Package__c,IETRS_Inspection_Package__r.Name,IETRS_Inspection_Package__r.IETRS_Status__c From Inspections__r)','(Select Id,Name,IETRS_Miles__c,IETRS_Regulated_Entity__c From Miles_by_County__r)']"
+                                                    whereCondition="{! 'AND Name != null AND (Id IN'+ v.regulatedEntitiesIds+'OR IETRS_OrganizationofRegEntity__c =\''+ v.recordId+'\') AND '+'RecordType.Name like  \'Regulated Entity%\' '}"
+                                                    limit="20"
+                                                    comparisonField="Name"
+                                                    primaryDisplayField="Name"
+                                                    alternateDisplayField="IETRS_Product_Class__c,IETRS_OrganizationName__c,Org_P5_Number__c"
+                                                    lightningIconName="standard:contact"
+                                                    uniqueLookupIdentifier="testContact1"
+                                                    fieldLabel=""
+                                                    lookupSelected="{!c.getSelectedsourceRegRecord}"
+                                                    selectedLookupRemoved="{!c.setSelectedContact}"
+                                                />
+                                                <aura:set attribute="else">
+                                                    <c:IETRS_Lookup
+                                                        objectName="Account"
+                                                        fieldSet="['Name','Id','IETRS_County__c','IETRS_Entity_Code__c','IETRS_Product_Class__c',
+                                                            'IETRS_Product_Sub_Class__c','IETRS_Status__c',	'IETRS_Jurisdiction__c','IETRS_OrganizationName__c','IETRS_P5_Number__c',
+                                                            'IETRS_T4_Permit__c','IETRS_Total_Miles__c','IETRS_Intra_Interstate__c','IETRS_Region__r.Name',	
+                                                            'IETRS_Install_Year__c','IETRS_Region__c',	'IETRS_On_Offshore__c', 'Org_P5_Number__c',
+                                                           ' Type','IETRS_Entity_Sub_Type__c','Parent.Name','parent.IETRS_Unit_ID__c','(Select Id,Name,IETRS_Regulated_Entity__c,IETRS_Inspection_Package__c,IETRS_Inspection_Package__r.Name,IETRS_Inspection_Package__r.IETRS_Status__c From Inspections__r)','(Select Id,Name,IETRS_Miles__c,IETRS_Regulated_Entity__c From Miles_by_County__r)']"
+                                                        whereCondition="{! 'AND Name != null AND  IETRS_OrganizationofRegEntity__c =\''+ v.recordId+'\' AND '+'RecordType.Name like  \'Regulated Entity%\' '}"
+                                                        limit="20"
+                                                        comparisonField="Name"
+                                                        primaryDisplayField="Name"
+                                                        alternateDisplayField="IETRS_Product_Class__c,IETRS_OrganizationName__c,Org_P5_Number__c"
+                                                        lightningIconName="standard:contact"
+                                                        uniqueLookupIdentifier="testContact1"
+                                                        fieldLabel=""
+                                                        lookupSelected="{!c.getSelectedsourceRegRecord}"
+                                                        selectedLookupRemoved="{!c.setSelectedContact}"
+                                                    />
+                                                </aura:set>
+                                            </aura:renderIf> </p>
+                                        <div style="float: left;color:cadetblue"><b>Name of Regulated Entity ID to Merge</b></div><br/>
+                                        <c:IETRS_Lookup
+                                           objectName="Account"
+                                                    fieldSet="['Name','Id','IETRS_County__c','IETRS_Entity_Code__c','IETRS_Product_Class__c', 
+                                                            'IETRS_Product_Sub_Class__c','IETRS_Status__c',	'IETRS_Jurisdiction__c','IETRS_OrganizationName__c','IETRS_P5_Number__c',
+                                                            'IETRS_T4_Permit__c','IETRS_Total_Miles__c','IETRS_Intra_Interstate__c',	
+                                                            'IETRS_Install_Year__c','IETRS_Region__c',	'IETRS_On_Offshore__c','IETRS_Region__r.Name', 'Org_P5_Number__c',
+                                                           ' Type','IETRS_Entity_Sub_Type__c','Parent.Name','Parent.IETRS_Unit_ID__c','(Select Id,Name,IETRS_Regulated_Entity__c,IETRS_Inspection_Package__c,IETRS_Inspection_Package__r.Name,IETRS_Inspection_Package__r.IETRS_Status__c From Inspections__r)','(Select Id,Name,IETRS_Miles__c,IETRS_Regulated_Entity__c From Miles_by_County__r)']"
+                                                    whereCondition="{! 'AND Name != null AND (Id IN'+ v.regulatedEntitiesIds+'OR IETRS_OrganizationofRegEntity__c =\''+ v.recordId+'\') AND '+'RecordType.Name like  \'Regulated Entity%\' '}"
+                                                    limit="50"
+                                                    comparisonField="IETRS_Regulated_Entity_ID__c"
+                                                    primaryDisplayField="Name"
+                                                    alternateDisplayField="IETRS_Product_Class__c,IETRS_OrganizationName__c,Org_P5_Number__c"    
+                                                    lightningIconName="standard:contact"
+                                                    uniqueLookupIdentifier="testContact1"
+                                                    fieldLabel=""
+                                                    lookupSelected="{!c.getSelectedsourceRegRecord}"
+                                                    selectedLookupRemoved="{!c.setSelectedContact}"             
+                                        />
+                                    </div>
+                                </lightning:layoutItem>
+                            </lightning:layout>
+
+                            <!--  <lightning:layout>
+            <lightning:layoutItem padding="around-small"  flexibility="auto">
+                
+                <div class="custom-box">
+				  <div>
+                    &nbsp; &nbsp;  <div style="float: left;color:cadetblue"><b>Name of the unit to merge</b></div>
+                       </div>     
+                     <c:IETRS_Lookup objectName="Account" fieldSet="['Name','Id','IETRS_County__c','IETRS_Entity_Code__c','IETRS_Product_Class__c', 
+                    'IETRS_Product_Sub_Class__c','IETRS_Status__c',	'IETRS_Jurisdiction__c',
+                    'IETRS_T4_Permit__c','IETRS_Total_Miles__c','IETRS_Intra_Interstate__c',	
+                    'IETRS_Install_Year__c','IETRS_Region__c',	'IETRS_On_Offshore__c',
+                   ' Type','IETRS_Entity_Sub_Type__c','Parent.Name','parent.IETRS_Unit_ID__c']"
+                    whereCondition="{! 'AND Name != null AND Id IN'+ v.unitsIds+' AND RecordType.Name like  \'Unit%\' '+''}" limit="20"
+                    comparisonField="Name" primaryDisplayField="Name"
+                    lightningIconName="standard:contact" uniqueLookupIdentifier="testContact2"
+                    fieldLabel="" lookupSelected="{!c.getSelectedsourceUnitRecord}"
+                    selectedLookupRemoved="{!c.setSelectedContact}" />
+                    </div>
+            </lightning:layoutItem>
+         </lightning:layout>-->
+                        </div>
+                    </div>
+                </lightning:layoutItem>
+                <lightning:layoutItem padding="around-small" size="2"> </lightning:layoutItem> </lightning:layout
+            ><br />
+            <div class="slds-align_absolute-center">
+                <lightning:button label="Next" onclick="{!c.showFlag}" variant="brand" />
+            </div>
+        </aura:renderIf>
+
+        <aura:renderIf isTrue="{!v.isSecondPage}">
+            <lightning:layout>
+                <lightning:layoutItem padding="around-small" size="2"> </lightning:layoutItem>
+                <lightning:layoutItem padding="around-small" size="8">
+                    <div class="c-container">
+                        <div class="custom-box">
+                            <lightning:layout>
+                                <lightning:layoutItem padding="around-small" flexibility="auto">
+                                    <div class="custom-box">
+                                        &nbsp;
+                                        <div style="float: left;color:cadetblue"
+                                            ><b>Name of the Regulated Entity Merge to </b></div
+                                        >
+                                        <p>
+                                            <c:IETRS_Lookup
+                                                objectName="Account"
+                                                fieldSet="['Name','Id','IETRS_County__c','IETRS_Entity_Code__c','IETRS_Product_Class__c', 'IETRS_Regulated_Entity_ID__c',
+                    'IETRS_Product_Sub_Class__c','IETRS_Status__c',	'IETRS_Jurisdiction__c','IETRS_OrganizationName__c','IETRS_P5_Number__c',
+                    'IETRS_T4_Permit__c','IETRS_Type_of_Regulated__c',  'Org_P5_Number__c','IETRS_Total_Miles__c',
+                    'IETRS_Install_Year__c','IETRS_Region__c',	'IETRS_On_Offshore__c',
+                   ' Type','IETRS_Entity_Sub_Type__c','Parent.Name','parent.IETRS_Unit_ID__c','(Select Id,Name,IETRS_Regulated_Entity__c,IETRS_Inspection_Package__c,IETRS_Inspection_Package__r.Name,IETRS_Inspection_Package__r.IETRS_Status__c From Inspections__r)']"
+                                                whereCondition="AND Name != null AND RecordType.Name like  'Regulated Entity%' "
+                                                limit="20"
+                                                comparisonField="Name"
+                                                primaryDisplayField="Name"
+                                                alternateDisplayField="IETRS_Product_Class__c,IETRS_OrganizationName__c,Org_P5_Number__c"            
+                                                lightningIconName="standard:contact"
+                                                uniqueLookupIdentifier="testContact3"
+                                                fieldLabel=""
+                                                lookupSelected="{!c.getSelectedtargetRegRecord}"
+                                                selectedLookupRemoved="{!c.setSelectedContact}"/></p>
+                                    
+                                        <div style="float: left;color:cadetblue"><b>Regulated Entity ID Merge to</b></div><br/>
+                                        <c:IETRS_Lookup
+                                                objectName="Account"
+                                                fieldSet="['Name','Id','IETRS_County__c','IETRS_Entity_Code__c','IETRS_Product_Class__c', 'IETRS_Regulated_Entity_ID__c',
+                                                           'IETRS_Product_Sub_Class__c','IETRS_Status__c',	'IETRS_Jurisdiction__c','IETRS_OrganizationName__c','IETRS_P5_Number__c',
+                                                           'IETRS_T4_Permit__c','IETRS_Type_of_Regulated__c','IETRS_Total_Miles__c',
+                                                           'IETRS_Install_Year__c','IETRS_Region__c',	'IETRS_On_Offshore__c', 'Org_P5_Number__c',
+                                                           'Type','IETRS_Entity_Sub_Type__c','Parent.Name','parent.IETRS_Unit_ID__c','(Select Id,Name,IETRS_Regulated_Entity__c,IETRS_Inspection_Package__c,IETRS_Inspection_Package__r.Name,IETRS_Inspection_Package__r.IETRS_Status__c From Inspections__r)']"
+                                                whereCondition="AND Name != null AND RecordType.Name like  'Regulated Entity%' "
+                                                limit="50"
+                                                comparisonField="IETRS_Regulated_Entity_ID__c"
+                                                primaryDisplayField="Name"
+                                                alternateDisplayField="IETRS_Product_Class__c,IETRS_OrganizationName__c,Org_P5_Number__c"        
+                                                lightningIconName="standard:contact"
+                                                uniqueLookupIdentifier="testContact3"
+                                                fieldLabel=""
+                                                lookupSelected="{!c.getSelectedtargetRegRecord}"
+                                                selectedLookupRemoved="{!c.setSelectedContact}"/>
+                                        
+                                    </div>
+                                </lightning:layoutItem>
+                            </lightning:layout>
+
+                            <!--    <lightning:layout>
+            <lightning:layoutItem padding="around-small"  flexibility="auto">
+                
+                <div class="custom-box">
+				  <div>
+                    &nbsp; &nbsp;  <div style="float: left;color:cadetblue"><b>Name of the unit  merge to </b></div>
+                       </div>     
+                            <c:IETRS_Lookup objectName="Account" fieldSet="['Name','Id','IETRS_County__c','IETRS_Entity_Code__c','IETRS_Product_Class__c',
+                    'IETRS_Product_Sub_Class__c','IETRS_Status__c',	'IETRS_Jurisdiction__c',
+                    'IETRS_T4_Permit__c',''IETRS_Intra_Interstate__c',	
+                    'IETRS_Install_Year__c','IETRS_Region__c',	'IETRS_On_Offshore__c',
+                   ' Type','IETRS_Entity_Sub_Type__c','Parent.Name','parent.IETRS_Unit_ID__c']"
+                    whereCondition="AND Name != null  AND RecordType.Name like  'Unit%' " limit="20"
+                    comparisonField="Name" primaryDisplayField="Name"
+                    lightningIconName="standard:contact" uniqueLookupIdentifier="testContact4"
+                    fieldLabel="" lookupSelected="{!c.getSelectedtargetUnitRecord}"
+                    selectedLookupRemoved="{!c.setSelectedContact}" />
+                    </div>
+            </lightning:layoutItem>
+         </lightning:layout>-->
+                            <lightning:layout>
+                                <lightning:layoutItem padding="around-small" flexibility="auto">
+                                    <div class="custom-box">
+                                        <div>
+                                            &nbsp; &nbsp;
+                                            <div style="float: left;color:cadetblue"><b>Event notes </b></div>
+                                        </div>
+
+                                        <ui:inputTextArea aura:id="notesid" rows="5" />
+                                    </div>
+                                </lightning:layoutItem>
+                            </lightning:layout>
+                        </div>
+                    </div>
+                </lightning:layoutItem>
+                <lightning:layoutItem padding="around-small" size="2"> </lightning:layoutItem> </lightning:layout
+            ><br />
+            <div class="slds-align_absolute-center">
+                <lightning:button label="Previous" variant="neutral" onclick="{!c.backFlag}" />
+                <lightning:button label="Next" variant="brand" onclick="{!c.continueFlag}" />
+            </div>
+        </aura:renderIf>
+        <aura:renderIf isTrue="{!v.isThirdPage}">
+            <div class="custom-box">
+                &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                <div style="color:cadetblue"><b> Merged Regulated Entity Preview </b></div><br />
+                <table
+                    class="slds-table slds-table--bordered slds-table--cell-buffer slds-table--fixed-layout slds-table--striped "
+                    style="color: #54698d;height:150px;overflow:auto;"
+                >
+                    <tr>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap "> Regulated Entity Name</td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">
+                            <ui:inputText value="{!v.selectedTargetRegulatedEntity.Name}" />
+                        </td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap "> Counties</td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">
+                            <lightning:input readonly="{!true}" variant="label-hidden" value="{!v.countiNumber}" />
+                        </td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">Entity Code</td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">
+                            <ui:inputText value="{!v.selectedTargetRegulatedEntity.IETRS_Entity_Code__c}" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap "> Product Class</td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">
+                            <ui:inputText value="{!v.selectedTargetRegulatedEntity.IETRS_Product_Class__c}" />
+                        </td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">Sub Class</td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">
+                            <ui:inputText value="{!v.selectedTargetRegulatedEntity.IETRS_Product_Sub_Class__c}" />
+                        </td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">Gathering Type</td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">
+                            <ui:inputText value="{!v.selectedTargetRegulatedEntity.IETRS_Type_of_Regulated__c}" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap "> Status</td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">
+                            <ui:inputText value="{!v.selectedTargetRegulatedEntity.IETRS_Status__c}" />
+                        </td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">Jurisdiction</td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">
+                            <ui:inputText value="{!v.selectedTargetRegulatedEntity.IETRS_Jurisdiction__c}" />
+                        </td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">T4 Permit Number</td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">
+                            <ui:inputText value="{!v.selectedTargetRegulatedEntity.IETRS_T4_Permit__c}" />
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap "> Intra Interstate</td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">
+                            <ui:inputText value="{!v.selectedTargetRegulatedEntity.IETRS_Intra_Interstate__c}" />
+                        </td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">Install Year</td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">
+                            <ui:inputText value="{!v.selectedTargetRegulatedEntity.IETRS_Install_Year__c}" />
+                        </td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">Region</td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">
+                            <lightning:input
+                                readonly="{!true}"
+                                variant="label-hidden"
+                                value="{!v.selectedTargetRegulatedEntity.IETRS_Region__r.Name}"
+                            />
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap "> On-Offshore</td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">
+                            <ui:inputText value="{!v.selectedTargetRegulatedEntity.IETRS_On_Offshore__c}" />
+                        </td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">Type</td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">
+                            <ui:inputText value="{!v.selectedTargetRegulatedEntity.Type}" />
+                        </td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">Entity Sub-Type</td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">
+                            <ui:inputText value="{!v.selectedTargetRegulatedEntity.IETRS_Entity_Sub_Type__c}" />
+                        </td>
+                    </tr>
+                    <!--   <tr >
+                         <td width="15%" class="slds-cell-buffer_left slds-cell-wrap "> Counties</td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">
+                            <ui:inputText value="{!v.selectedSourceRegulatedEntity.IETRS_Entity_Code__c}"   />
+                          </td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">On-Offshore</td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">
+                            <ui:inputText value="{!v.selectedSourceRegulatedEntity.IETRS_On_Offshore__c}"   />
+                          </td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">Type</td>
+                       <td width="17%" class="slds-cell-buffer_left slds-cell-wrap ">
+                            <ui:inputText value="{!v.selectedSourceRegulatedEntity.Type}"   />
+                          <td width="15%" class="slds-cell-buffer_left slds-cell-wrap "> Entity sub-type</td>
+                          <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">
+                            <ui:inputText value="{!v.selectedSourceRegulatedEntity.IETRS_Entity_Sub_Type__c}"   />
+                          </td>
+                          </td>
+                       
+                  </tr>-->
+                    <tr>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">Affected Inspections</td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap "
+                            ><lightning:input readonly="{!true}" variant="label-hidden" value="{!v.totalInspec}"
+                        /></td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">Total miles</td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">
+                            <lightning:input readonly="{!true}" variant="label-hidden" value="{!v.totalMiles}" />
+                        </td>
+                        <td width="15%" class="slds-cell-buffer_left slds-cell-wrap "></td>
+                    </tr>
+                </table>
+            </div>
+            <br />
+
+            <br />
+            <div class="slds-align_absolute-center">
+                <lightning:button label="Previous" variant="neutral" onclick="{!c.backFlagSecond}" />
+                <lightning:button label="Merge" variant="success" onclick="{!c.doMerge}" />
+            </div>
+        </aura:renderIf>
+    </lightning:card>
+</aura:component>

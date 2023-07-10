@@ -1,0 +1,11 @@
+<design:component label="IETRS Custom Lookup Field">
+    <design:attribute name="label"  label="Field Label" description="Field label"/>
+    <design:attribute name="objectName" label="Object Name" description="SObject name to search" required="true"/>
+    <design:attribute name="recordType" label="Record Type API Name" description="Optional Record Type filter to limit searches" required="true"/>
+    <design:attribute name="iconName" label="Icon Name" description="Icon name (ex. standard:account)"/>
+    <design:attribute name="allowMultiple" label="Allow Multiple" description="Allow user to select multiple records"/>
+    <design:attribute name="allowImport" label="Allow Import" description="Show option to import from RRC mainframe"/>
+    <design:attribute name="required" label="Required?" description="Indicates this is a required field"/>
+    <design:attribute name="value" label="Output Value(s)" description="Selected record ID(s) to return to the parent component or flow"/>
+
+</design:component>

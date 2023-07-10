@@ -1,0 +1,60 @@
+<template>
+    <c-ietrs-search-bar
+        class={searchBarClass}
+        placeholder={searchBarPlaceholder}
+        persist-clear={shouldPersistClear}
+        data-refreshtoken={refreshtoken}
+        onfocus={onTextInputFocus}
+        onblur={onTextInputBlur}
+        onclear={onTextInputClear}
+        onvaluechange={onTextInputChange}
+        onkeydown={onTextInputKeyDown}
+        read-only={readOnly}
+        icon={lookupIcon}
+    ></c-ietrs-search-bar>
+    <div
+        if:true={shouldShowResultsMenu}
+        class="search-results pos-a z3 bg b rc ofy-a"
+        onmousedown={onMenuMouseDown}
+        onmouseleave={onMenuMouseLeave}
+    >
+        <template if:false={isSearching}>
+            <template if:true={searchResults.length}>
+                <div
+                    class={result.$class}
+                    for:each={searchResults}
+                    for:item="result"
+                    for:index="index"
+                    key={result.Id}
+                    onclick={onSearchResultClick}
+                    data-index={index}
+                >
+                    <span if:true={isUserLookup} class="dif slds-m-right_x-small">
+                        <lightning-avatar
+                            if:true={result.IsProfilePhotoActive}
+                            variant="circle"
+                            src={result.SmallPhotoUrl}
+                            fallback-icon-name="standard:custom"
+                            alternative-text={result.Name}
+                        >
+                        </lightning-avatar>
+                        <lightning-avatar
+                            if:false={result.IsProfilePhotoActive}
+                            variant="circle"
+                            fallback-icon-name="standard:custom"
+                            alternative-text={result.Name}
+                        >
+                        </lightning-avatar>
+                    </span>
+                    <div class="search-result-name db ellipsis">{result.Name}</div>
+                </div>
+            </template>
+            <template if:false={searchResults.length}>
+                <div class="slds-p-around_x-small">No Search Results</div>
+            </template>
+        </template>
+        <div class="spinner-container pos-r" if:true={isSearching}>
+            <lightning-spinner size="small"></lightning-spinner>
+        </div>
+    </div>
+</template>

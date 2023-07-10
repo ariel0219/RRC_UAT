@@ -1,0 +1,182 @@
+<!--
+  @Component Name     : IETRS_RecordImportModal.cmp
+  @Description        : 
+  @Author             : Mark Frizzell
+  @Group              : 
+  @Last Modified By   : Kevin Lu
+  @Last Modified On   : 10/21/2019, 4:22:19 PM
+  @Modification Log   : 
+  ==============================================================================
+  Ver         Date                     Author      		      Modification
+  ==============================================================================
+  1.0    7/22/2019, 4:00:27 PM   Mark Frizzell     Initial Version
+  2.0    10/21/2019              Kevin Lu          Added Drilling Permit option
+-->
+<aura:component controller="IETRS_LookupFieldController" implements="force:lightningQuickAction">
+
+    <!-- ATTRIBUTES -->
+    <aura:attribute name="searchTypeOptions" type="List" description="Mainframe search type options" access="PRIVATE"
+        default="[
+            { 'label' : 'Operators',        'value' : 'Operators' },
+            { 'label' : 'Officers',         'value' : 'Officers' },
+            { 'label' : 'Leases',           'value' : 'Leases' },
+            { 'label' : 'Wells',            'value' : 'Wells' },
+            { 'label' : 'Drilling Permits', 'value' : 'Drilling Permits' },
+            { 'label' : 'UIC',              'value' : 'UIC'}
+        ]"
+    />
+    <aura:attribute name="districtOptions" type="List" description="District code options" access="PRIVATE"/>
+        
+    <aura:attribute name="searchType" type="String" description="Type of record to search for" access="PRIVATE"/>
+    <aura:attribute name="districtCode" type="String" description="District code when searching for leases or wells" access="PRIVATE"/>
+    <aura:attribute name="searchText" type="String" description="String to search for" access="PRIVATE"/>
+    <aura:attribute name="placeholder" type="String" description="Placeholder text for search text field" access="PRIVATE"/>
+    
+    <aura:attribute name="columns" type="List" description="Columns displayed in the data table" access="PRIVATE"/>        
+    <aura:attribute name="sortedBy" type="String" description="Field to sort table" access="PRIVATE"/>
+    <aura:attribute name="sortedDirection" type="Boolean" default="true" description="Table sort direction (true = asc)" access="PRIVATE"/>
+    <aura:attribute name="maxRowSelection" type="Integer" default="1" description="Max number of rows for import" access="PRIVATE"/>
+    <aura:attribute name="selectedRowsCount" type="Integer" description="Number of rows selected" access="PRIVATE"/>
+    <aura:attribute name="tableErrors" type="Object" description="Error messages displayed on the data table" access="PRIVATE"/>
+
+    <aura:attribute name="results" type="List" description="Result data from mainframe search" access="PRIVATE"/>
+    <aura:attribute name="selected" type="List" description="Selected rows"/>
+
+    <aura:attribute name="isLoading" type="Boolean" default="false" description="Shows spinner in search input field and data table" access="PRIVATE"/>
+    <aura:attribute name="isImporting" type="Boolean" default="false" description="Shows spinner for import process" access="PRIVATE"/>
+    
+
+    <!-- HANDLERS -->
+    <aura:handler name="init" value="{!this}" action="{!c.handleInit}"/>
+    <aura:handler name="change" value="{!v.searchType}" action="{!c.searchTypeChange}"/>
+
+
+    <!-- CMP MARKUP -->
+
+    <!-- Spinner - Importing Only -->
+    <aura:if isTrue="{!v.isImporting}">
+        <lightning:spinner size="medium" variant="brand" style="position:fixed; z-index:9999;"  alternativeText="Importing data..."/>
+    </aura:if>
+
+    <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_large" aria-modal="true" aria-labelledby="importModalHeader" aria-describedby="importModalContent">
+        <div class="slds-modal__container">
+            
+            <!-- Header -->
+            <header class="slds-modal__header">
+                <!-- <lightning:buttonIcon iconName="utility:close" class="slds-modal__close" size="large" variant="bare" alternativeText="Close" onclick="{!c.closeClick}"/> -->
+                <h2 id="importModalHeader" class="slds-text-heading_medium">Import from Mainframe</h2>
+            </header>
+
+            <!-- Body -->
+            <div id="importModalContent" class="slds-modal__content">
+                <lightning:layout multipleRows="true" verticalAlign="start">
+                    
+                    <!-- Search Type -->
+                    <lightning:layoutItem size="3" padding="around-small">
+                        <lightning:combobox 
+                            aura:id="mfInput"
+                            title="Search Type"
+                            label=""
+                            placeholder="Search for..."
+                            value="{!v.searchType}" 
+                            options="{!v.searchTypeOptions}"
+                            variant="label-hidden"/>
+                    </lightning:layoutItem>
+
+                    <!-- District Code -->
+                    <aura:if isTrue="{!or(v.searchType == 'Leases', v.searchType == 'Wells')}">
+                        <lightning:layoutItem size="3" padding="around-small">
+                            <lightning:combobox 
+                                aura:id="mfInput"
+                                title="District Code"
+                                value="{!v.districtCode}" 
+                                options="{!v.districtOptions}" 
+                                required="true" 
+                                messageWhenValueMissing="Please select a district"
+                                placeholder="Select District"
+                                variant="label-hidden"/>
+                        </lightning:layoutItem>
+                    </aura:if>
+                    
+                    <aura:if isTrue="{!v.searchType != null}">
+                        
+                        <!-- Search Input -->
+                        <lightning:layoutItem size="{!if(or(v.searchType == 'Leases', v.searchType == 'Wells'), '4', '7')}" padding="around-small">
+                            <span onkeyup="{!c.handleKeyUp}">
+                                <lightning:input
+                                    aura:id="mfInput" 
+                                    title="Search Text"
+                                    type="search" 
+                                    value="{!v.searchText}" 
+                                    isLoading="{!v.isLoading}" 
+                                    required="true" 
+                                    messageWhenValueMissing="Please enter search terms" 
+                                    minlength="3" 
+                                    messageWhenTooShort="Please enter at least 3 characters to search"
+                                    placeholder="{!v.placeholder}"
+                                    variant="label-hidden"/>
+                            </span>
+                        </lightning:layoutItem>
+
+                        <!-- Search Button -->
+                        <lightning:layoutItem size="2" padding="around-small">
+                            <lightning:button 
+                                aura:id="searchBtn" 
+                                label="Search" 
+                                title="Search" 
+                                variant="brand" 
+                                iconName="utility:search" 
+                                onclick="{!c.searchClick}"
+                                class="button-search"/>
+                        </lightning:layoutItem>
+
+                    </aura:if>
+                    
+                    <!-- Results Table -->
+                    <lightning:layoutItem size="12">
+                        <div style="height: 300px">
+                            <lightning:datatable 
+                                aura:id="dataTable" 
+                                data="{!v.results}" 
+                                columns="{!v.columns}" 
+                                keyField="id" 
+                                maxRowSelection="{!v.maxRowSelection}" 
+                                sortedBy="{!v.sortedBy}" 
+                                sortedDirection="{!v.sortedDirection}" 
+                                onsort="{!c.handleSort}" 
+                                onrowselection="{!c.handleRowSelect}" 
+                                isLoading="{!v.isLoading}" 
+                                errors="{!v.tableErrors}"/>
+                        </div>
+                    </lightning:layoutItem>
+
+                </lightning:layout>
+            </div>
+            
+            <!-- Footer-->
+            <footer class="slds-modal__footer">
+                <lightning:button 
+                    aura:id="cancelBtn" 
+                    label="Cancel" 
+                    title="Cancel" 
+                    variant="neutral" 
+                    iconName="utility:close" 
+                    onclick="{!c.closeClick}" 
+                    disabled="{!v.isImporting}"/>
+                <lightning:button 
+                    aura:id="importBtn" 
+                    label="Import Record" 
+                    title="Import Record" 
+                    variant="brand" 
+                    iconName="utility:download" 
+                    onclick="{!c.importClick}" 
+                    disabled="{!or(v.selected.length == 0, v.isImporting)}"/>
+            </footer>
+
+        </div>
+
+    </section>
+
+    <div class="slds-backdrop slds-backdrop_open"></div>
+
+</aura:component>

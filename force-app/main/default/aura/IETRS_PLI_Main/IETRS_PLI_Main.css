@@ -1,0 +1,48 @@
+.THIS.c-container {
+    border: 1px solid #d8dde6;
+    margin: 10px 0 20px 0;
+    background-color: #ffffff;
+}
+.THIS .page-header,
+.THIS .page-footer {
+    height: 50px;
+}
+.THIS .page-main h2{
+	font-weight:bold;
+}
+.THIS .page-right h2{
+    font-weight:bold;
+}
+.THIS .page-lower h2{
+    font-weight:bold;
+}
+.THIS .slds-tabs_default__link{
+    height: 2rem;    
+    line-height:2rem;
+    font-size: 18px;
+    padding-right: 20px;
+    padding-left: 20px;
+}
+.THIS .slds-card{
+    border-radius: 5px;
+    border: solid 1px #ccc;
+    padding: 1rem;
+}
+.THIS .slds-button-group{
+    right: 15px ;
+    top: 15px;
+}
+/*Added by Ayesha for hide the Upload Finish button of flow*/
+.THIS .slds-card__footer.actionButtonBar.slds-grid.slds-grid_align-spread{
+    /*display:none;*/
+}
+/* For white background color */
+.THIS .c-container {
+    background-color: #ffffff;
+}
+.THIS .slds-tabs_default__nav {
+    background-color: #ffffff;
+}
+.THIS .slds-tabs_default__content{
+    background-color: #ffffff;
+}

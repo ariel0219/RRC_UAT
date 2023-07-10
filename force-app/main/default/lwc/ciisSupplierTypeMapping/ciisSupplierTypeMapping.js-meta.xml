@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+	<apiVersion>57.0</apiVersion>
+		<isExposed>true</isExposed>
+	<targets>
+		<target>lightning__FlowScreen</target>
+		<target>lightningCommunity__Page</target>
+	</targets>
+	<targetConfigs>
+		<targetConfig targets="lightning__FlowScreen">
+			<property
+				name="receiverType"
+				type="String"
+				label="Receiver Supply Chain Type"
+				description="This value should match the label of the Supply Chain Type Setting custom metadata record."
+			/>
+			<property name="selectedSupplierType" label="Selected Suppplier Type" type="String"  role="outputOnly"/>
+		</targetConfig>
+	</targetConfigs>
+</LightningComponentBundle>

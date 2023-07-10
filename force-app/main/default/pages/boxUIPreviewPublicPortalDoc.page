@@ -1,0 +1,29 @@
+<!--
+  @Page Name          : BoxPreview.page
+  @Description        : 
+  @Author             : Kevin Lu, Kim EScobar, Connor Rivera
+  @Group              : 
+  @Last Modified By   : Connor Rivera
+  @Last Modified On   : 5/30/23
+  @Modification Log   : 
+  ==============================================================================
+  Ver         Date                     Author                 Modification
+  ==============================================================================
+  1.0    5/30/23, 5:45:00 PM   Connor Rivera     Initial Version cloned from BoxUIPreviewPublic
+-->
+<apex:page standardController="CIIS_Public_Portal_Document__c" extensions="boxUIPreviewControllerPublicPortalDoc" action="{!initalizeToken}">
+    <!--SCRIPT START-->
+    <apex:includeScript value="https://cdn01.boxcdn.net/platform/preview/2.10.0/en-US/preview.js" />
+    <apex:includeScript value="https://cdn.polyfill.io/v2/polyfill.min.js?features=Promise" />
+    <apex:stylesheet value="https://cdn01.boxcdn.net/platform/preview/2.10.0/en-US/preview.css" />
+    <!--SCRIPT END-->
+    
+    <div class="preview-container" style="height:400px; width:100%;"></div>
+    <script>
+        var preview = new Box.Preview();
+        preview.show('{!CIIS_Public_Portal_Document__c.CIIS_Box_File_ID__c}', '{!DownscopeToken}', {
+            container: '.preview-container',
+            showDownload: 'true'
+        });
+    </script>
+</apex:page>

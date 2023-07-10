@@ -1,0 +1,197 @@
+<template>
+    <div class="slds-is-relative">
+        <div class="slds-spinner_container" if:true={loading}>
+            <lightning-spinner alternative-text="Loading"></lightning-spinner>
+        </div>
+
+        <div class="slds-tabs_default">
+            <ul class="slds-tabs_default__nav slds-p-around_small" role="tablist" if:true={tabOptions}>
+                <c-ietrs-inspection-tab
+                    for:each={tabOptions}
+                    for:item="tab"
+                    key={tab.value}
+                    for:index="i"
+                    index={i}
+                    label={tab.label}
+                    tab-name={tab.value}
+                    is-active={tab.isActive}
+                    ontabchange={handleTabChange}
+                ></c-ietrs-inspection-tab>
+            </ul>
+
+            <div class="table-container">
+                <!--Contact List Table-->
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                    <thead>
+                        <tr class="slds-line-height_reset">
+                            <th scope="col" class="slds-cell-buffer_left slds-cell-wrap">
+                                <div class="slds-truncate" title="Program Code">Program Code</div>
+                            </th>
+
+                            <th scope="col" class="slds-cell-buffer_left slds-cell-wrap input-col">
+                                <div class="slds-truncate" title="Regulatory Code">Regulatory Code</div>
+                            </th>
+                            <th scope="col" class="slds-cell-buffer_left slds-cell-wrap">
+                                <div class="slds-truncate" title="Checklist Item">Checklist Item</div>
+                            </th>
+
+                            <th scope="col" class="slds-cell-buffer_left slds-cell-wrap input-col">
+                                <div class="slds-truncate" title="Result">Result</div>
+                            </th>
+                            <th scope="col" class="slds-cell-buffer_left slds-cell-wrap input-col_long">
+                                <div class="slds-truncate" title="Notes">Notes</div>
+                            </th>
+
+                            <th scope="col" class="slds-cell-buffer_left slds-cell-wrap">
+                                <div class="slds-truncate" title="Create Violation">Create Violation</div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={inspections} for:item="ins" for:index="insIndex">
+                            <tr key={ins.inspectionId}>
+                                <th colspan="6" scope="row" class="slds-cell-buffer_left slds-cell-wrap ">
+                                    <div class="slds-grid slds-grid_vertical-align-center">
+                                        <lightning-icon
+                                            icon-name="standard:account"
+                                            alternative-text="Account"
+                                            title="Account"
+                                            size="x-small"
+                                        ></lightning-icon>
+                                        <a
+                                            onclick={handleSObjectClick}
+                                            class="slds-text-link slds-m-left_xx-small slds-m-right_small"
+                                            data-record-id={ins.entityId}
+                                            data-object-api-name="Account"
+                                            target="_blank"
+                                            >{ins.entityName}
+                                        </a>
+                                        <lightning-icon
+                                            icon-name="custom:custom57"
+                                            alternative-text="Inspection"
+                                            title="Inspection"
+                                            size="x-small"
+                                        ></lightning-icon>
+                                        <a
+                                            onclick={handleSObjectClick}
+                                            class="slds-text-link slds-m-left_xx-small slds-m-right_small"
+                                            data-record-id={ins.inspectionId}
+                                            data-object-api-name="IETRS_Inspection__c"
+                                            target="_blank"
+                                            >{ins.inspectionName}
+                                        </a>
+                                    </div>
+                                </th>
+                            </tr>
+
+                            <template for:each={ins.inspectionResults} for:item="ir" for:index="resultIndex">
+                                <c-ietrs-inspection-results-item
+                                    key={ir.inspRec.Id}
+                                    inspection-result={ir}
+                                    is-violation-read-only={ir.isViolationReadOnly}
+                                    data-inspection-index={insIndex}
+                                    data-result-index={resultIndex}
+                                    onrecordchange={handleRecordChange}
+                                    onsobjectclick={handleResultSObjectClick}
+                                >
+                                </c-ietrs-inspection-results-item>
+                                <c-ietrs-inspection-results-violation-item
+                                    key={ir.inspRec.Id}
+                                    data-inspection-index={insIndex}
+                                    data-result-index={resultIndex}
+                                    inspection-result-id={ir.inspRec.Id}
+                                    location={ir.inspRec.IETRS_Violation_Location__c}
+                                    comments={ir.inspRec.IETRS_Comments__c}
+                                    show-row={ir.inspRec.IETRS_Create_Violation__c}
+                                    read-only={ir.isViolationReadOnly}
+                                    onrecordchange={handleRecordChange}
+                                >
+                                </c-ietrs-inspection-results-violation-item>
+                            </template>
+                        </template>
+                    </tbody>
+                </table>
+                <!-- NO DATA -->
+                <div class="slds-illustration slds-illustration_small slds-m-around_xx-large" if:true={noData}>
+                    <div class="slds-text-longform">
+                        <h3 class="slds-text-heading_medium">No Data</h3>
+                        <p class="slds-text-body_regular">There are no inspection results to show for {activeTab}.</p>
+                    </div>
+                </div>
+                <!-- END NO DATA -->
+            </div>
+        </div>
+        <!-- FOOTER -->
+        <div class="slds-docked-form-footer js-footer">
+            <lightning-button
+                variant="brand"
+                class="slds-m-horizontal_xx-small"
+                label="Save"
+                disabled={loading}
+                onclick={handleSave}
+            ></lightning-button>
+            <lightning-button
+                variant="brand"
+                class="slds-m-horizontal_xx-small"
+                label="Save and Close"
+                disabled={loading}
+                onclick={handleSaveAndClose}
+            ></lightning-button>
+        </div>
+        <!-- END FOOTER -->
+    </div>
+    <!-- UNSAVED CHANGES MODAL -->
+    <section
+        role="dialog"
+        tabindex="-1"
+        aria-labelledby="modal-heading"
+        aria-modal="true"
+        aria-describedby="modal-content"
+        class={modalClass}
+    >
+        <div class="slds-modal__container slds-text-align_center">
+            <header class="slds-modal__header">
+                <lightning-button-icon
+                    icon-name="utility:close"
+                    alternative-text="Close"
+                    class="slds-modal__close"
+                    variant="bare-inverse"
+                    size="large"
+                    onclick={handleCloseModal}
+                ></lightning-button-icon>
+
+                <h2 id="modal-heading" class="slds-modal__title slds-hyphenate">
+                    Save changes in Inspection Checklist?
+                </h2>
+            </header>
+            <div class="slds-modal__content slds-p-around_medium" id="modal-content">
+                <p>
+                    There are unsaved changes.
+                </p>
+                <p>
+                    If you leave this tab, you’ll lose your changes.
+                </p>
+            </div>
+            <footer class="slds-modal__footer">
+                <lightning-button
+                    class="slds-m-horizontal_xx-small"
+                    label="Continue Editing"
+                    onclick={handleCloseModal}
+                ></lightning-button>
+                <lightning-button
+                    class="slds-m-horizontal_xx-small"
+                    label="Discard Changes"
+                    onclick={handleDiscardChanges}
+                ></lightning-button>
+                <lightning-button
+                    class="slds-m-horizontal_xx-small"
+                    label="Save"
+                    variant="brand"
+                    onclick={handleSaveChanges}
+                ></lightning-button>
+            </footer>
+        </div>
+    </section>
+    <div class={dropbackClass}></div>
+    <!-- UNSAVED CHANGES MODAL -->
+</template>

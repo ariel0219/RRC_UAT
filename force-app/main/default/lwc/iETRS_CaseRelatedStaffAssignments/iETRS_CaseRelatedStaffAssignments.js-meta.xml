@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata" fqn="iETRS_CaseRelatedStaffAssignments">
+    <apiVersion>46.0</apiVersion>
+    <isExposed>true</isExposed>
+    <targets>
+        <target>lightning__RecordPage</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__RecordPage">
+            <property name="strSortOrder" type="String" label="Sort Order" description="Enter a semicolon ; delimited list of Roles in the order in which you would like the records to be sorted. Values must match the Role picklist values. Ex. Attorney;Legal Assistant;Administrative Staff. If this field is left blank or values are omitted then the default picklist order will be applied to the missing values."/>
+            <property name="strCardTitle" type="String" label="Component Title" description="Title of the related list component"/>
+            <property name="blnHearings" type="Boolean" label="Hearings Format" description="This boolean will show the component with the Hearings format."/>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

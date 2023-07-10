@@ -1,0 +1,20 @@
+<!--
+  @File Name          : IETRS_InspUnapproveAction.cmp
+  @Description        : 
+  @Author             : Mark Frizzell
+  @Group              : 
+  @Last Modified By   : Mark Frizzell
+  @Last Modified On   : 9/12/2019, 12:40:16 PM
+  @Modification Log   : 
+  Ver       Date            Author      		    Modification
+  1.0       9/12/2019       Mark Frizzell           Initial Version
+-->
+<aura:component controller="IETRS_InspApprovalActionsController" implements="force:hasRecordId,force:lightningQuickActionWithoutHeader">
+    
+    <aura:attribute name="recordId" type="Id" description="Id of current schedule config record"/>
+
+    <aura:handler name="init" value="{!this}" action="{!c.handleInit}"/>
+
+    <p class="slds-align-absolute_center slds-text-heading_small">Starting unapproval process...</p>
+
+</aura:component>

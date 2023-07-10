@@ -1,0 +1,12 @@
+.THIS .lookup-results {
+    min-height: 40px;
+    margin-top: 0px;
+}
+
+.THIS .input-icon-fix {
+    top: 71%;
+}
+
+.THIS .slds-form-element__help {
+    display: none;
+}

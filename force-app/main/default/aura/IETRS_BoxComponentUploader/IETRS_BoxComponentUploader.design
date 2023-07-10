@@ -1,0 +1,8 @@
+<design:component >
+    <design:attribute name="accessToken" label="Access Token" />
+    <design:attribute name="fcRecordId" label="Record Id" />
+    <design:attribute name="vFrameURL" label="Visualforce Page URL" />
+    <design:attribute name="auraSourceURL" label="Lightning Aura URL" />
+    <design:attribute name="VFSourceURL" label="Visualforce URL" />
+    <design:attribute name="message" label="Box Upload Message" />
+</design:component>

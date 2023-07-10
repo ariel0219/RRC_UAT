@@ -1,0 +1,331 @@
+<aura:component
+  implements="flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes"
+  access="global"
+>
+  <ltng:require styles="{!$Resource.NoHeader}" />
+  <aura:attribute name="showSummaryComponent" type="boolean" default="false" />
+  <aura:attribute
+    name="showRepairedLeaksComponent"
+    type="boolean"
+    default="false"
+  />
+  <aura:attribute name="showSRCSearchCmp" type="boolean" default="false" />
+  <aura:attribute name="showIMPSearchCmp" type="boolean" default="false" />
+  <aura:attribute
+    name="showRepairedSRCsearchCmp"
+    type="boolean"
+    default="false"
+  />
+  <aura:attribute
+    name="notificationId"
+    type="String"
+    default=""
+    access="global"
+  />
+  <aura:attribute name="isdisplayPS95Status" type="boolean" default="false" />
+  <aura:attribute name="downloadUrl" type="String" />
+
+  <lightning:tabset class="PLI-tabs">
+    <div class="c-container">
+      <!-- <div class="slds-grid slds-wrap"> -->
+      <lightning:tab label="PS-95">
+        <div class="c-container">
+          <lightning:layout>
+            <lightning:layoutItem
+              flexibility="grow"
+              size="9"
+              alignmentBump="left"
+              padding="around-small"
+            >
+              <div class="page-section page-main">
+                <lightning:card title="Organization by Filing Period Search">
+                  <aura:set attribute="actions"> </aura:set>
+                  <c:iETRS_PLI_LWCQuery
+                    onvaluechange="{!c.getValueShowFromLwc}"
+                  />
+                  <br />
+                </lightning:card>
+
+                <aura:if isTrue="{!v.showSummaryComponent}">
+                  <lightning:card title="Summary of PS-95">
+                    <aura:set attribute="actions"> </aura:set>
+                    <c:iETRS_PLI_Header_Display
+                      onvaluechange="{!c.getValueRepairedLeaksFromLwc}"
+                    />
+                  </lightning:card>
+                </aura:if>
+
+                <aura:if isTrue="{!v.showRepairedLeaksComponent}">
+                  <lightning:card title="">
+                    <aura:set attribute="actions"> </aura:set>
+                    <c:iETRS_PLI_Detail_Display
+                      aura:id="detailDisplay"
+                      notificationID="{!v.notificationId}"
+                    />
+                  </lightning:card>
+                </aura:if>
+              </div>
+            </lightning:layoutItem>
+
+            <lightning:layoutItem
+              flexibility="auto"
+              alignmentBump="right"
+              padding="around-small"
+              size="3"
+            >
+              <aura:if isTrue="{!v.showRepairedLeaksComponent}">
+                <c:iETRS_PLI_EDI onvaluechange="{!c.getValueShowFromLwc}" />
+                <br />
+                <br />
+                <aura:if isTrue="{!v.isdisplayPS95Status}">
+                  <c:iETRS_PS95_Status
+                    currentNotificationId="{!v.notificationId}"
+                    aura:id="childStatusComponent"
+                  />
+                  <br />
+                  <br />
+                  <lightning:card title="Download PS-95 Report">
+                    <div class="slds-var-p-horizontal_medium">
+                      <p class="slds-var-p-vertical_medium">
+                        Click the button to download the report in CSV format.
+                      </p>
+                      <a
+                        href="{!v.downloadUrl}"
+                        target="_blank"
+                        class="slds-button slds-button_brand"
+                        >Download</a
+                      >
+                    </div>
+                  </lightning:card>
+                </aura:if>
+              </aura:if>
+            </lightning:layoutItem>
+          </lightning:layout>
+        </div>
+      </lightning:tab>
+      <!-- </div> -->
+    </div>
+    <!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  -->
+    <lightning:tab label="SRC">
+      <div class="c-container">
+        <lightning:layout>
+          <lightning:layoutItem
+            flexibility="auto"
+            size="12"
+            alignmentBump="left"
+            padding="around-small"
+          >
+            <div class="page-section page-main">
+              <lightning:card title="Organization by Filing Period Search">
+                <aura:set attribute="actions"> </aura:set>
+                <p class="slds-p-horizontal_small">
+                  Please search by Organization Name, P5 Number, or Regulated
+                  Entity Name for SRC.
+                </p>
+                <c:iETRS_PLI_SRC_SearchQuery
+                  onvaluechangeSrc="{!c.getValueSRCcmp}"
+                  getValuePS_TABs="SRC"
+                />
+              </lightning:card>
+              <aura:if isTrue="{!v.showSRCSearchCmp}">
+                <lightning:card>
+                  <c:iERTS_PLI_SRC_ReportList
+                    aura:id="srcdetailReport"
+                    onvaluechangeSrc="{!c.getshowReportDetailssMethod}"
+                  >
+                  </c:iERTS_PLI_SRC_ReportList>
+                </lightning:card>
+              </aura:if>
+              <aura:if isTrue="{!v.showRepairedSRCsearchCmp}">
+                <!--lightning:card title="SRC Report Details">
+                                    
+                                    <c:iETRS_PLI_SRC_ReportDetails></c:iETRS_PLI_SRC_ReportDetails>
+                                </lightning:card-->
+                <!--Added by Ayesha for invoking the flow on 21st DEC 2020-->
+                <!-- Modal/Popup Box starts here-->
+                <section
+                  role="dialog"
+                  tabindex="-1"
+                  aria-labelledby="modal-heading-01"
+                  aria-modal="true"
+                  aria-describedby="modal-content-id-1"
+                  class="slds-modal slds-fade-in-open"
+                >
+                  <div class="slds-modal__container">
+                    <!-- Modal/Popup Box Header Starts here-->
+                    <header class="slds-modal__header">
+                      <lightning:buttonIcon
+                        iconName="utility:close"
+                        onclick="{! c.closeModel }"
+                        alternativeText="close"
+                        variant="bare-inverse"
+                        class="slds-modal__close"
+                      />
+                      <h2
+                        id="modal-heading-01"
+                        class="slds-text-heading_medium slds-hyphenate"
+                      >
+                        Upload File
+                      </h2>
+                    </header>
+                    <!--Modal/Popup Box Body Starts here-->
+                    <div
+                      class="slds-modal__content slds-p-around_medium"
+                      id="modal-content-id-1"
+                    >
+                      <!--lightning:button label="Button" onclick="{!c.onUploadButton}"></lightning:-->
+                      <!--<lightning:flow aura:id="flowDatav2" onstatuschange="{!handlerefresh}"/> commented for forrest-->
+                      <lightning:flow
+                        aura:id="flowDatav1"
+                        onstatuschange="{!c.handlerefresh}"
+                      />
+                    </div>
+                    <!--Modal/Popup Box Footer Starts here-->
+                    <footer class="slds-modal__footer">
+                      <lightning:button
+                        variant="neutral"
+                        label="Cancel"
+                        title="Cancel"
+                        onclick="{! c.closeModel }"
+                      />
+                      <lightning:button
+                        variant="brand"
+                        label="Finish"
+                        title="Finish"
+                        onclick="{!c.closeModel}"
+                      />
+                    </footer>
+                  </div>
+                </section>
+              </aura:if>
+            </div>
+          </lightning:layoutItem>
+          <!-- <lightning:layoutItem flexibility="no-grow" 
+                                          alignmentBump="right"
+                                          padding="around-small" 
+                                          size="3">
+                        <div class="page-section page-right">
+                            <lightning:card  title="F&amp;C Notification File Upload Flow Aura">
+                                <aura:set attribute="actions">
+                                </aura:set>
+                                <c:iETRS_PLI_EDI/>
+                            </lightning:card>
+                            
+                        </div>
+                    </lightning:layoutItem> -->
+        </lightning:layout>
+      </div>
+    </lightning:tab>
+    <!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  -->
+    <lightning:tab label="IMP">
+      <div class="c-container">
+        <lightning:layout>
+          <lightning:layoutItem
+            flexibility="auto"
+            size="12"
+            alignmentBump="left"
+            padding="around-small"
+          >
+            <div class="page-section page-main">
+              <lightning:card title="Organization by Filing Period Search">
+                <aura:set attribute="actions"> </aura:set>
+                <p class="slds-p-horizontal_small">
+                  Please search by Organization Name, P5 Number or Regulated
+                  Entity Name for IMP.
+                </p>
+                <c:iETRS_PLI_SRC_SearchQuery
+                  onvaluechangeImp="{!c.getValueIMPcmp}"
+                  getValuePS_TABs="IMP"
+                />
+              </lightning:card>
+              <aura:if isTrue="{!v.showIMPSearchCmp}">
+                <lightning:card>
+                  <c:iERTS_PLI_SRC_ReportList
+                    aura:id="impDetailsList"
+                    onvaluechangeSrc="{!c.getshowReportDetailssMethod}"
+                  >
+                  </c:iERTS_PLI_SRC_ReportList>
+                </lightning:card>
+              </aura:if>
+              <aura:if isTrue="{!v.showRepairedSRCsearchCmp}">
+                <!--<lightning:card title="IMP Report Details">
+
+                                    <c:iETRS_PLI_SRC_ReportDetails></c:iETRS_PLI_SRC_ReportDetails>
+                                </lightning:card>-->
+                <!--Added by Ayesha for invoking Start the flow on 01th Jan 2020-->
+                <!-- Modal/Popup Box starts here-->
+                <section
+                  role="dialog"
+                  tabindex="-1"
+                  aria-labelledby="modal-heading-01"
+                  aria-modal="true"
+                  aria-describedby="modal-content-id-1"
+                  class="slds-modal slds-fade-in-open"
+                >
+                  <div class="slds-modal__container">
+                    <!-- Modal/Popup Box Header Starts here-->
+                    <header class="slds-modal__header">
+                      <lightning:buttonIcon
+                        iconName="utility:close"
+                        onclick="{! c.closeModel }"
+                        alternativeText="close"
+                        variant="bare-inverse"
+                        class="slds-modal__close"
+                      />
+                      <h2
+                        id="modal-heading-01"
+                        class="slds-text-heading_medium slds-hyphenate"
+                      >
+                        Upload File
+                      </h2>
+                    </header>
+                    <!--Modal/Popup Box Body Starts here-->
+                    <div
+                      class="slds-modal__content slds-p-around_medium"
+                      id="modal-content-id-1"
+                    >
+                      <!--lightning:button label="Button" onclick="{!c.onUploadButton}"></lightning:-->
+                      <lightning:flow
+                        aura:id="flowData"
+                        onstatuschange="{!c.handleImpFlow}"
+                      />
+                    </div>
+                    <!--Modal/Popup Box Footer Starts here-->
+                    <footer class="slds-modal__footer">
+                      <lightning:button
+                        variant="neutral"
+                        label="Cancel"
+                        title="Cancel"
+                        onclick="{! c.closeModel }"
+                      />
+                      <lightning:button
+                        variant="brand"
+                        label="Finish"
+                        title="Finish"
+                        onclick="{!c.closeModel}"
+                      />
+                    </footer>
+                  </div>
+                </section>
+                <!--Added by Ayesha for invoking end the flow on 01th Jan 2020-->
+              </aura:if>
+            </div>
+          </lightning:layoutItem>
+          <!-- <lightning:layoutItem flexibility="no-grow" 
+                                          alignmentBump="right"
+                                          padding="around-small" 
+                                          size="3">
+                        <div class="page-section page-right">
+                            <lightning:card  title="F&amp;C Notification File Upload Flow Aura">
+                                <aura:set attribute="actions">
+                                </aura:set>
+                                <c:iETRS_PLI_EDI/>
+                            </lightning:card>
+                            
+                        </div>
+                    </lightning:layoutItem> -->
+        </lightning:layout>
+      </div>
+    </lightning:tab>
+  </lightning:tabset>
+</aura:component>

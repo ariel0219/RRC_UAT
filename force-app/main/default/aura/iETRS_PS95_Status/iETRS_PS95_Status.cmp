@@ -1,0 +1,43 @@
+<aura:component controller="IETRS_PS95_StatsuController">
+
+    <aura:attribute name="SubmitionStatus" type="boolean" default="false" />
+    <aura:attribute name="isdisabled" type="boolean" default="false" />
+    <aura:attribute name="isdisplayPS95Status" type="boolean" default="false" />
+    <aura:attribute name="currentNotificationId" type="String" default="" access="global" />
+    
+
+    <aura:method name="getPS95SubmittedStatus" action="{!c.showStatusonTrue}" access="public">
+        <aura:attribute name="onshowPS95Staus" type="boolean" default="false" access="public" />
+    </aura:method>
+
+    <!--aura:handler name="onshowPS95Staus" value="{!this}" action="{!c.showStatusonTrue}" access="global" -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+
+    <aura:if isTrue="{!v.isdisplayPS95Status}">
+        <div class="page-section page-right">
+            <lightning:card title="PS-95 Status">
+                <div class="slds-m-left_small">
+                    <aura:if isTrue="{!v.SubmitionStatus}">
+                        <div Style="color:limegreen;">Succesfully Submitted</div>
+                    </aura:if>
+                    <aura:if isTrue="{!!v.SubmitionStatus}">
+                        <div Style="color:red;"> Not Yet Submitted </div>
+                    </aura:if>
+                    <br />
+                    <p>
+                        When you have completed filling out your PS-95 report on the left side of the page,
+                        click the submit button to finalize the report and submit to RRC.
+                    </p>
+
+                    <br />
+                    
+                    <lightning:button variant="brand" label="Submit" name="Submit" disabled="{!v.isdisabled}"
+                        onclick="{!c.onSubmit}"> </lightning:button>
+<!--
+                        <lightning:button class="slds-button slds-button_neutral" label="No Leaks to Report" onclick="{!c.noReportsTOLead}"> </lightning:button>
+                --></div>
+            </lightning:card>
+        </div>
+    </aura:if>
+
+</aura:component>

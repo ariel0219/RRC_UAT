@@ -1,0 +1,648 @@
+<aura:component
+  controller="IETRS_AccountTransfer"
+  implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickActionWithoutHeader"
+  access="global"
+>
+  <aura:html tag="style">
+    .slds-modal__container { width : 95% !important; max-width: none; }
+    .cuf-content { //padding: 0 0rem !important; } .slds-p-around--medium {
+    padding: 0rem !important; } .slds-modal__content{ overflow-y:auto
+    !important; height:unset !important; max-height:unset !important; }
+  </aura:html>
+
+  <ltng:require styles="{!$Resource.AccountTransfer}" />
+  <aura:attribute name="recordId" type="Id" />
+  <aura:attribute name="accountId" type="Id" />
+  <aura:attribute name="filterString" type="string" />
+  <aura:attribute name="selectedIds" type="list" />
+  <aura:attribute name="recordTypName" type="string" />
+  <aura:attribute
+    name="accountVar"
+    type="IETRS_AccountTransfer.AccountTypes"
+    default=""
+  />
+  <aura:attribute
+    name="paramTypes"
+    type="IETRS_AccountTransfer.SearchParams"
+    default=""
+  />
+  <aura:attribute name="Spinner" type="boolean" default="false" />
+  <aura:attribute name="hasRecords" type="boolean" default="true" />
+  <aura:attribute name="continuePopup" type="boolean" default="false" />
+  <aura:attribute name="backButton" type="boolean" default="false" />
+  <aura:attribute name="showColumn" type="boolean" default="true" />
+  <aura:attribute name="showColumnOrg" type="boolean" default="false" />
+  <aura:attribute name="showOrgColumn" type="boolean" default="false" />
+  <aura:attribute name="regulatedAccount" type="List" />
+  <aura:attribute name="unitAccount" type="List" />
+
+  <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+  <aura:attribute name="isOpen" type="boolean" default="false" />
+  <aura:attribute name="accountsList" type="list" />
+  <aura:attribute name="accList" type="list" />
+  <aura:attribute name="regionsList" type="list" />
+  <aura:attribute name="isSelectAll" type="boolean" default="false" />
+  <aura:attribute
+    name="options"
+    type="List"
+    default="[
+                                                        {'label': 'Units', 'value': 'Units'},
+                                                        {'label': 'Regulated Entities', 'value': 'Regulated Entities'}
+                                                        ]"
+  />
+  <aura:attribute name="radioValue" type="Integer" default="" />
+
+  <aura:attribute name="showButton" type="boolean" default="false" />
+  <aura:attribute name="regulatedEntityCheck" type="boolean" default="false" />
+  <aura:attribute name="hasError" type="string" />
+  <aura:attribute name="errorMessage" type="string" />
+  <aura:attribute name="openInspectionPackages" type="list" />
+
+  <aura:attribute name="searchedRecords" type="List" />
+
+  <lightning:navigation aura:id="nav" />
+
+  <div class="slds-is-relative">
+    <!--Modal Header-->
+    <div class="modal-header slds-modal__header slds-size_1-of-1">
+      <h4 class="title slds-text-heading--medium">TRANSFER</h4>
+    </div>
+
+    <lightning:radioGroup
+      aura:id="radioGrp"
+      name="radioButtonGroup"
+      label="Select Type"
+      options="{! v.options }"
+      value="{! v.radioValue }"
+      onchange="{! c.handleChange }"
+      class="customRadioCls"
+    />
+
+    <aura:if isTrue="{!v.Spinner}">
+      <div aura:id="spinnerId" class="slds-spinner_container">
+        <div
+          class="slds-spinner--brand slds-spinner slds-spinner--large slds-is-relative"
+          role="alert"
+        >
+          <span class="slds-assistive-text">Loading</span>
+          <div class="slds-spinner__dot-a"></div>
+          <div class="slds-spinner__dot-b"></div>
+        </div>
+      </div>
+    </aura:if>
+
+    <aura:if isTrue="{!v.regulatedEntityCheck}">
+      <div
+        class="slds-m-vertical_medium"
+        style="height: 12rem; overflow-y: scroll"
+      >
+        <lightning:input
+          type="text"
+          name="searchName"
+          label="Account Name"
+          aura:id="searchName"
+          onchange="{!c.searchKeyNameChange}"
+          placeholder="Search"
+          style="width: 300px !important"
+        /><br />
+        <table
+          class="slds-table slds-table--bordered slds-table--cell-buffer"
+          role="grid"
+        >
+          <thead>
+            <tr class="slds-text-title--caps">
+              <th>
+                <label class="slds-checkbox">
+                  <ui:inputCheckbox
+                    value="{!v.isSelectAll}"
+                    change="{!c.selectAllBoxes}"
+                    aura:id="selectAll"
+                  />
+                  <span class="slds-checkbox--faux" />
+                  <span class="slds-form-element__label"></span>
+                </label>
+              </th>
+              <th scope="col">
+                <div class="slds-truncate" title="Name">Name</div>
+              </th>
+              <!--  <aura:if isTrue="{!v.showColumn}"> -->
+              <th scope="col">
+                <div class="slds-truncate" title="Type">Type</div>
+              </th>
+              <!-- </aura:if> -->
+              <aura:if isTrue="{!v.showColumnOrg}">
+                <th scope="col">
+                  <div class="slds-truncate" title="Entity Code">
+                    Entity Code
+                  </div>
+                </th>
+              </aura:if>
+              <!-- <aura:if isTrue="{!v.showColumnOrg}"> -->
+              <th scope="col">
+                <div class="slds-truncate" title="Organization">
+                  Organization Name
+                </div>
+              </th>
+              <th scope="col">
+                <div class="slds-truncate" title="P5Number">P5 Number</div>
+              </th>
+              <!-- </aura:if>  -->
+
+              <th scope="col">
+                <div class="slds-truncate" title="Account">Parent Account</div>
+              </th>
+              <th scope="col">
+                <div class="slds-truncate" title="Account">region</div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <aura:iteration
+              items="{!v.accountsList}"
+              var="acc"
+              indexVar="index"
+            >
+              <tr>
+                <th>
+                  <label class="slds-checkbox">
+                    <a
+                      onclick="{!c.showData}"
+                      data-index="{!index}"
+                      data-record="{!acc.Id}"
+                    >
+                      <ui:inputCheckbox aura:id="accountCheckBox" />
+                      <span class="slds-checkbox--faux" />
+                      <span class="slds-form-element__label"></span>
+                    </a>
+                  </label>
+                </th>
+                <td scope="row">
+                  <div class="slds-truncate" title="{!acc.Name}">
+                    {!acc.Name}
+                  </div>
+                </td>
+                <!-- <aura:if isTrue="{!v.showColumn}">  -->
+                <td scope="row">
+                  <div class="slds-truncate" title="{!acc.Type}">
+                    {!acc.Type}
+                  </div>
+                </td>
+                <!--    </aura:if>  -->
+                <aura:if isTrue="{!v.showColumnOrg}">
+                  <td scope="row">
+                    <div
+                      class="slds-truncate"
+                      title="{!acc.IETRS_Entity_Code__c}"
+                    >
+                      {!acc.IETRS_Entity_Code__c}
+                    </div>
+                  </td>
+                </aura:if>
+                <aura:if isTrue="{!v.showColumnOrg}">
+                  <td scope="row">
+                    <div
+                      class="slds-truncate"
+                      title="{!acc.IETRS_OrganizationofRegEntity__r.Name}"
+                    >
+                      {!acc.IETRS_OrganizationofRegEntity__r.Name}
+                    </div>
+                  </td>
+                </aura:if>
+                <aura:if isTrue="{!v.showColumn}">
+                  <td scope="row">
+                    <div class="slds-truncate" title="{!acc.Parent.Name}">
+                      {!acc.Parent.Name}
+                    </div>
+                  </td>
+                </aura:if>
+                <td scope="row">
+                  <div class="slds-truncate" title="{!acc.Org_P5_Number__c}">
+                    {!acc.Org_P5_Number__c}
+                  </div>
+                </td>
+                <!--    </aura:if> -->
+
+                <td>
+                  <div class="slds-truncate" title="{!acc.Account.Name}">
+                    {!acc.Parent.Name}
+                  </div>
+                </td>
+                <td>
+                  <div class="slds-truncate" title="{!acc.Account.Name}">
+                    {!acc.IETRS_Region_ID__c}
+                  </div>
+                </td>
+              </tr>
+            </aura:iteration>
+          </tbody>
+        </table>
+      </div>
+    </aura:if>
+
+    <div>
+      <lightning:layout>
+        <lightning:layoutItem padding="around-small" flexibility="auto">
+          <div class="custom-box">
+            <div>
+              &nbsp; &nbsp;
+              <div style="float: left; color: cadetblue">
+                <b>Event notes </b>
+              </div>
+            </div>
+
+            <ui:inputTextArea aura:id="notesid" rows="5" />
+          </div>
+        </lightning:layoutItem>
+      </lightning:layout>
+    </div>
+
+    <!--Modal Footer-->
+    <div class="modal-footer slds-modal__footer slds-size_1-of-1">
+      <lightning:button
+        variant="Brand"
+        class="slds-button"
+        label="Close"
+        onclick="{!c.handleClose}"
+      />
+
+      <aura:if isTrue="{!v.showButton}">
+        <lightning:button
+          label="Next"
+          class="slds-button_brand"
+          onclick="{!c.handleSelectedAccounts }"
+        />
+      </aura:if>
+
+      <!--   <lightning:button variant="Brand" class="slds-button" label="Save" onclick="{!c.save}"/>
+            <lightning:button variant="Brand" class="slds-button" label="Save and Close" onclick="{!c.saveandClose}"/>-->
+    </div>
+    <!--End of Modal Footer-->
+
+    <aura:if isTrue="{!v.continuePopup}">
+      <section
+        role="dialog"
+        tabindex="-1"
+        aria-label=""
+        aria-modal="true"
+        aria-describedby="modal-content-id-1"
+        class="slds-modal slds-fade-in-open"
+      >
+        <div class="slds-modal__container">
+          <!--<header class="slds-modal__header slds-modal__header_empty">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close">
+                    <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                    <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#close"></use>
+                    </svg>
+                    <span class="slds-assistive-text">Close</span>
+                    </button>
+                    </header>-->
+          <div
+            class="slds-modal__content slds-p-around_medium"
+            id="modal-content-id-1"
+          >
+            <p>
+              <div
+                class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_warning"
+                role="alert"
+              >
+                <span class="slds-assistive-text">warning</span>
+                <span
+                  class="slds-icon_container slds-icon-utility-warning slds-m-right_x-small"
+                  title="Description of icon when needed"
+                >
+                  <lightning:icon
+                    iconName="utility:warning"
+                    alternativeText="warning"
+                    title="Approved"
+                  />
+                </span>
+                <h2 style="font-weight: 700">
+                  You have selected 2 different regions. Do you still want to
+                  contine?
+                </h2>
+              </div>
+            </p>
+          </div>
+          <footer class="slds-modal__footer">
+            <lightning:button
+              variant="neutral"
+              label="Cancel"
+              title="Cancel"
+              onclick="{! c.closeWarning }"
+            />
+            <lightning:button
+              label="Continue with transfer"
+              class="slds-button_brand"
+              onclick="{!c.searchPage }"
+            />
+          </footer>
+        </div>
+      </section>
+      <div class="slds-backdrop slds-backdrop_open"></div>
+    </aura:if>
+
+    <div class="slds-m-around_xx-large">
+      <aura:if isTrue="{!v.isOpen}">
+        <section
+          role="dialog"
+          tabindex="-1"
+          aria-labelledby="modal-heading-01"
+          aria-modal="true"
+          aria-describedby="modal-content-id-1"
+          class="slds-modal slds-fade-in-open"
+        >
+          <div
+            class="slds-modal__container"
+            style="width: 90% !important; max-width: 90% !important"
+          >
+            <header class="slds-modal__header">
+              <aura:if isTrue="{!v.recordTypName == 'Units'}">
+                Select the Organization the Unit will transfer to
+                <aura:set attribute="else">
+                  Select the Unit to transfer the Regulated Entity to
+                </aura:set>
+              </aura:if>
+            </header>
+
+            <div
+              class="slds-modal__content slds-p-around_medium"
+              id="modal-content-id-1"
+              style="eight: 50rem !important; max-height: 50rem !important"
+            >
+              <!--iconName="action:new_account" -->
+              <!--<ul class="slds-button-group-list">
+                                <li style="width: 300px;padding-right: 5px;">
+                                    <c:lookup_component objectName="Account" value="{!v.accountId}" iconName="standard:account" fieldName="{!v.filterString}" placeholder="Search Account..." required="false" />
+                                </li>
+                                <li style="width: 200px;padding-right: 5px;">
+                                    
+                                </li>
+                                </ul>-->
+              <div class="c-container">
+                <lightning:layout>
+                  <lightning:layoutItem padding="around-small">
+                    <!--<c:lookup_component objectName="Account" label="Account Name" value="{!v.accountId}" iconName="standard:account" fieldName="{!v.filterString}" placeholder="Search Account..." required="false" />-->
+                    <lightning:input
+                      name="accountName"
+                      label="Account Name"
+                      value="{!v.paramTypes.accountName}"
+                    />
+                  </lightning:layoutItem>
+                  <lightning:layoutItem padding="around-small">
+                    <lightning:input
+                      name="p5Number"
+                      label="P5 Number"
+                      value="{!v.paramTypes.p5Number}"
+                    />
+                  </lightning:layoutItem>
+                  <lightning:layoutItem padding="around-small">
+                    <lightning:input
+                      name="address"
+                      label="Address"
+                      value="{!v.paramTypes.address}"
+                    />
+                  </lightning:layoutItem>
+                  <lightning:layoutItem padding="around-small">
+                    <lightning:input
+                      name="city"
+                      label="City"
+                      value="{!v.paramTypes.city}"
+                    />
+                  </lightning:layoutItem>
+                  <lightning:layoutItem padding="around-small">
+                    <lightning:input
+                      name="state"
+                      label="State"
+                      value="{!v.paramTypes.state}"
+                    />
+                  </lightning:layoutItem>
+                  <lightning:layoutItem padding="around-small">
+                    <lightning:input
+                      name="zip"
+                      label="Zip"
+                      value="{!v.paramTypes.zip}"
+                    />
+                  </lightning:layoutItem>
+                  <lightning:layoutItem
+                    padding="around-small"
+                    class="paddClass"
+                  >
+                    <label
+                      class="slds-form-element__label slds-no-flex"
+                    ></label>
+                    <lightning:button
+                      label="Search"
+                      class="slds-button_brand"
+                      onclick="{!c.searchRecords }"
+                    />
+                  </lightning:layoutItem>
+                </lightning:layout>
+              </div>
+
+              <div class="slds-m-around_xx-large" style="height: 12rem">
+                <lightning:input
+                  type="text"
+                  name="searchKey"
+                  label="Account Name"
+                  aura:id="searchKey"
+                  onchange="{!c.searchKeyChange}"
+                  placeholder="Search"
+                  style="width: 300px !important"
+                /><br />
+                <aura:if isTrue="{!and(v.hasRecords, !v.hasError)}">
+                  <div style="overflow-y: scroll">
+                    <table
+                      class="slds-table slds-table--bordered slds-table--cell-buffer"
+                      role="grid"
+                    >
+                      <thead>
+                        <tr class="slds-text-title--caps">
+                          <th>
+                            <label class="slds-checkbox"> # </label>
+                          </th>
+                          <th scope="col">
+                            <div class="slds-truncate" title="Name">
+                              Account Name
+                            </div>
+                          </th>
+                          <!-- <aura:if isTrue="{!v.showColumn}"> -->
+                          <th scope="col">
+                            <div class="slds-truncate" title="Type">Type</div>
+                          </th>
+                          <th scope="col">
+                            <div class="slds-truncate" title="Entity Code">
+                              Entity Code
+                            </div>
+                          </th>
+                          <!-- </aura:if> -->
+                          <aura:if isTrue="{!v.showOrgColumn}">
+                            <th scope="col">
+                              <div class="slds-truncate" title="Organization">
+                                Organization Name
+                              </div>
+                            </th>
+                          </aura:if>
+                          <th scope="col">
+                            <div class="slds-truncate" title="Account">
+                              P5 Number
+                            </div>
+                          </th>
+                          <th scope="col">
+                            <div class="slds-truncate" title="Account">
+                              Billing City
+                            </div>
+                          </th>
+                          <th scope="col">
+                            <div class="slds-truncate" title="Account">
+                              Billing State
+                            </div>
+                          </th>
+                          <th scope="col">
+                            <div class="slds-truncate" title="Account">
+                              Billing County
+                            </div>
+                          </th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        <aura:iteration
+                          items="{!v.accList}"
+                          var="acc"
+                          indexVar="index"
+                        >
+                          <tr>
+                            <td>
+                              <ui:inputRadio
+                                aura:id="r{!index}"
+                                text="{!acc.Id}"
+                                name="others"
+                                label=""
+                                change="{!c.onGroup}"
+                              />
+                            </td>
+                            <td scope="row">
+                              <div class="slds-truncate" title="{!acc.Name}">
+                                {!acc.Name}
+                              </div>
+                            </td>
+                            <!-- <aura:if isTrue="{!v.showColumn}"> -->
+                            <td scope="row">
+                              <div class="slds-truncate" title="{!acc.Type}">
+                                {!acc.Type}
+                              </div>
+                            </td>
+                            <!-- </aura:if> -->
+                            <td scope="row">
+                              <div
+                                class="slds-truncate"
+                                title="{!acc.IETRS_Entity_Code__c}"
+                              >
+                                {!acc.IETRS_Entity_Code__c}
+                              </div>
+                            </td>
+                            <aura:if isTrue="{!v.showOrgColumn}">
+                              <td scope="row">
+                                <div
+                                  class="slds-truncate"
+                                  title="{!acc.Parent.Name}"
+                                >
+                                  {!acc.Parent.Name}
+                                </div>
+                              </td>
+                            </aura:if>
+                            <td>
+                              <div
+                                class="slds-truncate"
+                                title="{!acc.Org_P5_Number__c}"
+                              >
+                                {!acc.Org_P5_Number__c}
+                              </div>
+                            </td>
+                            <td>
+                              <div
+                                class="slds-truncate"
+                                title="{!acc.BillingCity}"
+                              >
+                                {!acc.BillingCity}
+                              </div>
+                            </td>
+                            <td>
+                              <div
+                                class="slds-truncate"
+                                title="{!acc.BillingState}"
+                              >
+                                {!acc.BillingState}
+                              </div>
+                            </td>
+                            <td>
+                              <div
+                                class="slds-truncate"
+                                title="{!acc.BillingCountry}"
+                              >
+                                {!acc.BillingCountry}
+                              </div>
+                            </td>
+                          </tr>
+                        </aura:iteration>
+                      </tbody>
+                    </table>
+                  </div>
+                  <aura:set attribute="else">
+                    <center>No records found</center>
+                  </aura:set>
+                </aura:if>
+                <aura:if isTrue="{!v.hasError}">
+                  <h2 class="slds-text-heading_medium slds-m-bottom_small">
+                    Error
+                  </h2>
+                  <p class="slds-m-bottom_small">{!v.errorMessage}</p>
+                  <aura:if isTrue="{!v.openInspectionPackages}">
+                    <ul>
+                      <aura:iteration
+                        items="{!v.openInspectionPackages}"
+                        var="ip"
+                      >
+                        <li>
+                          <a
+                            href="#"
+                            data-record-id="{!ip.Id}"
+                            onclick="{!c.handleNavigateToRecordClick}"
+                          >
+                            {!ip.Name}
+                          </a>
+                          ({!ip.IETRS_Status__c})
+                        </li>
+                      </aura:iteration>
+                    </ul>
+                  </aura:if>
+                </aura:if>
+              </div>
+            </div>
+            <footer class="slds-modal__footer">
+              <lightning:button
+                variant="neutral"
+                label="Cancel"
+                title="Cancel"
+                onclick="{! c.closeModel }"
+              />
+              <aura:if isTrue="{!v.backButton}">
+                <lightning:button
+                  label="Back"
+                  class="slds-button_brand"
+                  onclick="{!c.isBack}"
+                />
+              </aura:if>
+              <lightning:button
+                label="Transfer"
+                class="slds-button_brand"
+                onclick="{!c.saveModel }"
+              />
+            </footer>
+          </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+      </aura:if>
+    </div>
+  </div>
+</aura:component>

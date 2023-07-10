@@ -1,0 +1,107 @@
+<aura:component controller="IETRS_InspectionViolationController" implements="flexipage:availableForRecordHome,force:hasRecordId,force:lightningQuickActionWithoutHeader" access="global" >
+    
+    <aura:attribute name="insppackagerecord" type="Object"/>
+    <aura:attribute name="recordLoadError" type="string"/>
+    <aura:attribute name="data" type="string"/>
+    <aura:attribute name="columns" type="string"/>
+    <aura:attribute name="show" type="boolean" default="false"/>
+    <aura:attribute name="estcompdate" type="Date"/>
+    <aura:attribute name="compdate" type="Date"/>
+    <aura:attribute name="selectedRows" type="List" />
+    <aura:attribute name="isModalOpen" type="boolean" default="false"/>
+    <aura:attribute name="POCcolumns" type="string"/>
+    <aura:attribute name="POCdata" type="string"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+    
+    <aura:html tag="style">
+        .cuf-content {
+        padding: 0 0rem !important;
+        }
+        .slds-p-around--medium {
+        padding: 0rem !important;
+        }
+         .slds-modal__container {
+        min-width: 60vw;
+        }
+    </aura:html>
+    
+    <!--Modal Header-->  
+    <div class="modal-header slds-modal__header">
+        <h4 class="title slds-text-heading--medium">Add Multiple POCs</h4>
+    </div>
+    <!--End Modal Header-->      
+    
+    <!--Modal Body-->
+    <aura:if isTrue="{!v.show}">
+        
+        
+        <div class="slds-modal__content slds-p-around_x-small" style="overflow-y:auto;max-height:282px;height:282px">
+            <lightning:layout horizontalAlign="spread">
+                <lightning:layoutItem padding="around-medium">
+                    <lightning:input type="date" label="Estimated Completion Date" value="{!v.estcompdate}"/>
+                </lightning:layoutItem>
+                <lightning:layoutItem padding="around-medium">
+                    <lightning:input type="date" label="Completion Date" value="{!v.compdate}" />
+                </lightning:layoutItem>
+            </lightning:layout>
+            <div class="slds-grid">
+                <lightning:datatable
+                                     aura:id="datatable"
+                                     keyField="id"
+                                     data="{! v.data }"
+                                     columns="{! v.columns }"
+                                     selectedRows="{! v.selectedRows }"
+                                     onrowaction="{! c.handleRowAction }"
+                                     />
+                <aura:if isTrue="{! v.data == null }">
+                    <div class="slds-card slds-align_absolute-center slds-text-heading_small">No records to display</div>
+                </aura:if>
+            </div>
+        </div>
+    </aura:if>
+    
+    <aura:if isTrue="{!v.isModalOpen}">
+        
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open" >
+            <div class="slds-modal__container" style="width: auto;">
+                <header class="slds-modal__header">
+                    <lightning:buttonIcon iconName="utility:close"
+                                          onclick="{! c.closeModel }"
+                                          alternativeText="close"
+                                          variant="bare-inverse"
+                                          class="slds-modal__close"/>
+                    <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">POC Records</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                    <lightning:datatable
+                                         columns="{! v.POCcolumns }"
+                                         data="{! v.POCdata }"
+                                         keyField="id"
+                                         hideCheckboxColumn="true"
+                                         showRowNumberColumn="true"
+                                         />
+                    <aura:if isTrue="{! v.POCdata.length == 0 }">
+                        <div class="slds-card slds-align_absolute-center slds-text-heading_small">No POC records to display</div>
+                    </aura:if>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </aura:if>
+    <aura:if isTrue="{!!v.show}">
+        <div class="slds-card slds-align_absolute-center slds-text-heading_small" style="height: 282px;">The Inspection Package Uncorrected Status must be in "Waiting for POC" or "POC Waiting for Approval" or "POC Rejected" or "POC Ext Waiting for Approval" or "POC Ext Approved" or "POC Ext Denied" to add multiple POCs</div>
+    </aura:if>
+    <!--End of Modal Body-->
+    
+    <!--Modal Footer-->
+    <div class="modal-footer slds-modal__footer" style="height:59px">
+        <aura:if isTrue="{!v.show}">
+            <lightning:button variant="brand" class="slds-button" label="Update POCs" onclick="{!c.handleUpdatePOCs}"/>
+            <lightning:button variant="brand" class="slds-button" label="Add POCs" onclick="{!c.handlePOCs}"/>
+        </aura:if>
+        <lightning:button variant="brand" class="slds-button" label="Cancel" onclick="{!c.handleCancel}"/>
+    </div>
+    <!--End of Modal Footer-->
+        
+
+</aura:component>

@@ -1,0 +1,242 @@
+<template>
+  <div class="slds-theme_default">
+    <article class="slds-card">
+      <div class="slds-card__header slds-grid">
+        <div class="slds-align_absolute-center">
+          <lightning-button
+            label="Mass Add Cases"
+            variant="brand"
+            onclick={openmodal}
+          ></lightning-button>
+        </div>
+      </div>
+    </article>
+    <template if:true={openmodel}>
+      <div class="slds-is-relative" style="height: 640px">
+        <section
+          role="dialog"
+          tabindex="-1"
+          aria-labelledby="modal-heading-01"
+          aria-modal="true"
+          aria-describedby="modal-content-id-1"
+          class="slds-modal slds-fade-in-open"
+        >
+          <lightning-spinner
+            if:true={isLoading}
+            alternative-text="Loading"
+          ></lightning-spinner>
+          <div class="slds-modal__container">
+            <header class="slds-modal__header">
+              <button
+                class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                title="Close"
+                onclick={closeModal}
+              >
+                <lightning-icon icon-name="utility:close" size="medium">
+                </lightning-icon>
+                <span class="slds-assistive-text">Close</span>
+              </button>
+              <h2
+                id="modal-heading-01"
+                class="slds-text-heading_medium slds-hyphenate"
+              >
+                Mass Add Cases
+              </h2>
+            </header>
+            <div
+              class="slds-modal__content slds-p-around_medium"
+              data-id="modal-content-data-id-1"
+              id="modal-content-id-1"
+              if:false={areResultsVisible}
+            >
+              <h2><b>Populate fields to assist search.</b></h2>
+              <br />
+              <div>
+                <lightning-input
+                  type="checkbox"
+                  value={readyForConfValue}
+                  label="Ready for Conference"
+                  onchange={handleChange1}
+                ></lightning-input>
+                <template if:true={AgendaSectionPicklistValues.data}>
+                  <lightning-combobox
+                    name="progress"
+                    label="Agenda Section"
+                    value={agendaSectionValue}
+                    placeholder="-Select-"
+                    options={AgendaSectionPicklistValues.data.values}
+                    onchange={handleChange2}
+                  >
+                  </lightning-combobox>
+                </template>
+                <lightning-input
+                  type="date"
+                  name="input1"
+                  value={confDateValue}
+                  label="Conference Date"
+                  onchange={handleChange3}
+                ></lightning-input>
+                <lightning-input
+                  type="text"
+                  name="input2"
+                  value={parentCaseValue}
+                  label="Related/Parent Case"
+                  onchange={handleChange4}
+                ></lightning-input>
+              </div>
+            </div>
+            <div
+              class="slds-modal__content slds-p-around_medium"
+              if:true={areResultsVisible}
+            >
+              <h2 class="slds-text-heading_small">Search Results</h2>
+              <div class="slds-m-around_xx-large" if:true={noCases}>
+                <div class="slds-text-align_center">No Search Results.</div>
+              </div>
+              <div class="slds-m-vertical_medium" if:false={noCases}>
+                <table
+                  class="slds-table slds-table_cell-buffer slds-table_bordered slds-m-top_small"
+                >
+                  <thead>
+                    <tr class="slds-line-height_reset">
+                      <th class="" scope="col">
+                        <div class="slds-truncate" title="Selected">
+                          Select All
+                        </div>
+                        <lightning-input
+                          type="checkbox"
+                          onchange={selectAllCheckboxes}
+                        ></lightning-input>
+                      </th>
+                      <th class="" scope="col">
+                        <div class="slds-truncate" title="Case Number">
+                          Case Number
+                        </div>
+                      </th>
+                      <th class="" scope="col">
+                        <div class="slds-truncate" title="Primary Account">
+                          Primary Account
+                        </div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template for:each={cases} for:item="Case">
+                      <tr class="slds-hint-parent" key={Case.Id}>
+                        <td>
+                          <div>
+                            <lightning-input
+                              class="recCheckboxes"
+                              type="checkbox"
+                              value={Case.Id}
+                            ></lightning-input>
+                          </div>
+                        </td>
+                        <td>
+                          <div class="slds-truncate">{Case.CaseNumber}</div>
+                        </td>
+                        <td>
+                          <div class="slds-truncate">
+                            {Case.IETRS_Primary_Account_Assignment__r.Name}
+                          </div>
+                        </td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+              <div class="slds-var-m-top_medium">
+                <h2 class="slds-text-heading_small">
+                  Cases Related to this File
+                </h2>
+                <table
+                  class="slds-table slds-table_cell-buffer slds-table_bordered slds-m-top_small"
+                  if:false={noExistingCases}
+                >
+                  <thead>
+                    <tr class="slds-line-height_reset">
+                      <th class="" scope="col">
+                        <div class="slds-truncate" title="Selected">
+                          Related to Case
+                        </div>
+                      </th>
+                      <th class="" scope="col">
+                        <div class="slds-truncate" title="Case Number">
+                          Case Number
+                        </div>
+                      </th>
+                      <th class="" scope="col">
+                        <div class="slds-truncate" title="Primary Account">
+                          Primary Account
+                        </div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template for:each={existingCases} for:item="Case">
+                      <tr class="slds-hint-parent" key={Case.Id}>
+                        <td>
+                          <div>
+                            <lightning-input
+                              type="checkbox"
+                              checked
+                              disabled
+                            ></lightning-input>
+                          </div>
+                        </td>
+                        <td>
+                          <div class="slds-truncate">{Case.CaseNumber}</div>
+                        </td>
+                        <td>
+                          <div class="slds-truncate">
+                            {Case.IETRS_Primary_Account_Assignment__r.Name}
+                          </div>
+                        </td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+                <div class="slds-m-around_xx-large" if:true={noExistingCases}>
+                  <div class="slds-text-align_center">
+                    There are no Cases related to this File.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <footer class="slds-modal__footer">
+              <div class="slds-float_left" if:true={areResultsVisible}>
+                <lightning-button
+                  label="Back"
+                  variant="neutral"
+                  onclick={handleBackClick}
+                ></lightning-button>
+              </div>
+              <lightning-button
+                label="Cancel"
+                variant="neutral"
+                onclick={closeModal}
+              ></lightning-button
+              >&nbsp;&nbsp;&nbsp;&nbsp;
+              <template if:false={areResultsVisible}>
+                <lightning-button
+                  label="Search"
+                  variant="brand"
+                  onclick={handleSearch}
+                ></lightning-button>
+              </template>
+              <template if:true={areResultsVisible}>
+                <lightning-button
+                  if:false={noCases}
+                  label="Add Records"
+                  variant="brand"
+                  onclick={createRecordsAction}
+                ></lightning-button>
+              </template>
+            </footer>
+          </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+      </div>
+    </template>
+  </div>
+</template>

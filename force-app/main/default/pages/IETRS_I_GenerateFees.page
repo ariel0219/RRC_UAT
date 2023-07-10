@@ -1,0 +1,94 @@
+<apex:page controller="IETRS_I_GenerateFeesController" showHeader="false" standardStylesheets="false" sidebar="false" applyBodyTag="false"
+           docType="html-5.0" lightningStylesheets="true">
+    
+    <apex:includeScript value="/support/console/48.0/integration.js" />
+    <script type="text/javascript">
+    function setTabTitle() {
+        //Set the current tab's title
+        sforce.console.setTabTitle('Generate Fees');
+    }
+    var pageLoad=window.onload;
+    window.onload=function() {
+        if(pageLoad) {
+            pageLoad();
+        }
+        setTabTitle();
+    }
+    </script>
+    
+    <apex:slds />
+    
+    <body class="slds-scope">
+        <apex:form id="fees">
+            <!-- Loder -->
+            <apex:outputPanel rendered="{!loading}">
+                <div role="status" class="slds-spinner slds-spinner_medium">
+                    <span class="slds-assistive-text">Loading</span>
+                    <div class="slds-spinner__dot-a"></div>
+                    <div class="slds-spinner__dot-b"></div>
+                </div>
+            </apex:outputPanel>
+            <div class="slds-p-around_large">
+                <!-- Generate Fees Actions -->
+                <apex:outputPanel rendered="{!!success}" layout="none">
+                    
+                    <h2 class="slds-text-heading_medium">
+                        Generate {!selectedFeeType} Fees
+                    </h2>
+                    <div class="slds-m-bottom_small">
+                        <apex:pageMessages />
+                    </div>
+                    <apex:outputPanel rendered="{!!hasGeneratedFees}">
+                        <!-- No Fee Type Detected -->
+                        <apex:outputPanel rendered="{!ISBLANK(selectedFeeType)}" layout="none">
+                            <label class="slds-text-title slds-show">Select a Fee Type</label>
+                            <apex:selectList styleClass="slds-m-bottom_small" value="{!selectedFeeType}" multiselect="false" size="1">
+                                <apex:selectOptions value="{!feeTypeOptions}" />
+                            </apex:selectList>
+                        </apex:outputPanel>
+                        
+                        <label class="slds-text-title slds-show">Year</label>
+                        <apex:selectList value="{!selectedYear}" multiselect="false" size="1">
+                            <apex:selectOptions value="{!years}" />
+                        </apex:selectList>
+                    </apex:outputPanel>
+                    <div class="slds-m-top_medium">
+                        <apex:commandButton rendered="{!!hasGeneratedFees}" title="Generate Fees" value="Generate Fees" action="{!save}" reRender="fees"
+                                            />
+                        <apex:outputPanel rendered="{!hasGeneratedFees}">
+                            <apex:commandButton rendered="{!hasGeneratedFees}" title="Remove Existing Fees and Generate New Fees" value="Remove Existing Fees and Generate New Fees"
+                                                action="{!saveAndRemoveExisting}" reRender="fees" />
+                            <apex:commandButton styleClass="slds-m-left_small" rendered="{!hasGeneratedFees}" title="Keep Existing Fees and Generate Missing Fees"
+                                                value="Keep Existing Fees and Generate Missing Fees" action="{!saveAndKeepExisting}" reRender="fees"
+                                                />
+                        </apex:outputPanel>
+                    </div>
+                    
+                </apex:outputPanel>
+                <!-- Success message -->
+                <apex:outputPanel rendered="{!success}">
+                    <apex:outputPanel rendered="{!!fcsuccess}">
+                        <h2 class="slds-text-heading_medium slds-m-bottom_medium">
+                            Success
+                        </h2>
+                        <p>
+                            The {!selectedFeeType} Fees were created.
+                        </p>
+                        <div class="slds-m-top_medium">
+                            <apex:commandButton rendered="{!fcsupported}" title="Generate Files and Correspondance" value="Generate Files and Correspondance" action="{!generateFandC}" reRender="fees"
+                                                />
+                        </div>
+                    </apex:outputPanel>
+                    <apex:outputPanel rendered="{!fcsuccess}">
+                        <h2 class="slds-text-heading_medium slds-m-bottom_medium">
+                            Success
+                        </h2>
+                        <p>
+                            The Files and Correspondance for Master Metter Fees will be created.
+                        </p>
+                    </apex:outputPanel>
+                </apex:outputPanel>
+            </div>
+        </apex:form>
+    </body>
+</apex:page>

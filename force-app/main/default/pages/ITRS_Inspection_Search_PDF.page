@@ -1,0 +1,70 @@
+<apex:page controller="IETRS_Inspection_Search_PDF_Generation" renderAs="pdf" applyBodyTag="false">
+    <head>
+        <style>
+            @page{
+                size: A4 landscape;
+            }            
+            body {
+                font-family: 'Arial Unicode MS';
+            }
+            /* td,th{
+              border:1px solid black;padding: 7px;
+              word-wrap: break-word;
+            }
+          
+          table tr, table td{
+                page-break-inside: avoid;
+          }
+            */           
+          table{
+                -fs-table-paginate: paginate;
+            //border-collapse: collapse;
+                border-spacing: 0;
+            border-top:1px solid black;
+          }
+            
+         
+        </style>
+    </head>
+    <body>
+        
+    <apex:form >
+         <div id="searchTable" style="font-size:8px"> 
+             <table id="basic-table" border="1">
+            <thead>
+                <tr>
+                    <apex:repeat value="{!mapColsLableList}" var="colHead">
+                        <th scope="col">
+                            <div align="Center"> {!colHead}</div>
+                        </th>
+                     </apex:repeat>
+                </tr>
+            </thead>
+                 <tbody>
+                 <apex:repeat value="{!DRW.lstRecords}" var="recList">
+                    <apex:repeat value="{!recList}" var="rec"> 
+                      <tr>
+                        <apex:repeat value="{!mapColsLableList}" var="colHead">
+                    
+                        
+                            <td>
+                            <div align="Center">
+                                {!rec[fieldMap[colHead]]}
+                                </div>
+                            </td>
+  
+                        
+                        </apex:repeat>
+                    </tr>
+                </apex:repeat>
+                 </apex:repeat>
+            </tbody>
+            
+            
+        </table>
+    </div>
+
+    </apex:form>
+        
+    </body>
+</apex:page>

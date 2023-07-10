@@ -1,0 +1,6 @@
+:host {
+    display: table-row;
+}
+.slds-form-element__label {
+    display: none;
+}

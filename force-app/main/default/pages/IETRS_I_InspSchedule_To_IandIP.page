@@ -1,0 +1,94 @@
+<apex:page standardController="IETRS_InspSchedule__c" standardStylesheets="false" extensions="IETRS_I_CreateInspScheduleExtension"
+    recordSetVar="inspSchedules" applyBodyTag="false" lightningStylesheets="true" showHeader="false" sidebar="false" docType="html-5.0">
+    <apex:includeLightning />
+    <slds/>
+
+    <body class="slds-scope">
+        <apex:pageBlock >
+            <apex:outputPanel rendered="{!isValidSelection}">
+                <!-- No selections were provide -->
+                <apex:outputPanel rendered="{!isEmpty}">
+                    <apex:pageMessage severity="error" title="Error" summary="Please select at least one Inspection Schedule and try again."></apex:pageMessage>
+                    <apex:form >
+                        <apex:commandButton action="{!cancel}" value="Go Back"></apex:commandButton>
+                    </apex:form>
+                </apex:outputPanel>
+                <!-- Selections were provided and valid -->
+                <apex:outputPanel rendered="{!!isEmpty}">
+                    <div class="flow-loading slds-p-around_medium">
+                        <h2 class="slds-text-heading_small">
+                            Creating Inspection Package...
+                        </h2>
+                    </div>
+                    <div class="flow-complete slds-p-around_medium" style="display: none">
+                        <h2 class="slds-text-heading_small">
+                            Done
+                        </h2>
+                        <p class="slds-p-bottom_small">
+                            Click back to return to the Inspection Schedule list.
+                        </p>
+                        <apex:form >
+                            <apex:commandButton action="{!cancel}" value="Back"></apex:commandButton>
+                        </apex:form>
+                    </div>
+                    <div id="flowContainer" />
+                    <script>
+                        var cmp;
+                        var statusChange=function(event) {
+                            console.log('FLOW STATUS CHANGE: ', event.getParam('status'));
+                            var status=event.getParam('status');
+                            if(status==='STARTED') {
+                                document.querySelector('.flow-loading').style.display='none';
+                            } else if(status==='FINISHED') {
+                                cmp.destroy();
+                                document.querySelector('.flow-complete').style.display='block';
+                                // Control what happens when the interview finishes
+                                var outputVariables=event.getParam('outputVariables');
+                                var key;
+                                for(key in outputVariables) {
+                                    if(outputVariables[key].name==='varInspectionPackageId') {
+                                        // navigate to the new package
+                                        if(outputVariables[key].value) {
+                                            sforce.one.navigateToSObject(outputVariables[key].value);
+                                        }
+                                    }
+                                }
+                            }
+                        };
+                        $Lightning.use('c:lightningOut', function() {
+                            // Create the flow component and set the onstatuschange attribute
+                            $Lightning.createComponent(
+                                'lightning:flow',
+                                {'onstatuschange': statusChange},
+                                'flowContainer',
+                                function(component) {
+                                    // Set the input variables
+                                    var inspections={!inspectionsJson
+                                };
+                            var inputVariables=[{name: 'varIncomingInspectionScheduleIDs', type: 'SObject', value: inspections}];
+                            console.log('START FLOW');
+                            cmp=component;
+                            cmp.startFlow('IETRS_I_Inspection_Schedules_into_Inspection_Packages', inputVariables);
+                        }
+                        );
+                        });
+                    </script>
+                </apex:outputPanel>
+            </apex:outputPanel>
+            <!-- Invalid selection error -->
+            <apex:outputPanel rendered="{!!isValidSelection}">
+                <apex:pageMessage severity="error" title="Error" summary="One or more of the selected records does not have the same Organization, Unit, Type, Sub-Type, Business Area or Regulated Entity Allowed Inspection Type. Ensure all selected inspection schedules have the same values and try again."></apex:pageMessage>
+                <apex:form >
+                    <apex:commandButton action="{!cancel}" value="Go Back"></apex:commandButton>
+                </apex:form>
+            </apex:outputPanel>
+            <apex:outputPanel rendered="{!InspectionAlreadyExists}">
+                <apex:pageMessage severity="error" title="Error" summary=" One or more of the selected records already has Inspection Package created"></apex:pageMessage>
+                <apex:form >
+                    <apex:commandButton action="{!cancel}" value="Go Back"></apex:commandButton>
+                </apex:form>
+            </apex:outputPanel>
+        </apex:pageBlock>
+
+    </body>
+</apex:page>

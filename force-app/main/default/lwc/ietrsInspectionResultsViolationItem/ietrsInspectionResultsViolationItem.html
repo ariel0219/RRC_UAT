@@ -1,0 +1,23 @@
+<template>
+    <td colspan="2" class={colClass}>
+        <label class="slds-text-title slds-text-color_weak">Violation Location</label>
+        <lightning-input
+            class="slds-m-bottom_small"
+            value={location}
+            data-field-name="IETRS_Violation_Location__c"
+            read-only={readOnly}
+            onblur={handleChange}
+        ></lightning-input>
+    </td>
+
+    <td colspan="4" class={colClass}>
+        <label class="slds-text-title slds-text-color_weak">Violation Comments</label>
+        <lightning-input
+            class="slds-m-bottom_small"
+            value={comments}
+            data-field-name="IETRS_Comments__c"
+            read-only={readOnly}
+            onblur={handleChange}
+        ></lightning-input>
+    </td>
+</template>

@@ -1,0 +1,78 @@
+<template>
+    <!-- Main content -->
+    <lightning-card title="Incidents" icon-name="custom:custom63">
+        <!--Loader block-->
+        <template if:true={loader}>
+            <lightning-spinner alternative-text="Loading..." size="small"></lightning-spinner>
+        </template>
+        <!-- Error block -->
+        <template if:true={error}>
+            <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_error" role="alert">
+                <span class="slds-assistive-text">error</span>
+                <p>{error}</p>
+            </div>
+        </template>
+        <!-- Data table  -->
+        <template if:true={data}>
+            <lightning-datatable 
+                key-field="Name"
+                data= {data}
+                columns={columns}
+                sorted-by={sortingField}
+                sorted-direction={sortDirection}
+                onsort={sortColumns}>  
+                hide-checkbox-column>
+            </lightning-datatable>
+            </br>
+            <lightning-layout horizontal-align="space">
+                <lightning-layout-item flexibility="auto">
+                    <lightning-button 
+                        variant="brand" 
+                        disabled={isDisablePrev} 
+                        label="First" 
+                        title="Primary action"
+                        onclick={firstPage} 
+                        class="slds-var-m-left_xx-small">
+                    </lightning-button>
+                </lightning-layout-item>
+                <lightning-layout-item flexibility="auto">
+                    <lightning-button 
+                        variant="brand" 
+                        disabled={isDisablePrev} 
+                        label="Previous" 
+                        icon-name="utility:chevronleft"
+                        icon-position="left"
+                        onclick={previousPage} 
+                        class="slds-var-m-left_xx-small">
+                    </lightning-button>
+                </lightning-layout-item>
+                <lightning-layout-item flexibility="auto">
+                <span class="slds-badge slds-badge_lightest">
+                    {recordStart}-{recordEnd} of {totalRows} | Page {pageNumber} of {totalPages}
+                </span>
+                </lightning-layout-item>
+                <lightning-layout-item flexibility="auto">
+                    <lightning-button 
+                        variant="brand" 
+                        disabled={isDisableNext} 
+                        label="Next" 
+                        icon-name="utility:chevronright" 
+                        icon-position="right"
+                        onclick={nextPage}
+                        class="slds-var-m-left_xx-small">
+                    </lightning-button>
+                </lightning-layout-item>
+                <lightning-layout-item flexibility="auto">
+                    <lightning-button 
+                        variant="brand" 
+                        disabled={isDisableNext} 
+                        label="Last" 
+                        title="Primary action"
+                        onclick={lastPage} 
+                        class="slds-var-m-left_xx-small slds-var-m-right_xx-small">
+                    </lightning-button>
+                </lightning-layout-item>
+            </lightning-layout>
+        </template>
+    </lightning-card> 
+</template>

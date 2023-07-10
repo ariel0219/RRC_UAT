@@ -1,0 +1,11 @@
+<aura:component implements="force:lightningQuickActionWithoutHeader,force:hasRecordId">
+    <aura:handler name="init" action="{!c.handleInit}" value="{!this}" />
+    <aura:attribute name="recordId" type="Id" />
+    <aura:attribute name="loading" type="Boolean" />
+    <lightning:workspaceAPI aura:id="workspace" />
+    <aura:if isTrue="{!v.loading}">
+        <div class="slds-is-relative" style="height: 250px">
+            <lightning:spinner alternativeText="Loading"></lightning:spinner>
+        </div>
+    </aura:if>
+</aura:component>

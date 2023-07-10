@@ -1,0 +1,154 @@
+<!--
+  @Component Name     : IETRS_LookupField.cmp
+  @Description        : Custom related record lookup component with ability to select multiple records and import records from RRC systems
+  @Author             : Mark Frizzell
+  @Group              : 
+  @Last Modified By   : Mark Frizzell
+  @Last Modified On   : 8/16/2019, 1:20:43 PM
+  @Modification Log   : 
+  ==============================================================================
+  Ver         Date                     Author      		      Modification
+  ==============================================================================
+  1.0    7/8/2019, 6:21:57 PM   Mark Frizzell     Initial Version
+-->
+<aura:component controller="IETRS_LookupFieldController" implements="force:hasRecordId,force:appHostable,force:lightningQuickAction,lightning:availableForFlowScreens,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,forceCommunity:availableForAllPageTypes" access="global">
+        <aura:dependency resource="markup://IETRS_LookupFieldResult" type="COMPONENT"/>
+        <aura:dependency resource="markup://IETRS_RecordImportModal" type="COMPONENT"/>
+
+    
+    <!-- ATTRIBUTES -->
+    <aura:attribute name="label" type="String" default="" description="Field label"/>
+    <aura:attribute name="objectName" type="String" description="Name of the object to search"/>
+    <aura:attribute name="recordType" type="String" description="API name of the record type to limit searches (optional)"/>
+    <aura:attribute name="allowMultiple" type="Boolean" default="false" description="Allows user to select more than one record"/>
+    <aura:attribute name="allowImport" type="Boolean" default="false" description="Allows user to import a record from RRC Mainframe"/>
+    <aura:attribute name="iconName" type="String" description="Icon to display next to each search result"/>
+    <aura:attribute name="required" type="Boolean" default="false" description="Indicates this is a required field"/>
+    <aura:attribute name="message" type="String" description="Message if no records are found"/>
+    
+    <aura:attribute name="value" type="String" description="Selected record Ids to return to parent component"/>
+    <aura:attribute name="validity" type="Object" description="Returns the field validity to a parent component"/>
+
+    <aura:attribute name="search" type="String" description="Search text entered by the user" access="PRIVATE"/>
+    <aura:attribute name="results" type="List" description="Search results" access="PRIVATE"/>
+    <aura:attribute name="selectedRecords" type="List" description="Selected record details" access="PRIVATE"/>
+    
+    <aura:attribute name="isLoading" type="Boolean" default="true" access="PRIVATE"/>
+    
+    
+    <!-- TODO: DEPRECATE -->
+    <aura:attribute name="selected" type="String" description="Selected record Ids to return to parent component"/>
+    
+
+    <!-- EVENTS -->
+    <aura:handler name="init" value="{!this}" action="{!c.handleInit}"/>
+    <aura:handler name="change" value="{!v.selectedRecords}" action="{!c.handleSelectChange}" description="Used to update string of record Ids that is returned to the parent component"/>
+    <aura:handler name="recordSelectedEvent" event="c:IETRS_LookupSelected" action="{!c.handleSelect}" description="Component event fired from child IETRS_LookupFieldResult component"/>
+
+    
+    <!-- METHODS -->
+    <aura:method name="reportValidity" action="{!c.handleValidation}" access="PUBLIC">
+        <aura:attribute name="cmp" type="Object"/>
+        <aura:attribute name="validateRequiredFields" type="Boolean"/>
+    </aura:method>
+
+    
+    <!-- CMP MARKUP -->
+    <div aura:id="recordImportModal"></div>
+    
+    <div aura:id="searchRes" onmouseleave="{!c.handleOnblur}" class="slds-form-element slds-lookup slds-input-has-icon slds-input-has-icon_left-right" data-select="single">
+
+        <!-- Label -->
+        <aura:if isTrue="{!v.required}">
+            <abbr title="Required Field" class="slds-required">*</abbr>
+        </aura:if>
+        <aura:if isTrue="{!v.label}">
+            <label class="slds-form-element__label" for="searchInput">{!v.label}</label>
+        </aura:if>
+                    
+        <!-- Search Input -->
+        <aura:if isTrue="{!or(
+                            and(v.allowMultiple == false, v.selectedRecords.length == 0),
+                            v.allowMultiple == true
+                        )}">
+            <lightning:input
+                aura:id="searchInput" 
+                id="searchInput" 
+                label="{!v.label}" 
+                type="text" 
+                value="{!v.search}" 
+                placeholder="Search..." 
+                variant="label-hidden" 
+                onfocus="{!c.handleOnfocus}" 
+                onkeyup="{!c.handleKeyup}" 
+                autocomplete="off" 
+            />
+            <lightning:icon iconName="{!v.iconName}" size="small" class="{!if(v.label != '', 'input-icon-fix', '') + ' slds-combobox__input-entity-icon slds-icon-text-default'}"/>
+            <lightning:icon iconName="utility:search" size="x-small" class="{!if(v.label != '', 'input-icon-fix', '') + ' slds-input__icon slds-input__icon_right slds-icon-text-default'}"/>
+        </aura:if>
+        
+        <!-- Pill for Single Record (input hidden on select) -->
+        <aura:if isTrue="{!and(v.allowMultiple == false, v.selectedRecords.length == 1)}">
+            <div aura:id="lookupPill" class="slds-pill-container">
+                    <lightning:pill 
+                        class="pillSize" 
+                        label="{!if(v.objectName == 'Case', v.selectedRecords[0].CaseNumber, v.selectedRecords[0].Name)}" 
+                        name="{!if(v.objectName == 'Case', v.selectedRecords[0].CaseNumber, v.selectedRecords[0].Name)}" 
+                        onremove="{!c.handleRemove}">
+                    <aura:set attribute="media">
+                        <lightning:icon iconName="{!v.iconName}" size="x-small" alternativeText="{!v.iconName}"/>
+                    </aura:set>
+                </lightning:pill>
+            </div>
+        </aura:if>
+
+        <!-- Search Results -->
+        <ul class="slds-listbox slds-listbox_vertical slds-dropdown slds-dropdown_fluid slds-lookup__menu lookup-results" role="listbox">
+            <aura:if isTrue="{!v.isLoading}">
+                <lightning:spinner variant="brand" size="small" alternativeText="Loading search results..."/>
+            </aura:if>
+            <center>{!v.message}</center>
+            <aura:iteration items="{!v.results}" var="rec">
+                <c:IETRS_LookupFieldResult record="{!rec}" iconName="{!v.iconName}"/>
+            </aura:iteration>
+            
+            <!-- Mainframe Search Option -->
+            <aura:if isTrue="{!v.allowImport}">
+                <li class="slds-listbox__item">
+                    <span class="slds-media slds-listbox__option slds-listbox__option_entity slds-listbox__option_has-meta">
+                        <span class="slds-media__figure">
+                            <span class="slds-icon_container">
+                                <lightning:icon iconName="utility:add" size="small"/>
+                            </span>
+                        </span>    
+                        <span class="slds-media__body" onclick="{!c.handleImportClick}">  
+                            <span class="slds-listbox__option-text slds-listbox__option-text_entity">
+                                Import {!v.objectName}...
+                            </span>
+                            <span class="slds-listbox__option-meta slds-listbox__option-meta_entity">
+                                Search RRC Mainframe for records to import
+                            </span>
+                        </span>
+                    </span>
+                </li>
+            </aura:if>
+
+        </ul>
+
+    </div>
+
+    <!-- Pills for Multiple Records (input not hidden on select) -->
+    <aura:if isTrue="{!v.allowMultiple == true}">
+        <aura:iteration items="{!v.selectedRecords}" var="record">
+            <lightning:pill 
+                    label="{!if(v.objectName == 'Case', record.CaseNumber, record.Name)}" 
+                    name="{!if(v.objectName == 'Case', record.CaseNumber, record.Name)}" 
+                    onremove="{!c.handleRemove}">
+                <aura:set attribute="media">
+                    <lightning:icon iconName="{!v.iconName}" alternativeText="{!v.iconName}"/>
+                </aura:set>
+            </lightning:pill>
+        </aura:iteration>
+    </aura:if>
+    
+</aura:component>

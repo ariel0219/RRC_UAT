@@ -1,0 +1,218 @@
+<apex:page controller="IETRS_RepairedLeaksCsvController" readOnly="true" showHeader="false" sidebar="false">
+    <apex:slds />
+    <script type="text/javascript">
+
+        // don't pollute the global namespace
+        (function () {
+
+            /******************
+             * Variables
+             *****************/
+
+            const hideClass = 'slds-hide';
+            const fileName = '{!fileName}';
+            let columns = [];
+            let data;
+
+            // element vars
+            let errorContainerEl;
+            let errorMsgEl;
+            let loadingEl;
+            let downloadContainerEl;
+            let downloadLinkEl;
+
+            let pipelineSystemsKey;
+            let notificationId = getNotificationId();
+
+
+            /******************
+             * Event Handlers
+             *****************/
+
+            window.onload = handleLoad;
+
+            /******************
+             * Functions
+             *****************/
+
+            /**
+             * Select elements and kick off server callouts when the page is loaded
+             */
+            function handleLoad() {
+                // grab elements once they're loaded
+                errorContainerEl = document.querySelector('.js-error-container');
+                errorMsgEl = document.querySelector('.js-error-msg');
+                loadingEl = document.querySelector('.js-loading');
+                downloadContainerEl = document.querySelector('.js-success');
+                downloadLinkEl = document.querySelector('.js-download-link');
+                if (!notificationId) {
+                    loadingEl.classList.add(hideClass);
+                    showError('The "id" query string parameter is missing on this page.');
+                    return;
+                }
+                getDataForCsvFile();
+            }
+
+            /**
+             * Invoke remote actions and handles the responses
+             */
+            function getDataForCsvFile() {
+                remoteMethod('{!$RemoteAction.IETRS_RepairedLeaksCsvController.getCsvColumns}', [])
+                    .then(function (result) {
+                        columns = result;
+                        return remoteMethod('{!$RemoteAction.IETRS_RepairedLeaksCsvController.getJsonData}', [notificationId])
+                    })
+                    .then(function (result) {
+                        data = result;
+                        pipelineSystemsKey = columns.findIndex(function (col) {
+                            return col.apiName === 'IETRS_Pipelines_System_ID__c';
+                        });
+                        const regEntityIds = data.reduce(function (acc, curVal) {
+                            if (curVal[pipelineSystemsKey]) {
+                                acc.push(curVal[pipelineSystemsKey]);
+                            }
+                            return acc;
+                        }, []).filter(function (value, index, self) {
+                            return self.indexOf(value) === index
+                        });
+                        return remoteMethod('{!$RemoteAction.IETRS_RepairedLeaksCsvController.getRegEntities}', [regEntityIds])
+                    })
+                    .then(function (result) {
+                        const json = data.map(function (obj) {
+                            if (result[obj[pipelineSystemsKey]]) {
+                                obj[pipelineSystemsKey] = result[obj[pipelineSystemsKey]].Name;
+                            }
+                            return obj;
+                        });
+                        const columnLabels = columns.map(function (col) {
+                            return col.label;
+                        });
+                        const csv = convertJsonToCsv(json, columnLabels, ',');
+                        prepareDownloadLink(csv);
+                    })
+                    .catch(function (err) {
+                        showError(err);
+                    })
+                    .finally(function () {
+                        data = [];
+                        loadingEl.classList.add(hideClass);
+                    })
+            }
+
+            /**
+             * Get the notification id from the url (https://mysite.com?id=<notificationId>)
+             * @return {string} the notification id
+             */
+            function getNotificationId() {
+                const urlParamStr = document.location.search;
+                if ((urlParamStr || '').length === 0) {
+                    return;
+                }
+                const urlParams = new URLSearchParams(urlParamStr);
+                return urlParams.get('id');
+            }
+
+            /**
+             * Convert json to csv format
+             * @param {Array} data - List of objects to convert
+             * @param {Array} columnLabels - List of column labels to use instead of keys from the json
+             * @param {string} delimiter - Character to separate values
+             * @returns {string}
+             */
+            function convertJsonToCsv(data, columnLabels, delimiter) {
+                const headerKeys = Object.keys(data[0]);
+                const columnNames = columnLabels ?? headerKeys;
+                const csv = data.map((row) =>
+                    headerKeys
+                        .map((fieldName) =>
+                            JSON.stringify(
+                                row[fieldName] === 0 ? 0 : row[fieldName] ?? ''
+                            )
+                        )
+                        .join(delimiter)
+                );
+                csv.unshift(columnNames.join(delimiter));
+                return csv.join('\r\n');
+            }
+
+            /**
+             * Convert json to csv format
+             * @param {string} csvAsString - List of objects to convert
+             */
+            function prepareDownloadLink(csvAsString) {
+                const byteOrderMark = '\ufeff';
+
+                const blob = new Blob([byteOrderMark, csvAsString], {
+                    type: 'text/csv;charset=utf-8;'
+                });
+
+                const url = URL.createObjectURL(blob);
+                downloadLinkEl.setAttribute('href', URL.createObjectURL(blob));
+                downloadLinkEl.setAttribute('download', fileName);
+                downloadContainerEl.classList.remove(hideClass);
+                downloadLinkEl.click();
+            }
+
+            /**
+             * Show an error message on the page
+             * @param {string} errorContent - The error message to show
+             */
+            function showError(errorContent) {
+                errorMsgEl.innerHTML = errorContent
+                errorContainerEl.classList.remove(hideClass);
+            }
+
+            /**
+             * Wraps a visualfoce remote action callout in a Promise
+             * @param {string} methodName - The name of the remote action method
+             * @param {Array} params - The method params to pass to the remote action
+             */
+            function remoteMethod(methodName, params) {
+                return new Promise(function (resolve, reject) {
+                    const actionCallback = function (result, event) {
+                        if (event.status) {
+                            resolve(result);
+                        } else if (event.type === 'exception') {
+                            reject(event.message + "<br/>\n<pre>" + event.where + "</pre>");
+                        } else {
+                            reject(event.message);
+                        }
+                    }
+                    const actionParams = [methodName, ...params, actionCallback, { timeout: 120000 }];
+                    Visualforce.remoting.Manager.invokeAction(...actionParams);
+                });
+            }
+        })();
+
+    </script>
+    <div class="slds-scope">
+        <div class="slds-align_absolute-center" style="height: 100vh">
+            <!-- loading spinner -->
+            <div class="js-loading slds-text-align_center ">
+                <div class="slds-spinner_container">
+                    <div role="status" class="slds-spinner slds-spinner_medium slds-spinner_brand">
+                        <span class="slds-assistive-text">Loading</span>
+                        <div class="slds-spinner__dot-a"></div>
+                        <div class="slds-spinner__dot-b"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- error container -->
+            <div class="js-error-container slds-theme_error slds-box slds-hide">
+                <h2 class="slds-text-heading_small">Error</h2>
+                <p class="js-error-msg"></p>
+            </div>
+
+            <!-- success container -->
+            <div class="js-success slds-text-align_center slds-hide">
+                <h2 class="slds-text-heading_small slds-p-bottom_medium">
+                    <strong>Success</strong>
+                </h2>
+                <p class="slds-text-body_small slds-p-bottom_medium">Use the button below if the file didn't download automatically.</p>
+                <a href="" class="js-download-link slds-button slds-button_neutral slds-m-bottom_medium">Download File</a>
+                <button class="slds-button slds-block" onclick="window.close()" type="button">Close this page</button>
+            </div>
+        </div>
+    </div>
+</apex:page>

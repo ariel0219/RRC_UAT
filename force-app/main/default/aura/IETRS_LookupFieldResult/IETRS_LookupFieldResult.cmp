@@ -1,0 +1,41 @@
+<!--
+  @Component Name     : IETRS_LookupFieldResult.cmp
+  @Description        : 
+  @Author             : Mark Frizzell
+  @Group              : 
+  @Last Modified By   : Mark Frizzell
+  @Last Modified On   : 7/29/2019, 11:42:58 AM
+  @Modification Log   : 
+  ==============================================================================
+  Ver         Date                     Author      		      Modification
+  ==============================================================================
+  1.0    7/8/2019, 6:15:17 PM   Mark Frizzell     Initial Version
+-->
+<aura:component>
+    
+    <aura:attribute name="record" type="SObject" />
+    <aura:attribute name="iconName" type="String"/> 
+ 
+    <aura:registerEvent name="recordSelectedEvent" type="c:IETRS_LookupSelected"/>
+ 
+    <li role="presentation" class="slds-listbox__item" onclick="{!c.selectRecord}">
+        <span id="listbox-option-unique-id-01" class="slds-media slds-listbox__option slds-listbox__option_entity slds-listbox__option_has-meta" role="option">
+            
+            <span class="slds-media__figure">
+                <span class="slds-icon_container">
+                <lightning:icon iconName="{!v.iconName}" class="slds-icon slds-icon_small" size="small"/>
+                </span>
+            </span>
+
+            <span class="slds-media__body">
+                <span class="slds-listbox__option-text slds-listbox__option-text_entity">
+                    {!v.record.Name}{!v.record.CaseNumber}
+                </span>
+                <span class="slds-listbox__option-meta slds-listbox__option-meta_entity">
+                    {!v.record.RecordType.Name}
+                </span>
+            </span>
+
+        </span>
+    </li>
+</aura:component>

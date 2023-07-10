@@ -1,0 +1,60 @@
+<aura:component
+    implements="force:lightningQuickActionWithoutHeader,lightning:availableForFlowScreens,force:hasRecordId">
+    <aura:html tag="style">
+        .slds-p-around–medium {
+        padding: 0rem !important;
+        }
+        .slds-modal__content{
+        overflow-y:hidden !important;
+        height:unset !important;
+        max-height:unset !important;
+        }
+        .cuf-content {
+        padding: 0 0rem !important;
+        }
+    </aura:html>
+    <aura:attribute type="String" name="recordId" />
+
+    <ltng:require styles="{!$Resource.lightningActionModelWidth_css}" />
+
+
+    <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
+        aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_large">
+        <div class="slds-modal__container">
+            <header class="slds-modal__header">
+                <lightning:buttonIcon size="large" iconName="utility:close" variant="bare"
+                    onclick="{! c.closeQuickAction }" alternativeText="Close window."
+                    class="slds-modal__close slds-button_icon-inverse" />
+                <h2 id="modal-heading-01" class=" slds-text-heading_medium slds-hyphenate">
+                    <span>
+                        Add Reps As Recipients
+                    </span>
+                </h2>
+            </header>
+
+            <!--
+                <div class="modal-header slds-modal__header slds-size_1-of-1">
+        <h4 class="title slds-text-heading_large">  </h4>
+    </div>-->
+            <!--<div class="slds-modal__content slds-p-around–x-small slds-align_absolute-center slds-size_1-of-1
+        slds-is-relative">-->
+            <div class="slds-modal__content slds-p-around_medium slds-p-top_x-small" id="modal-content-id-1">
+                <form class="slds-form–stacked">
+                    <lightning:card class="slds-p-left_medium" >
+                        <lightning:workspaceAPI aura:id="workspace" />
+                        <c:contactDetailForAddRep aura:id="contactDetailComp" recordId="{!v.recordId}"
+                            oncloseAction="{!c.closeQuickAction}" onsaveAction="{!c.saveHandler}">
+                        </c:contactDetailForAddRep>
+                    </lightning:card>
+                </form>
+            </div>
+
+            <footer class="slds-modal__footer">
+                <!--<div class="modal-footer slds-modal__footer slds-size_1-of-1 attach-to-bottom">-->
+
+                <lightning:button variant="brand" label="Cancel" title="title" onclick="{!c.closeQuickAction}" />
+                <lightning:button variant="brand" label="Save" title="title" onclick="{!c.saveHandler}" />
+            </footer>
+        </div>
+    </section>
+</aura:component>

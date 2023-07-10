@@ -1,0 +1,33 @@
+<template>
+  <div class="slds-var-p-left_large slds-var-p-right_large">
+    <h1 class="slds-text-heading_large slds-var-p-top_large">{pageTitle}</h1>
+    <nav role="navigation" aria-label="Breadcrumbs">
+      <ol class="slds-breadcrumb slds-list_horizontal slds-wrap">
+        <li
+          class="slds-breadcrumb__item slds-var-m-right_small"
+          style="margin-top: -1px"
+        >
+          <lightning-button-icon
+            icon-name="utility:home"
+            aria-label="Home"
+            onclick={handleHomeClick}
+            variant="bare"
+          ></lightning-button-icon>
+        </li>
+        <lightning-breadcrumb
+          label={homeBreadcrumb.label}
+          name={homeBreadcrumb.name}
+          onclick={handleBreadcrumbClick}
+        >
+        </lightning-breadcrumb>
+
+        <lightning-breadcrumb
+          if:true={currentBreadcrumb}
+          label={currentBreadcrumb.label}
+          name={currentBreadcrumb.name}
+        >
+        </lightning-breadcrumb>
+      </ol>
+    </nav>
+  </div>
+</template>

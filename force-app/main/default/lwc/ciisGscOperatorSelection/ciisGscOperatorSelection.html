@@ -1,0 +1,31 @@
+<template>
+  <div class="slds-grid slds-wrap">
+    <div class="slds-col">
+      <template if:true={isLoading}>
+        <lightning-spinner alternative-text="Loading"></lightning-spinner>
+      </template>
+      <div class="slds-form slds-grid" role="list" if:false={isLoading}>
+        <div
+          class="slds-col slds-size_1-of-1 slds-small-size_1-of-6"
+          if:true={hasOperators}
+        >
+          <lightning-combobox
+            label="Select Operator"
+            value={selectedOperator}
+            options={operatorOptions}
+            onchange={changeHandler}
+            placeholder="Select Operator"
+            field-level-help="Select from this menu to see records for another Operator."
+          ></lightning-combobox>
+        </div>
+        <!-- show a message that the user doesn't have any related operators -->
+        <div if:false={hasOperators}>
+          <div class="slds-var-m-bottom_small">
+            Sorry, we couldn't find any operators associated with your account.
+            Please contact us if this is an error.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>

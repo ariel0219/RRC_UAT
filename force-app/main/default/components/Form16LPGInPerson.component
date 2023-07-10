@@ -1,0 +1,8 @@
+<apex:component controller="Form16attachmentscontrollerLPG" access="global">
+    <apex:attribute name="registrant"
+        description="Registrant Id"
+        assignTo="{!RegistrantId}"
+        type="Id" />
+
+    <apex:outputText value="{!PageContents}" escape="false" />
+</apex:component>

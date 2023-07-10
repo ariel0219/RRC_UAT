@@ -1,0 +1,152 @@
+<!--
+  @Component Name     : IETRS_CaseEditPage.cmp
+  @Description        : 
+  @Author             : Mark Frizzell
+  @Group              : 
+  @Last Modified By   : Mark Frizzell
+  @Last Modified On   : 8/9/2019, 1:16:27 PM
+  @Modification Log   : 
+  ==============================================================================
+  Ver         Date                     Author      		      Modification
+  ==============================================================================
+  1.0    7/31/2019, 10:39:20 PM   Mark Frizzell     Initial Version
+-->
+<aura:component implements="force:hasRecordId,lightning:actionOverride,lightning:isUrlAddressable,force:lightningQuickActionWithoutHeader" controller="IETRS_RecordEditController">
+    <aura:dependency resource="markup://IETRS_LookupField" type="COMPONENT"/>
+
+    <!-- ATTRIBUTES -->
+    <aura:attribute name="layoutSections" type="List"/>
+    <aura:attribute name="disableSubmit" type="Boolean" default="false"/>
+    <aura:attribute name="saved" type="Boolean" default="false"/>
+    <aura:attribute name="fieldsLoaded" type="Boolean" default="false"/>
+    <aura:attribute name="customFieldsLoaded" type="Boolean" default="false"/>
+    <aura:attribute name="isLoading" type="Boolean" default="true"/>
+
+    <aura:attribute name="relatedAccount" type="String"/>
+    <aura:attribute name="relatedCase" type="String"/>
+
+    <aura:attribute name="recordId" type="String"/>
+    <aura:attribute name="recordTypeId" type="String"/>
+    <aura:attribute name="recordUiData" type="Object"/>
+
+    
+    <!-- HANDLERS -->
+    <aura:handler name="init" value="{!this}" action="{!c.handleInit}"/>
+    
+
+    <!-- COMPONENT MARKUP -->
+
+    <!-- Used to show record after save and close new record tab -->
+    <lightning:workspaceAPI aura:id="recordEditCustomWorkspace"/>
+
+    <!-- Spinner -->
+    <aura:if isTrue="{!v.isLoading}">
+        <lightning:spinner size="medium" variant="brand" alternativeText="Loading record..."/>
+    </aura:if>
+
+    <!-- Header -->
+    <header class="slds-modal__header">
+        <h2 class="slds-text-heading_medium">{!if(v.recordId == null, 'New Case', 'Edit Case')}</h2>
+    </header>
+    
+    <!-- Body -->
+    <lightning:layout multipleRows="true" class="slds-modal__content" verticalAlign="start">
+        
+        <span onkeyup="{!c.keycheck}">
+            <lightning:recordEditForm 
+                aura:id="editForm" 
+                recordId="{!if(v.recordId, v.recordId, '')}" 
+                recordTypeId="{!v.recordTypeId}" 
+                objectApiName="Case" 
+                onsubmit="{!c.handleSubmit}" 
+                onsuccess="{!c.handleSuccess}" 
+                onload="{!c.handleDataLoaded}" 
+                onerror="{!c.handleError}" 
+                density="comfy">
+                
+                <lightning:messages/>
+                
+                <aura:iteration items="{!v.layoutSections}" var="section">
+                    <div class="slds-section slds-is-open slds-p-around_small">
+                        <h3 class="slds-section__title slds-section__title-action">
+                            {!section.label}
+                        </h3>
+                        <div class="slds-section__content">
+                            <lightning:layout multipleRows="true" verticalAlign="end">
+
+                                <aura:if isTrue="{!section.fields.length > 0}">
+                                    <aura:iteration items="{!section.fields}" var="field">
+                                        <lightning:layoutItem size="{!12 / section.totalColumns}" flexibility="auto" padding="around-small">
+
+                                            <!-- Primary Account Assignment (placeholder to render dynamically to control loading) -->
+                                            <aura:if isTrue="{!field.fieldName == 'IETRS_Primary_Account_Assignment__c'}">
+                                                <div 
+                                                    aura:id="lookupFieldPlaceholder" 
+                                                    data-fieldName="{#field.fieldName}" 
+                                                    data-label="Primary Account Assignment" 
+                                                    data-objectName="Account" 
+                                                    data-recordType="Organization" 
+                                                    data-allowMultiple="false" 
+                                                    data-allowImport="true" 
+                                                    data-iconName="standard:account" 
+                                                    data-required="{#field.isRequired}" 
+                                                    data-value="v.relatedAccount">
+                                                </div>
+                                            </aura:if>
+                                            
+                                            <!-- Related Case (placeholder to render dynamically to control loading) -->
+                                            <aura:if isTrue="{!field.fieldName == 'ParentId'}">
+                                                <div
+                                                    aura:id="lookupFieldPlaceholder"
+                                                    data-fieldName="{#field.fieldName}" 
+                                                    data-label="Related Case" 
+                                                    data-objectName="Case" 
+                                                    data-allowMultiple="false" 
+                                                    data-allowImport="false" 
+                                                    data-iconName="standard:case" 
+                                                    data-required="{#field.isRequired}" 
+                                                    data-value="v.relatedCase">
+                                                </div>
+                                            </aura:if>
+                                                
+                                            <!-- Record Type -->
+                                            <aura:if isTrue="{!field.fieldName == 'RecordTypeId'}">
+                                                <lightning:inputField aura:id="input" fieldName="{!field.fieldName}" disabled="true"/>
+                                            </aura:if>
+                                            
+                                            <!-- Other Fields -->
+                                            <aura:if isTrue="{!and(
+                                                    and(field.fieldName != 'IETRS_Primary_Account_Assignment__c', field.fieldName != 'ParentId'),
+                                                    field.fieldName != 'RecordTypeId'
+                                                )}">
+                                                <aura:if isTrue="{!(!field.isReadOnly)}">
+                                                    <lightning:inputField aura:id="input" fieldName="{!field.fieldName}" class="{!if(field.isRequired, 'ietrs-required', '')}"/>
+                                                    <aura:set attribute="else">
+                                                        <lightning:outputField aura:id="output" fieldName="{!field.fieldName}"/>
+                                                    </aura:set>
+                                                </aura:if>
+                                            </aura:if>
+
+                                        </lightning:layoutItem>
+                                    </aura:iteration>
+                                </aura:if>
+
+                            </lightning:layout>
+                        </div>
+                        
+                    </div>
+                </aura:iteration>
+
+                <!-- Footer -->
+                <footer>
+                    <div class="slds-docked-form-footer">
+                        <lightning:button label="Cancel" onclick="{!c.cancelClick}" disabled="{!v.isLoading}" title="Cancel"/>
+                        <lightning:button label="Save" type="submit" disabled="{!v.isLoading}" variant="brand" title="Save the record"/>
+                    </div>
+                </footer>
+
+            </lightning:recordEditForm>
+        </span>
+    </lightning:layout>
+    
+</aura:component>

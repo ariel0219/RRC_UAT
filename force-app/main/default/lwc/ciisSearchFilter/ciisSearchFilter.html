@@ -1,0 +1,32 @@
+<template>
+    <div class={containerClass}>
+        <lightning-input
+            if:true={showInput}
+            class="js-filter slds-size_1-of-1"
+            label={label}
+            value={value}
+            onblur={handleBlur}
+            required={required}
+            read-only={isLocked}
+            max-length={maxLength}
+        ></lightning-input>
+        <lightning-combobox
+            if:true={showSelect}
+            class="js-filter slds-size_1-of-1"
+            label={label}
+            value={value}
+            options={options}
+            onchange={handleChange}
+            required={required}
+            read-only={isLocked}
+        ></lightning-combobox>
+
+        <lightning-button-icon
+            if:true={isLocked}
+            class="slds-m-left_x-small"
+            icon-name="utility:lock"
+            variant="bare"
+            disabled
+        ></lightning-button-icon>
+    </div>
+</template>

@@ -1,0 +1,393 @@
+<!--
+  @Component Name     : IETRS_UpdateFromMainframe.cmp
+  @Description        : 
+  @Author             : Mark Frizzell
+  @Group              : 
+  @Last Modified By   : Kevin Lu
+  @Last Modified On   : 11/1/2019, 11:07:58 AM
+  @Modification Log   : 
+  ==============================================================================
+  Ver         Date                     Author      		      Modification
+  ==============================================================================
+  1.0    8/10/2019, 12:20:53 AM   Mark Frizzell     Initial Version
+  1.0    10/29/2019               Kevin Lu          Added drilling permit information
+-->
+<aura:component implements="force:hasRecordId,force:hasSObjectName,force:lightningQuickActionWithoutHeader" controller="IETRS_UpdateFromMainframeController">
+    
+
+    <!-- ATTRIBUTES -->
+    <aura:attribute name="recordId" type="String"/>
+    <aura:attribute name="sObjectName" type="String" />
+    <aura:attribute name="sfData" type="Object" description="Account object data from Salesforce"/>
+    <aura:attribute name="mfData" type="Object" description="Account data from RRC mainframe" />
+
+    <aura:attribute name="isLoading" type="Boolean" default="true"/>
+
+
+    <!-- HANDLERS -->
+    <aura:handler name="init" value="{!this}" action="{!c.handleInit}"/>
+
+
+    <!-- COMPONENT MARKUP -->
+    <aura:html tag="style">
+        .slds-modal__container {
+            width: 80%;
+        }
+        .cuf-content {
+            padding: 0 0rem !important;
+        }
+        .slds-p-around_medium {
+            padding: 0rem !important;
+        }
+        .slds-modal__content {
+            padding: 0rem !important;
+            height: unset !important;
+            max-height: unset !important;
+        }        
+    </aura:html>
+
+    <!-- Header -->
+    <header class="slds-modal__header">
+        <h2 class="slds-text-heading_medium">Update {!v.sObjectName} Data from Mainframe</h2>
+    </header>
+    
+    <!-- Body -->
+    <lightning:layout multipleRows="true" verticalAlign="start" class="slds-modal__content slds-is-relative">
+
+        <!-- Spinner -->
+        <aura:if isTrue="{!v.isLoading}">
+            <lightning:spinner size="medium" variant="brand" alternativeText="Loading..."/>
+        </aura:if>
+
+        <!-- Instructions -->
+        <lightning:layoutItem size="12" padding="around-small" class="slds-text-align_center slds-m-bottom_medium">
+            <p>Please review the Salesforce and Mainframe data below.</p>
+            <p>The Salesforce data will be <b>REPLACED</b> by this update, including related records.</p>
+            <p class="slds-text-color_destructive"><b>This cannot be undone.</b></p>
+        </lightning:layoutItem>
+
+        <!-- Account Details -->
+        <lightning:layoutItem size="12" padding="around-small">
+            <lightning:tile label="{!v.sfData.Name}" href="">
+                <aura:set attribute="media">
+                    <lightning:icon iconName="standard:account"/>
+                </aura:set>
+                <dl class="slds-dl_horizontal">
+                    <dt class="slds-dl_horizontal__label">
+                        <p class="slds-truncate">Record Type:</p>
+                    </dt>
+                    <dd class="slds-dl_horizontal__detail slds-tile__meta">
+                        <p class="slds-truncate">{!v.sfData.RecordType.Name}</p>
+                    </dd>
+                    <dt class="slds-dl_horizontal__label">
+                        <p class="slds-truncate">Identifier:</p>
+                    </dt>
+                    <dd class="slds-dl_horizontal__detail slds-tile__meta">
+                        <p class="slds-truncate">{!if(v.sfData.RecordType.Name == 'Organization', v.sfData.IETRS_P5_Number__c, v.sfData.IETRS_Lease_Number__c)}</p>
+                    </dd>
+                    <dt class="slds-dl_horizontal__label">
+                        <p class="slds-truncate">Type:</p>
+                    </dt>
+                    <dd class="slds-dl_horizontal__detail slds-tile__meta">
+                        <p class="slds-truncate">{!if(v.sfData.RecordType.Name == 'Organization', v.sfData.IETRS_Organization_Type__c, v.sfData.Type)}</p>
+                    </dd>
+                </dl>
+            </lightning:tile>
+        </lightning:layoutItem>     
+        
+        <!-- Data Comparison Box -->
+        <div class="slds-box_border slds-m-around_small ietrs-data-container">
+
+            <!-- Salesforce Data -->
+            <lightning:layoutItem size="6" padding="around-small" class="slds-float_left">
+                <div class="slds-text-heading_label slds-border_bottom slds-p-around_xx-small">
+                    <lightning:icon iconName="utility:salesforce1" size="small"/>
+                    <span class="slds-text-heading_label slds-p-left_small"><b>Salesforce Data</b></span>
+                </div>
+                
+                <!-- Operators -->
+                <aura:if isTrue="{!v.sfData.RecordType.DeveloperName == 'Organization'}">
+                    <span class="slds-form-element__label slds-m-top_small">Primary Address</span>
+                    <lightning:formattedAddress 
+                        class="slds-form-element__static"
+                        street="{!v.sfData.BillingAddress.street}"
+                        city="{!v.sfData.BillingAddress.city}"
+                        province="{!v.sfData.BillingAddress.state}"
+                        postalCode="{!v.sfData.BillingAddress.postalCode}"/>
+
+                    <!-- Officers -->
+                    <span class="slds-form-element__label slds-m-top_small">Related Contacts</span>
+                    <aura:iteration items="{!v.sfData.Contacts}" var="officer">
+                        <lightning:tile label="{!officer.LastName + ', ' + officer.FirstName + ' ' + officer.MiddleName}" href="">
+                            <aura:set attribute="media">
+                                <lightning:icon iconName="standard:contact"/>
+                            </aura:set>
+                            <dl class="slds-dl_horizontal">
+                                <dt class="slds-dl_horizontal__label">
+                                    <p class="slds-truncate">Title:</p>
+                                </dt>
+                                <dd class="slds-dl_horizontal__detail slds-tile__meta">
+                                    <p class="slds-truncate">{!officer.Title}</p>
+                                </dd>
+                            </dl>
+                        </lightning:tile>
+                    </aura:iteration>
+                </aura:if>
+                
+                <!-- Leases -->
+                <aura:if isTrue="{!v.sfData.Type == 'Lease'}">
+                    <span class="slds-form-element__label slds-m-top_small">District Code</span>
+                    <span class="slds-form-element__static">{!v.sfData.IETRS_District__r.Name}</span>
+                    <span class="slds-form-element__label slds-m-top_small">Field Name</span>
+                    <span class="slds-form-element__static">{!v.sfData.IETRS_Field_Name__c}</span>
+                    <span class="slds-form-element__label slds-m-top_small">Field Number</span>
+                    <span class="slds-form-element__static">{!v.sfData.IETRS_Field_Number__c}</span>
+
+                    <!-- Wells -->
+                    <span class="slds-form-element__label slds-m-top_small">Wells</span>
+                    <aura:iteration items="{!v.sfData.ChildAccounts}" var="well">
+                        <lightning:tile label="{!well.Name}" href="">
+                            <aura:set attribute="media">
+                                <lightning:icon iconName="standard:account"/>
+                            </aura:set>
+                            <dl class="slds-dl_horizontal">
+                                <dt class="slds-dl_horizontal__label">
+                                    <p class="slds-truncate">API:</p>
+                                </dt>
+                                <dd class="slds-dl_horizontal__detail slds-tile__meta">
+                                    <p class="slds-truncate">{!well.IETRS_Account_ID__c}</p>
+                                </dd>
+                            </dl>
+                            <dl class="slds-dl_horizontal">
+                                <dt class="slds-dl_horizontal__label">
+                                    <p class="slds-truncate">Well:</p>
+                                </dt>
+                                <dd class="slds-dl_horizontal__detail slds-tile__meta">
+                                    <p class="slds-truncate">{!well.IETRS_Well_Number__c}</p>
+                                </dd>
+                            </dl>
+                            <dl class="slds-dl_horizontal">
+                                <dt class="slds-dl_horizontal__label">
+                                    <p class="slds-truncate">Lease:</p>
+                                </dt>
+                                <dd class="slds-dl_horizontal__detail slds-tile__meta">
+                                    <p class="slds-truncate">{!well.IETRS_Lease_Number__c}</p>
+                                </dd>
+                            </dl>
+                            <dl class="slds-dl_horizontal">
+                                <dt class="slds-dl_horizontal__label">
+                                    <p class="slds-truncate">Operator:</p>
+                                </dt>
+                                <dd class="slds-dl_horizontal__detail slds-tile__meta">
+                                    <p class="slds-truncate">{!well.IETRS_P5_Number__c}</p>
+                                </dd>
+                            </dl>
+                            <dl class="slds-dl_horizontal">
+                                <dt class="slds-dl_horizontal__label">
+                                    <p class="slds-truncate">District:</p>
+                                </dt>
+                                <dd class="slds-dl_horizontal__detail slds-tile__meta">
+                                    <p class="slds-truncate">{!well.IETRS_District__r.Name}</p>
+                                </dd>
+                            </dl>
+                            <dl class="slds-dl_horizontal">
+                                <dt class="slds-dl_horizontal__label">
+                                    <p class="slds-truncate">County:</p>
+                                </dt>
+                                <dd class="slds-dl_horizontal__detail slds-tile__meta">
+                                    <p class="slds-truncate">{!well.IETRS_County__r.Name}</p>
+                                </dd>
+                            </dl>
+                        </lightning:tile>
+                    </aura:iteration>
+                </aura:if>
+
+                <!-- Drilling Permits -->
+                <aura:if isTrue="{!v.sfData.Type == 'Drilling Permit'}">
+                    <span class="slds-form-element__label slds-m-top_small">Permit Number</span>
+                    <span class="slds-form-element__static">{!v.sfData.IETRS_Drilling_Permit_Number__c}</span>
+                    <span class="slds-form-element__label slds-m-top_small">Version Number</span>
+                    <span class="slds-form-element__static">{!v.sfData.IETRS_Drilling_Permit_Version__c}</span>
+                    <span class="slds-form-element__label slds-m-top_small">Operator Name</span>
+                    <span class="slds-form-element__static">{!v.sfData.Parent.Name}</span>
+                    <span class="slds-form-element__label slds-m-top_small">Operator Number</span>
+                    <span class="slds-form-element__static">{!v.sfData.Parent.IETRS_P5_Number__c}</span>
+                    <span class="slds-form-element__label slds-m-top_small">Lease Name</span>
+                    <span class="slds-form-element__static">{!v.sfData.IETRS_Lease_Name__c}</span>
+                </aura:if>
+
+                <!-- UIC Permits -->
+                <aura:if isTrue="{!v.sfData.Type == 'UIC Permit'}">
+                    <span class="slds-form-element__label slds-m-top_small">API Number</span>
+                    <span class="slds-form-element__static">{!v.sfData.IETRS_API__c}</span>
+                    <span class="slds-form-element__label slds-m-top_small">UIC Number</span>
+                    <span class="slds-form-element__static">{!v.sfData.IETRS_UIC_Number__c}</span>
+                    <span class="slds-form-element__label slds-m-top_small">UIC Permit Number</span>
+                    <span class="slds-form-element__static">{!v.sfData.IETRS_UIC_Permit_Number__c}</span>
+                    <span class="slds-form-element__label slds-m-top_small">UIC Project Number</span>
+                    <span class="slds-form-element__static">{!v.sfData.IETRS_UIC_Project_Number__c}</span>
+                    <span class="slds-form-element__label slds-m-top_small">Operator Name</span>
+                    <span class="slds-form-element__static">{!v.sfData.IETRS_OrganizationofRegEntity__r.Name}</span>
+                    <span class="slds-form-element__label slds-m-top_small">Operator Number</span>
+                    <span class="slds-form-element__static">{!v.sfData.IETRS_OrganizationofRegEntity__r.IETRS_P5_Number__c}</span>
+                </aura:if>
+                
+            </lightning:layoutItem>
+
+            <!-- Mainframe Data -->
+            <lightning:layoutItem size="6" padding="around-small" class="slds-float_right">
+                <div class="slds-text-heading_label slds-border_bottom slds-p-around_xx-small">
+                    <lightning:icon iconName="utility:database" size="small"/>
+                    <span class="slds-text-heading_label slds-p-left_small"><b>Mainframe Data</b></span>
+                </div>
+                
+                <!-- Operators -->
+                <aura:if isTrue="{!v.sfData.RecordType.DeveloperName == 'Organization'}">                
+                    <span class="slds-form-element__label slds-m-top_small">Primary Address</span>
+                    <lightning:formattedAddress 
+                        class="slds-form-element__static"
+                        street="{!v.mfData.operator.billingAddress}"
+                        city="{!v.mfData.operator.billingCity}"
+                        province="{!v.mfData.operator.billingState}"
+                        postalCode="{!v.mfData.operator.billingZip}"/>
+
+                    <!-- Contacts -->
+                    <span class="slds-form-element__label slds-m-top_small">Related Contacts</span>
+                    <aura:iteration items="{!v.mfData.officers}" var="officer">
+                        <lightning:tile label="{!officer.officerName}" href="">
+                            <aura:set attribute="media">
+                                <lightning:icon iconName="standard:contact"/>
+                            </aura:set>
+                            <dl class="slds-dl_horizontal">
+                                <dt class="slds-dl_horizontal__label">
+                                    <p class="slds-truncate">Title:</p>
+                                </dt>
+                                <dd class="slds-dl_horizontal__detail slds-tile__meta">
+                                    <p class="slds-truncate">{!officer.officerTitle}</p>
+                                </dd>
+                            </dl>
+                        </lightning:tile>
+                    </aura:iteration>
+                </aura:if>
+
+                <!-- Leases -->
+                <aura:if isTrue="{!v.sfData.Type == 'Lease'}">
+                    <span class="slds-form-element__label slds-m-top_small">District Code</span>
+                    <span class="slds-form-element__static">{!v.mfData.lease.districtCode}</span>
+                    <span class="slds-form-element__label slds-m-top_small">Field Name</span>
+                    <span class="slds-form-element__static">{!v.mfData.lease.fieldName}</span>
+                    <span class="slds-form-element__label slds-m-top_small">Field Number</span>
+                    <span class="slds-form-element__static">{!v.mfData.lease.fieldNumber}</span>
+
+                    <!-- {"wellNumber":"M  2  ","operatorNumber":"247628","leaseNumber":"04137","districtCode":"01","county":"TRAVIS","apiNumber":"45300326"} -->
+                    <!-- Wells -->
+                    <span class="slds-form-element__label slds-m-top_small">Wells</span>
+                    <aura:iteration items="{!v.mfData.wells}" var="well">
+                        <lightning:tile label="{!'Well ' + well.wellNumber + ' - Lease ' + well.leaseNumber + ' - District ' + well.districtCode}" href="">
+                            <aura:set attribute="media">
+                                <lightning:icon iconName="standard:account"/>
+                            </aura:set>
+                            <dl class="slds-dl_horizontal">
+                                <dt class="slds-dl_horizontal__label">
+                                    <p class="slds-truncate">API:</p>
+                                </dt>
+                                <dd class="slds-dl_horizontal__detail slds-tile__meta">
+                                    <p class="slds-truncate">{!well.apiNumber}</p>
+                                </dd>
+                            </dl>
+                            <dl class="slds-dl_horizontal">
+                                <dt class="slds-dl_horizontal__label">
+                                    <p class="slds-truncate">Well:</p>
+                                </dt>
+                                <dd class="slds-dl_horizontal__detail slds-tile__meta">
+                                    <p class="slds-truncate">{!well.wellNumber}</p>
+                                </dd>
+                            </dl>
+                            <dl class="slds-dl_horizontal">
+                                <dt class="slds-dl_horizontal__label">
+                                    <p class="slds-truncate">Lease:</p>
+                                </dt>
+                                <dd class="slds-dl_horizontal__detail slds-tile__meta">
+                                    <p class="slds-truncate">{!well.leaseNumber}</p>
+                                </dd>
+                            </dl>
+                            <dl class="slds-dl_horizontal">
+                                <dt class="slds-dl_horizontal__label">
+                                    <p class="slds-truncate">Operator:</p>
+                                </dt>
+                                <dd class="slds-dl_horizontal__detail slds-tile__meta">
+                                    <p class="slds-truncate">{!well.operatorNumber}</p>
+                                </dd>
+                            </dl>
+                            <dl class="slds-dl_horizontal">
+                                <dt class="slds-dl_horizontal__label">
+                                    <p class="slds-truncate">District:</p>
+                                </dt>
+                                <dd class="slds-dl_horizontal__detail slds-tile__meta">
+                                    <p class="slds-truncate">{!well.districtCode}</p>
+                                </dd>
+                            </dl>
+                            <dl class="slds-dl_horizontal">
+                                <dt class="slds-dl_horizontal__label">
+                                    <p class="slds-truncate">County:</p>
+                                </dt>
+                                <dd class="slds-dl_horizontal__detail slds-tile__meta">
+                                    <p class="slds-truncate">{!well.county}</p>
+                                </dd>
+                            </dl>
+                        </lightning:tile>
+                    </aura:iteration>
+                </aura:if>
+
+                <!-- Drilling Permits-->
+                <aura:if isTrue="{!v.sfData.Type == 'Drilling Permit'}">
+                    <span class="slds-form-element__label slds-m-top_small">Permit Number</span>
+                    <span class="slds-form-element__static">{!v.mfData.drillingPermitNumber}</span>
+                    <span class="slds-form-element__label slds-m-top_small">Number of Versions</span>
+                    <span class="slds-form-element__static">{!v.mfData.drillingPermitVersionCount}</span>
+                    <span class="slds-form-element__label slds-m-top_small">Versions</span>
+                    <span class="slds-form-element__static">{!v.mfData.drillingPermitVersions}</span>
+                    <span class="slds-form-element__label slds-m-top_small">Operator Name</span>
+                    <span class="slds-form-element__static">{!v.mfData.operatorName}</span>
+                    <span class="slds-form-element__label slds-m-top_small">Operator Number</span>
+                    <span class="slds-form-element__static">{!v.mfData.operatorNumber}</span>
+                    <span class="slds-form-element__label slds-m-top_small">Lease Name</span>
+                    <span class="slds-form-element__static">{!v.mfData.leaseName}</span>
+                </aura:if>
+
+                <!-- UIC Permits-->
+                <aura:if isTrue="{!v.sfData.Type == 'UIC Permit'}">
+                    <span class="slds-form-element__label slds-m-top_small">API Number</span>
+                    <span class="slds-form-element__static">{!v.mfData.uicinfo[0].apiNumber}</span>
+
+                    <span class="slds-form-element__label slds-m-top_small">UIC Number</span>
+                    <span class="slds-form-element__static">{!v.mfData.uicinfo[0].uicNumber}</span>
+
+                    <span class="slds-form-element__label slds-m-top_small">UIC Permit Number</span>
+                    <span class="slds-form-element__static">{!v.mfData.uicinfo[0].uicPermitNumber}</span>
+
+                    <span class="slds-form-element__label slds-m-top_small">UIC Project Number</span>
+                    <span class="slds-form-element__static">{!v.mfData.uicinfo[0].uicProjectNumber}</span>
+
+                    <span class="slds-form-element__label slds-m-top_small">Operator Name</span>
+                    <span class="slds-form-element__static">{!v.mfData.uicinfo[0].operatorName}</span>
+
+                    <span class="slds-form-element__label slds-m-top_small">Operator Number</span>
+                    <span class="slds-form-element__static">{!v.mfData.uicinfo[0].operatorNumber}</span>
+                </aura:if>
+
+            </lightning:layoutItem>
+            
+        </div>
+
+    </lightning:layout>
+
+    <!-- Footer -->
+    <footer>
+        <div class="slds-modal__footer">
+            <lightning:button label="Cancel" onclick="{!c.cancelClick}" disabled="{!v.isLoading}" title="Close"/>
+            <lightning:button label="Update Records" onclick="{!c.updateClick}" disabled="{!v.isLoading}" variant="brand" title="Update the records"/>
+        </div>
+    </footer>
+
+</aura:component>

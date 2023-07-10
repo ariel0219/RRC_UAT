@@ -1,0 +1,16 @@
+/* scroll vertically */
+.ps-container {
+    background-color: white;
+    overflow-y: scroll;
+    height: 100%;
+    left: 0;
+    top: 0;
+}
+
+.ps-label {
+    cursor: pointer;
+}
+
+.slds-dl_horizontal__detail {
+    text-align: right;
+}

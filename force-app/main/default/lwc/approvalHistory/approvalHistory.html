@@ -1,0 +1,56 @@
+<template>
+  <div>
+    <lightning-card>
+      <h3 slot="title">
+        <lightning-icon
+          icon-name="standard:approval"
+          size="small"
+        ></lightning-icon>
+        <a
+          class="slds-card__header-link slds-p-left_medium"
+          if:true={approvalHistory} onclick={handleViewAllClick}
+          >Approval History ({approvalHistory.approvalStepsSize})</a
+        >
+      </h3>
+      <template if:true={showDataTable}>
+        <lightning-datatable
+          key-field="id"
+          data={approvalHistory.approvalSteps}
+          columns={columns}
+          hide-checkbox-column
+          class="myApprovalHistoryTable"
+        ></lightning-datatable>
+        
+      </template>
+      <template if:true={showDataTable}>
+        <!-- needed to use the footer class because the tob bar looked weird with the datatable component on top-->
+        <center>
+          <p  class="slds-p-around_small">
+            <lightning-button variant="base" label="View All" title="View All Approval History records" onclick={handleViewAllClick} class="slds-m-left_x-small"></lightning-button>
+          </p>  
+        </center>
+      </template>
+                      
+
+      <c-modal data-id="submitForApproval" onclosedialog={handleModalCancel}>
+        <div slot="header">Approval History</div>
+        <div class="slds-form-element" if:true={showViewAllModal}>
+            <lightning-datatable
+            key-field="id"
+            data={approvalHistoryViewAll.approvalSteps}
+            columns={columns}
+            hide-checkbox-column
+            class="myApprovalHistoryTable"
+          ></lightning-datatable>
+        </div>
+        <div slot="footer">
+          <lightning-button
+            data-id="Close"
+            label="Close"
+            onclick={handleModalCancel}
+          ></lightning-button>
+        </div>
+      </c-modal>
+    </lightning-card>
+  </div>
+</template>

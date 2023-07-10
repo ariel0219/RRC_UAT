@@ -1,0 +1,25 @@
+.THIS .slds-modal__content{
+    overflow: initial;
+}
+
+.THIS .slds-th__action-button { 
+    display: none; 
+}
+
+.THIS lightning-datatable table {
+    min-height: 40px;
+}
+
+.THIS .slds-form-element__label .slds-required {
+    display: none;
+}
+
+.THIS .button-search { 
+    width: 100%;
+}
+
+/* Justifies number fields in the lightning datatable */
+.THIS .slds-grid_align-end
+{
+    justify-content: left; 
+}

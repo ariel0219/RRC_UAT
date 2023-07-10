@@ -1,0 +1,4 @@
+<!-- CONTAINER AURA COMPONENT THAT ACCEPTS AN EVENT FROM A CHILD LWC AND REFRESHES THE PAGE -->
+<aura:component implements="force:hasRecordId,flexipage:availableForRecordHome">
+    <c:iETRS_BrokerLWC onrefreshevent="{! c.forceRefreshView }"/>
+</aura:component>

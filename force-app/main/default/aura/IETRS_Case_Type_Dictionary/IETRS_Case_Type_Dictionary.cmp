@@ -1,0 +1,3 @@
+<aura:component implements="force:lightningQuickAction">
+    <aura:handler name="render" value="{!this}" action="{!c.onRender}"/>
+</aura:component>

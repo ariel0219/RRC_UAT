@@ -1,0 +1,19 @@
+<template>
+    <template if:true={isLoading}>
+        <lightning-spinner alternative-text="Validating" size="medium"></lightning-spinner>
+    </template>                  
+{stringList}
+    <div class="slds-m-around_medium">
+        <div style="height: 300px;">
+            <lightning-datatable
+                    key-field="id"
+                    data={data}
+                    hide-checkbox-column
+                    columns={columns}>
+            </lightning-datatable>
+        </div>
+        <template if:true={error}>
+            <div class="slds-text-color_error">{error}</div>
+        </template>
+    </div>
+</template>

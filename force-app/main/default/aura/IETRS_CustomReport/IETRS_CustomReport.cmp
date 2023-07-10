@@ -1,0 +1,122 @@
+<aura:component implements="flexipage:availableForAllPageTypes" controller="CustomReportController" access="global" >
+    
+    
+    <aura:attribute name="showButton" type="boolean" default="false"/> 
+    <aura:attribute name="showGeneratePDFButton" type="boolean" default="false"/> 
+    <aura:attribute name="showScheduleFilter" type="boolean" default="false"/>
+    <aura:attribute name="showCoastlineAddrFilter" type="boolean" default="false"/>
+    <aura:attribute name="showPerformanceQtrFilter" type="boolean" default="false"/>
+    <aura:attribute name="showOperatorAddrFilter" type="boolean" default="false"/>
+    <aura:attribute name="showSystemMilesFilter" type="boolean" default="false"/>
+    <aura:attribute name="showNoOfUnitsFilter" type="boolean" default="false"/>
+    <aura:attribute name="showCard" type="boolean" default="false"/> 
+    <aura:attribute name="options" type="List" default="['--Select One--','Summary System Scheduling','Eastern Coastline Addresses','Performance Quarters report',
+                                                        'Operator Address','System Miles by Region','Number of Units by Region']"/>
+    <aura:attribute name="ltngSelectedvalue" type="string"/> 
+    <aura:attribute name="ltngSelectedYear" type="integer"/>
+    <aura:attribute name="ltngSelectedAddr" type="string"/>
+    <aura:attribute name="ltngSelectedQtr" type="string"/>  
+    <aura:attribute name="ltngSelectedQtrYr" type="string"/>
+    <aura:attribute name="ltngSelectedType" type="string"/>  
+    <aura:attribute name="ltngSelectedCtry" type="string"/> 
+    <aura:attribute name="ltngSelectedSType" type="string"/>  
+    <aura:attribute name="ltngSelectedReg" type="string"/>   
+    <aura:attribute name="ltngSelectedUnit" type="string"/>
+    <aura:attribute name="ltngSelectedMile" type="string"/>   
+    <aura:attribute name="Regions" type="List"/> 
+    <aura:attribute name="Countys" type="List"/> 
+    <aura:attribute name="sTypes" type="List"/> 
+    <aura:attribute name="SystemTypes" type="List"/> 
+    <lightning:card title="Please select a Report Type from the following drop down:" class="slds-is-relative">  
+        <aura:if isTrue = "{!v.showButton}">     
+            <div class="slds-float_right">
+                <lightning:button label="Select" onclick="{!c.onSelect}" variant="brand" class="slds-m-right_small"/>
+            </div>
+        </aura:if>  
+        
+        <div class="slds-grid slds-wrap slds-gutters slds-p-around_small"> 
+            <div class="slds-col slds-size_1-of-2 slds-p-bottom_large">   
+                <lightning:select name="cStat" label="Report Type" value="{!v.ltngSelectedvalue}" aura:id="statusPicklist" onchange="{!c.doSelectChange}">
+                    <aura:iteration items="{!v.options}" var="opt">
+                        <option value="{!opt}">{!opt}</option>
+                    </aura:iteration>
+                </lightning:select>
+            </div>    
+            <div class="slds-col slds-size_1-of-2"></div>   
+        </div>  
+    </lightning:card>
+    
+    
+    <aura:if isTrue="{!v.showCard}"> 
+        <lightning:card title="Use the following filters to specify the parameters for the generated report.">
+            <div class="slds-float_right">
+                <lightning:button label="Generate PDF" onclick="{!c.generatePDF}" variant="brand" class="slds-m-right_small"/>
+                
+            </div>
+            <br/>    
+            <div class="slds-grid slds-wrap slds-gutters slds-p-around_small">
+                <div class="slds-col slds-small-size_1-of-2 ">
+                    <!-- SUMMARY SYSTEM SCHEDULED REPORT -->
+                    <aura:if isTrue = "{!v.showScheduleFilter}">     
+                        <lightning:input aura:id="ltngSelectedYear"  label="Enter Year" placeholder="Enter Year Only Numbers" maxlength="4" 
+                                         name="ltngSelectedYear"  pattern="^[0-9_ ]*$"
+                                         messageWhenPatternMismatch="Year is not valid"
+                                         messageWhenBadInput='Year should be numbers only'
+                                         /> 
+                    </aura:if>
+                    <!-- EASTERN COASTLINE REPORT -->
+                    <aura:if isTrue = "{!v.showCoastlineAddrFilter}">     
+                        <lightning:select name="cStat" label="Address" value="{!v.ltngSelectedAddr}" aura:id="SelectedAddr" onchange="{!c.doChangeAddr}">
+                            <option value="None">None</option>
+                        </lightning:select>
+                    </aura:if>
+                    <!-- PERFORMANCE QUARTER REPORT -->
+                    <aura:if isTrue = "{!v.showPerformanceQtrFilter}">     
+                        <lightning:select name="cStat" label="Quarter" value="{!v.ltngSelectedQtr}" aura:id="SelectedQtr" >
+                            <option value="9-11">Qtr1</option>
+                            <option value="12-2">Qtr2</option>
+                            <option value="3-5">Qtr3</option>
+                            <option value="6-8">Qtr4</option>
+                        </lightning:select>
+
+                        <lightning:input aura:id="SelectedQtrYr"  label="Enter Year" placeholder="Enter Year Only Numbers" maxlength="4" 
+                                         name="cStat"  pattern="^[0-9_ ]*$"
+                                         messageWhenPatternMismatch="Year is not valid"
+                                         messageWhenBadInput='Year should be numbers only'
+                                         value="{!v.ltngSelectedQtrYr}"
+                                         /> 
+                    </aura:if>
+                    <!-- OPERATOR ADDRESS REPORT -->
+                    <aura:if isTrue = "{!v.showOperatorAddrFilter}">     
+                        <lightning:select name="cStat" label="System Type" value="{!v.ltngSelectedType}" aura:id="SelectedType">
+                            <option value="All">All</option>
+                            <aura:iteration items="{!v.sTypes}" var="type">
+                                <option value="{!type}">{!type}</option>
+                            </aura:iteration> 
+                        </lightning:select>
+                        <lightning:select name="cStat" label="County" value="{!v.ltngSelectedCtry}" aura:id="SelectedCtry">
+                            <option value="All">All</option>
+                            <aura:iteration items="{!v.Countys}" var="county">
+                                <option value="{!county}">{!county}</option>
+                            </aura:iteration> 
+                        </lightning:select>
+                    </aura:if>
+                    <!-- SYSTEM MILES BY REGION REPORT -->
+                    <aura:if isTrue = "{!v.showSystemMilesFilter}">     
+                        <lightning:select name="cStat" label="Jurisdictional" value="{!v.ltngSelectedMile}" aura:id="SelectedMile">
+                            <option value="Jurisdictional">Regulated</option>
+                            <option value="Non-jurisdictional">All</option>
+                        </lightning:select>
+                    </aura:if>
+                    <!-- NUMBER OF UNITS BY REGION REPORT -->
+                    <aura:if isTrue = "{!v.showNoOfUnitsFilter}">     
+                        <lightning:select name="cStat" label="Jurisdictional" value="{!v.ltngSelectedUnit}" aura:id="SelectedUnit">
+                            <option value="Jurisdictional">Regulated</option>
+                            <option value="Non-jurisdictional">All</option>
+                        </lightning:select>
+                    </aura:if>
+                </div>
+            </div> 
+        </lightning:card>    
+    </aura:if>
+</aura:component>

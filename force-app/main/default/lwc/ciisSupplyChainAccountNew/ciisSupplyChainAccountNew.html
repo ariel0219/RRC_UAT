@@ -1,0 +1,40 @@
+<template>
+    <div
+        if:true={error}
+        class="slds-box slds-theme_error slds-var-m-bottom_medium"
+    >
+        {error}
+    </div>
+    <div
+        class="slds-grid slds-wrap slds-gutters slds-grid_vertical-align-end"
+        if:true={isReady}
+    >
+        <div
+            for:each={inputFields}
+            for:item="field"
+            key={field.fieldName}
+            class="slds-col slds-size_1-of-1 slds-small-size_1-of-2"
+        >
+            <lightning-input
+                if:false={field.options}
+                label={field.label}
+                data-field={field.fieldName}
+                type={field.type}
+                formatter={field.formatter}
+                step={field.step}
+                onchange={handleChange}
+                required
+            >
+            </lightning-input>
+            <lightning-combobox
+                if:true={field.options}
+                label={field.label}
+                data-field={field.fieldName}
+                options={field.options}
+                onchange={handleChange}
+                required
+            >
+            </lightning-combobox>
+        </div>
+    </div>
+</template>

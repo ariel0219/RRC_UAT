@@ -1,0 +1,7 @@
+<aura:component 
+controller="IETRS_Conga_Doc_Gen_Controller"
+implements="force:lightningQuickAction,force:hasRecordId,force:hasSObjectName">
+<aura:attribute name="sobjecttype" type="String" default="{!v.sObjectName}"/>
+<aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+</aura:component>

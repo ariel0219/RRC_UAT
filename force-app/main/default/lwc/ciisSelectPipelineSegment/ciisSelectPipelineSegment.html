@@ -1,0 +1,254 @@
+<!-- sldsValidatorIgnore -->
+<template>
+    <header
+        class="slds-theme_default slds-border_bottom slds-p-vertical_small slds-size_1-of-1 slds-grid slds-wrap"
+    >
+        <div
+            class="slds-size_1-of-1 slds-grid slds-grid_vertical-align-center slds-grid_align-end slds-p-bottom_small"
+        >
+            <!--span if:true={selectedSegmentValue} class="slds-badge">
+                <span
+                    ><lightning-button-icon
+                        icon-name="utility:close"
+                        onclick={handleClearSelectedSegment}
+                        variant="bare"
+                        alternative-text="Clear Selected Segment"
+                    ></lightning-button-icon
+                ></span>
+                Selected Segment Id: {selectedSegmentValue}
+            </span>
+            <div class="slds-m-top_small slds-m-bottom_medium">
+                <lightning-button
+                    label="Add Selected Segment"
+                    icon-name="utility:add"
+                    onclick={handleAddSelectedSegmentToCollection}
+                    alternative-text="Add Selected Segment To Collection"
+                ></lightning-button>
+            </div!-->
+        </div>
+        <div
+            class="slds-size_1-of-1 slds-grid slds-grid_vertical-align-center slds-grid_align-end slds-p-bottom_small"
+        >
+         <span if:true={selectedSegmentCollection} class="slds-badge">
+        <div class="slds-text-heading_small slds-p-around_small">Selected Segments: </div>
+
+        <template for:each={selectedSegmentCollection} for:item="seg">
+                <span  key={seg}  class="slds-m-right_xx-small slds-badge" 
+                ><lightning-button-icon
+                data-seg={seg}
+                    icon-name="utility:close"
+                    onclick={handleClearSelectedSegmentFromList}
+                    variant="bare"
+                    alternative-text="Clear Selected Segment"
+                ></lightning-button-icon>
+                {seg}
+            </span>
+        </template>
+        </span>
+        </div>
+        <div class="slds-size_1-of-1 slds-grid slds-grid_align-spread">
+            <lightning-button-stateful
+                selected={isPanelOpen}
+                onclick={handleTogglePanelClick}
+                icon-name-when-off="utility:filterList"
+                icon-name-when-on="utility:filterList"
+                label-when-off="Open Search Filters"
+                label-when-on="Close Search Filters"
+            ></lightning-button-stateful>
+            <span if:true={hasReceiverCoordinates}>
+                <span class="slds-m-right_small">{receiverName}</span>
+                <svg
+                    width="29"
+                    height="27"
+                    viewBox="0 0 29 27"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <path
+                        d="M14.5 0L17.7555 10.0193L28.2903 10.0193L19.7674 16.2115L23.0229 26.2307L14.5 20.0385L5.97711 26.2307L9.23257 16.2115L0.709681 10.0193L11.2445 10.0193L14.5 0Z"
+                        fill="#E53D3C"
+                    />
+                </svg>
+            </span>
+        </div>
+    </header>
+    <div class="slds-grid slds-size_1-of-1 slds-is-relative">
+        <!-- filters panel -->
+        <div class={panelContainerClass} aria-hidden="false">
+            <div class="slds-panel__header">
+                <h2
+                    class="slds-panel__header-title slds-text-heading_small slds-truncate"
+                    title="Pipeline Segment Search"
+                >
+                    Pipeline Segment Search
+                </h2>
+                <div class="slds-panel__header-actions">
+                    <lightning-button-icon
+                        icon-name="utility:close"
+                        onclick={handleTogglePanelClick}
+                        aria-label="Close Pipeline Segment Search Filters"
+                    ></lightning-button-icon>
+                </div>
+            </div>
+            <div class="slds-panel__body">
+                <div class="slds-col slds-size_1-of-1">
+                    <ol class="slds-list_vertical slds-list_vertical-space">
+                        <!-- locked p5 Number -->
+                        <li class="slds-item slds-hint-parent">
+                            <c-ciis-search-filter
+                                data-filter="p5Number"
+                                label="P5 Number"
+                                value={p5Number}
+                                is-locked
+                            ></c-ciis-search-filter>
+                        </li>
+                        <!-- end locked p5 number -->
+                        <!-- editable t4 permit -->
+                        <li class="slds-item slds-hint-parent">
+                            <c-ciis-search-filter
+                                data-filter="t4PermitNumber"
+                                label="T4 Permit"
+                                value={t4PermitNumber}
+                                onfilterchange={handleFilterChange}
+                                max-length="5"
+                                required
+                            ></c-ciis-search-filter>
+                        </li>
+                        <!-- end editable t4 permit -->
+                        <!-- gas commodity -->
+                        <li class="slds-item slds-hint-parent">
+                            <c-ciis-search-filter
+                                data-filter="gasCommodity"
+                                label="Commodity"
+                                value={gasCommodity}
+                                options={gasCommodityOptions}
+                                onfilterchange={handleFilterChange}
+                                required
+                            ></c-ciis-search-filter>
+                        </li>
+                        <!-- end gas commodity -->
+                        <!-- county -->
+                        <li class="slds-item slds-hint-parent">
+                            <c-ciis-search-filter
+                                data-filter="county"
+                                label="County"
+                                value={county}
+                                options={countyOptions}
+                                onfilterchange={handleFilterChange}
+                            ></c-ciis-search-filter>
+                        </li>
+                        <!-- end county -->
+                        <!-- gas commodity -->
+                        <li class="slds-item slds-hint-parent">
+                            <c-ciis-search-filter
+                                data-filter="diameter"
+                                label="Diameter"
+                                value={diameter}
+                                onfilterchange={handleFilterChange}
+                            ></c-ciis-search-filter>
+                        </li>
+                        <!-- end gas commodity -->
+                        <!-- system name -->
+                        <li class="slds-item slds-hint-parent">
+                            <c-ciis-search-filter
+                                data-filter="systemName"
+                                label="System Name"
+                                value={systemName}
+                                filter-operator="LIKE"
+                                max-length="40"
+                                onfilterchange={handleFilterChange}
+                            ></c-ciis-search-filter>
+                        </li>
+                        <!-- end system name -->
+                        <!-- subsystem name -->
+                        <li class="slds-item slds-hint-parent">
+                            <c-ciis-search-filter
+                                data-filter="subSystemName"
+                                label="Subsytem Name"
+                                value={subSystemName}
+                                filter-operator="LIKE"
+                                max-length="40"
+                                onfilterchange={handleFilterChange}
+                            ></c-ciis-search-filter>
+                        </li>
+                        <!-- end subsystem name -->
+                        <!-- pipessystemname -->
+                        <li class="slds-item slds-hint-parent">
+                            <c-ciis-search-filter
+                                data-filter="pipesSystemName"
+                                label="PIPES System Name"
+                                value={pipesSystemName}
+                                filter-operator="LIKE"
+                                max-length="40"
+                                onfilterchange={handleFilterChange}
+                            ></c-ciis-search-filter>
+                        </li>
+                        <!-- end pipessystemname -->
+                        <!-- pipeline status -->
+                        <li class="slds-item slds-hint-parent">
+                            <c-ciis-search-filter
+                                data-filter="pipelineStatus"
+                                label="Texas Regulatory Pipeline Status"
+                                value={pipelineStatus}
+                                options={pipelineStatusOptions}
+                                onfilterchange={handleFilterChange}
+                            ></c-ciis-search-filter>
+                        </li>
+                        <!-- end pipeline status -->
+                        <!-- pipeline id -->
+                        <li class="slds-item slds-hint-parent">
+                            <c-ciis-search-filter
+                                data-filter="pipelineId"
+                                label="Pipeline Id"
+                                value={pipelineId}
+                                filter-operator="LIKE"
+                                max-length="20"
+                                onfilterchange={handleFilterChange}
+                            ></c-ciis-search-filter>
+                        </li>
+                        <!-- end pipeline id -->
+                    </ol>
+                    <div class="slds-var-m-top_medium">
+                        <lightning-button
+                            label="Search"
+                            onclick={handleSearchClick}
+                            variant="brand"
+                        ></lightning-button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- end filters panel -->
+        <div
+            class="slds-col slds-grid slds-wrap slds-grid_align-center slds-grid_vertical-stretch"
+        >
+            <div class="slds-col slds-size_1-of-1 slds-is-relative">
+                <!-- loading spinner -->
+                <lightning-spinner
+                    alternative-text="Loading"
+                    if:true={isLoading}
+                ></lightning-spinner>
+                <!-- end loading spinner -->
+
+                <!-- mapped results -->
+                <lightning-map
+                    map-markers={markers}
+                    list-view="visible"
+                    center={center}
+                    zoom-level={zoomLevel}
+                    onmarkerselect={handleMarkerSelect}
+                ></lightning-map>
+                <!-- end mapped results -->
+
+                <!-- error msg -->
+                <div
+                    if:true={error}
+                    class="slds-box slds-theme_error slds-var-m-around_large"
+                >
+                    {error}
+                </div>
+                <!-- end error msg -->
+            </div>
+        </div>
+    </div>
+</template>

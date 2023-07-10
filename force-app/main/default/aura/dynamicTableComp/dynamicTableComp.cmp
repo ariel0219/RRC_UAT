@@ -1,0 +1,30 @@
+<aura:component access="global">
+    <aura:attribute name="dataList" type="SObject[]" />
+    <aura:attribute name="cols" type="List" />
+    <aura:attribute name="sortDirection" type="String" default="asc" />
+    <aura:attribute name="defaultSortDirection" type="String" default="asc" />
+    <aura:attribute name="sortedBy" type="String" />
+    <aura:attribute name="columnsByFieldName" type="Object" />
+    <aura:attribute name="sObjText" type="String"/>
+    <aura:attribute name="sendData" type="object"/>
+    <aura:attribute name="sObjectName" type="Object" default="{}" />   
+          <div class="slds-float_right">
+            <lightning:button label="Download CSV" onclick="{!c.downloadCsv}" variant="brand" class="slds-m-right_small"/>
+            <lightning:button label="Generate PDF" onclick="{!c.generatePDF}" variant="brand" class="slds-m-right_small"/>
+          </div>   
+          <br/><br/>
+             
+    
+    <lightning:datatable
+        data="{! v.dataList }"
+        columns="{! v.cols }"
+        defaultSortDirection="{!v.defaultSortDirection}"
+        sortedDirection="{!v.sortDirection}"
+        sortedBy="{!v.sortedBy}"
+        keyField="Id"
+        hideCheckboxColumn="true"
+        onsort="{!c.handleSort}"
+    />
+    <br/>
+    
+</aura:component>

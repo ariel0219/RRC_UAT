@@ -1,0 +1,52 @@
+<template>
+  <div
+    if:true={error}
+    class="slds-box slds-theme_error slds-var-m-bottom_medium"
+  >
+    {error}
+  </div>
+  <article
+    class="slds-card slds-card_boundary slds-var-m-bottom_medium"
+    if:true={isReady}
+  >
+    <div class="slds-card__header">
+      <h2 class="slds-card__header-title">
+        <span>{supplyChainType}</span>
+      </h2>
+    </div>
+    <div class="slds-card__body slds-card__body_inner">
+      <!-- <lightning-record-view-form
+        if:true={recordId}
+        record-id={recordId}
+        object-api-name="Account"
+      >
+        <div class="slds-grid slds-wrap">
+          <div
+            for:each={fields}
+            for:item="field"
+            key={field.fieldName}
+            class="slds-col slds-size_1-of-1 slds-small-size_1-of-2"
+          >
+            <lightning-output-field
+              field-name={field.fieldName}
+            ></lightning-output-field>
+          </div>
+        </div>
+      </lightning-record-view-form> -->
+      <div class="slds-grid slds-wrap slds-grid_vertical-align-end">
+        <div
+          for:each={fields}
+          for:item="field"
+          key={field.fieldName}
+          class="slds-col slds-size_1-of-1 slds-small-size_1-of-2"
+        >
+          <c-ciis-form-element
+            label={field.label}
+            value={field.value}
+            type={field.type}
+          ></c-ciis-form-element>
+        </div>
+      </div>
+    </div>
+  </article>
+</template>

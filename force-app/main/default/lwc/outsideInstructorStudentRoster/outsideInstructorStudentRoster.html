@@ -1,0 +1,104 @@
+<template>
+    <lightning-quick-action-panel class="slds-modal__container">
+    <lightning-card >
+        
+        <div class="student-roster-work-area">
+            <template if:false={isOpen}>
+                <p><lightning-formatted-text value="Students can only be added to events with an open status." ></lightning-formatted-text></p>
+            </template>
+
+            <template if:false={isOwnedByUserLoggedin}>
+                <p><lightning-formatted-text value="You cannot add Students to the event." ></lightning-formatted-text></p>
+            </template>
+
+            <template if:true={isAllowed}>
+                <h3 slot="title">
+                    <lightning-icon icon-name="standard:timesheet" alternative-text="Event" size="small"></lightning-icon>
+                    
+                </h3>
+                
+                    <template for:each={itemList} for:item="item" for:index="index"  >
+                        <lightning-record-edit-form key={item.id} object-api-name="EEM_Registrant__c" onsuccess={handleSuccess} record-type-id={importRecordTypeId} >
+                            <lightning-messages> </lightning-messages>
+                            <lightning-layout multiple-rows class="slds-table_bordered">
+                                <div class="row-format slds-size_1-of-9"><c-outside-instructor-child-component get-value-from-parent={index}></c-outside-instructor-child-component></div>
+                                <lightning-layout-item class="slds-size_1-of-9" 
+                                    padding="5px"> 
+                                    <lightning-input-field field-name="EEM_First_Name__c" variant="label-stacked"   required >
+                                    </lightning-input-field>
+                                </lightning-layout-item>
+                                <lightning-layout-item class="slds-size_1-of-9" 
+                                    padding="5px">
+                                    <lightning-input-field field-name="EEM_Last_Name__c" variant="label-stacked" required>
+                                    </lightning-input-field>
+                                </lightning-layout-item>
+                                <lightning-layout-item class="slds-size_1-of-9" 
+                                    padding="5px">
+                                    <lightning-input-field field-name="EEM_Middle_Name__c" variant="label-stacked" >
+                                    </lightning-input-field>
+                                </lightning-layout-item>
+                                <lightning-layout-item class="slds-size_1-of-9" 
+                                    padding="5px">
+                                    <lightning-input-field field-name="EEM_Email__c" variant="label-stacked">
+                                    </lightning-input-field>
+                                </lightning-layout-item>
+                                <lightning-layout-item class="slds-size_1-of-9" 
+                                    padding="5px">
+                                    <lightning-input-field field-name="EEM_Company_Name__c" variant="label-stacked" required>
+                                    </lightning-input-field>
+                                </lightning-layout-item>
+                                <lightning-layout-item class="slds-size_1-of-9" 
+                                padding="5px">
+                            <!-- <label for="fieldidrrc">RRC Company License #</label>-->
+                                <lightning-input-field  field-name="EEM_RRC_Company_License_Number__c" variant="label-stacked" required >
+                                </lightning-input-field>
+                            </lightning-layout-item>
+
+                            <lightning-layout-item class="slds-size_1-of-9" 
+                                    padding="5px">
+                                    <lightning-input-field field-name="AFS_Social_Security_Number__c" variant="label-stacked">
+                                    </lightning-input-field>
+                            </lightning-layout-item>
+
+                            <lightning-layout-item class="slds-size_1-of-9" 
+                                    padding="5px">
+                                    <lightning-input-field field-name="AFS_Non_US_Citizen__c" variant="label-stacked">
+                                    </lightning-input-field>
+                            </lightning-layout-item>
+                            
+                                <lightning-layout-item class="slds-size_1-of-9 slds-p-top_x-large pointer" padding="around-small">
+                                <lightning-icon icon-name="action:delete" access-key={item.id} id={index}
+                                alternative-text="Delete Row" size="small" title="Delete Row" onclick={removeRow}>
+                                </lightning-icon>
+                                </lightning-layout-item>
+                            
+                        
+                            </lightning-layout>
+                            <lightning-layout-item size="12" small-device-size="6" medium-device-size="4" large-device-size="2"
+                                    padding="around-small" class="under">
+                                    <div class="slds-p-top_medium">
+                                        <lightning-icon icon-name="action:new" access-key={item.id} id={index}
+                                            alternative-text="Add Row" size="small" title="Add Row" onclick={addRow} >
+                                        </lightning-icon>
+                                    </div>
+                                </lightning-layout-item>
+                        </lightning-record-edit-form>
+                    </template>
+                
+                <lightning-layout>
+                    <div class="slds-align_absolute-center">
+                        <lightning-button variant="success" onclick={handleSubmit} name="submit" label="Submit" id="page-bottom">
+                        </lightning-button>
+                    </div>
+                    
+                </lightning-layout>
+            </template>
+        </div>
+        <div class="student-roster-sucess-message-area">
+            <p>Click Cancel to close this overlay.</p>
+        </div>
+        
+        
+    </lightning-card>
+</lightning-quick-action-panel>
+</template>

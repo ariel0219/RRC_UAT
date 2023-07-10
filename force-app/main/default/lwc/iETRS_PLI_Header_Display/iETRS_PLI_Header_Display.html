@@ -1,0 +1,186 @@
+<template>
+  <template if:true={isHeaderDisplayRecordsFound}>
+    <lightning-layout multiple-rows="true" class="x-large">
+      <!-- *pending Search button*
+         -->
+      <lightning-layout-item flexibility="auto" padding="around-small">
+        <dl>
+          <dt class="slds-text-title_caps">Organization Name</dt>
+          <dd class="slds-var-p-bottom_small">{operatorName}</dd>
+
+          <dt class="slds-text-title_caps">Filing Period</dt>
+          <dd class="slds-var-p-bottom_small">{ReportPeriod}</dd>
+
+          <dt class="slds-text-title_caps">P5 Number</dt>
+          <dd class="slds-var-p-bottom_small">{companyId}</dd>
+
+          <dt class="slds-text-title_caps">Submitted Date</dt>
+          <dd class="slds-var-p-bottom_small">
+            <lightning-formatted-date-time
+              if:true={submittedDate}
+              value={submittedDate}
+              year="numeric"
+              month="numeric"
+              day="numeric"
+              hour="2-digit"
+              minute="2-digit"
+              time-zone-name="short"
+            ></lightning-formatted-date-time>
+            <span if:false={submittedDate}>-</span>
+          </dd>
+        </dl>
+        <div if:true={hasFiles}>
+          <!-- iterate over {uploadedFiles} -->
+          <h3 class="slds-text-title_caps">PS-95 Uploads</h3>
+          <ul class="slds-has-inline-block-links">
+            <li for:each={uploadedFiles} for:item="file" key={file.Id}>
+              <a
+                href="#"
+                onclick={handleFileClick}
+                data-inspection-doc-id={file.Id}
+                data-file-id={file.IETRS_Related_File_Correspondence__c}
+                >{file.IETRS_Original_File_Name__c}</a
+              >
+            </li>
+          </ul>
+        </div>
+      </lightning-layout-item>
+
+      <lightning-layout-item flexibility="auto" padding="around-small">
+        <lightning-input
+          label="Total Grade 1 Unrepaired: "
+          value={grade1}
+          onchange={grade1TotalHandle}
+        >
+        </lightning-input>
+        <lightning-input
+          label="Total Grade 2 Unrepaired: "
+          type=""
+          value={grade2}
+          onchange={grade2TotalHandle}
+        >
+        </lightning-input>
+        <lightning-input
+          label="Total Grade 3 Unrepaired: "
+          value={grade3}
+          onchange={grade3TotalHandle}
+        >
+        </lightning-input>
+        <lightning-input
+          label="Total Repaired: "
+          type="text"
+          value={totalRepaired}
+          disabled="false"
+        >
+        </lightning-input>
+      </lightning-layout-item>
+    </lightning-layout>
+  </template>
+  <div class="slds-hidden slds-float_right submitCls" style="margin-top: -25px">
+    <!---<lightning-button 
+                           label="Submit"
+                           onclick={handleSubmit}
+                           variant="brand" 
+                           padding="around-small">
+         </lightning-button>  class="slds-m-left_x-small slds-button slds-button_brand "-->
+    <template if:true={getAccess}>
+      <Span>
+        <button
+          class="slds-button slds-button_neutral"
+          onclick={noReportsTOLead}
+        >
+          No Leaks to Report
+        </button>
+      </Span>
+      <Span class="slds-p-around_small">
+        <lightning-button
+          class="changebutton"
+          label="Save"
+          variant="brand"
+          disabled={disableSave}
+          onclick={handleSubmit}
+        >
+        </lightning-button>
+      </Span>
+    </template>
+    <template if:true={showConfirmScreeen}>
+      <!-- Modal/Popup Box LWC starts here -->
+      <section
+        role="dialog"
+        tabindex="-1"
+        aria-labelledby="modal-heading-01"
+        aria-modal="true"
+        aria-describedby="modal-content-id-1"
+        class="slds-modal slds-fade-in-open"
+      >
+        <div class="slds-modal__container">
+          <!-- Modal/Popup Box LWC header here -->
+          <header class="slds-modal__header">
+            <button
+              class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+              title="Close"
+              onclick={closeModal}
+            >
+              <lightning-icon
+                icon-name="utility:close"
+                alternative-text="close"
+                variant="inverse"
+                size="small"
+              ></lightning-icon>
+              <span class="slds-assistive-text">Close</span>
+            </button>
+            <h2
+              id="modal-heading-01"
+              class="slds-text-heading_medium slds-hyphenate"
+            >
+              Confirmation Screen
+            </h2>
+          </header>
+          <!-- Modal/Popup Box LWC body starts here -->
+          <div
+            class="slds-modal__content slds-p-around_medium"
+            id="modal-content-id-1"
+          >
+            <p>
+              Are you sure you want to select the "No Leaks to Report" button
+              for this reporting period?
+            </p>
+            <p>
+              Existing records will be removed and both the Unrepaired Grades
+              and Total Repaired count will default back to 0.
+            </p>
+          </div>
+          <!-- Modal/Popup Box LWC footer starts here -->
+          <footer class="slds-modal__footer">
+            <button class="slds-button slds-button_neutral" onclick={handleYes}>
+              Yes
+            </button>
+            <button class="slds-button slds-button_neutral" onclick={handleNo}>
+              No
+            </button>
+          </footer>
+        </div>
+      </section>
+      <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+  </div>
+  <template if:true={isHeaderDisplayTextShow}>
+    <p style="margin-left: 2%">
+      There is no PS-95 report filled for Organization {operatorName} In Report
+      Period {ReportPeriod}. Would you like to <br />
+      submit a new PS-95 for Organization {operatorName}?
+    </p>
+    <p style="margin-left: 2%">
+      Click New Below for manual entry or use Batch Upload sidebar for EDI
+    </p>
+    <br /><br />
+    <div class="slds-float_right" style="margin-top: -20px">
+      <template if:true={getAccess}>
+        <!--<button class="slds-button slds-button_neutral" onclick={noReportsTOLead}>No Leaks to Report</button>-->
+        <button class="slds-button slds-button_brand" onclick={onNewRecord}>
+          New
+        </button>
+      </template>
+    </div>
+  </template>
+</template>

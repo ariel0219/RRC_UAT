@@ -1,0 +1,26 @@
+<template>
+    <div class="slds-grid slds-wrap slds-var-m-top_medium">
+        <div
+            class="slds-col slds-size_1-of-1 slds-var-p-around_medium"
+            if:false={readOnly}
+        >
+            <lightning-input-location
+                label="Enter Facility's Location"
+                latitude={latitude}
+                longitude={longitude}
+                list-view="visible"
+                onchange={handleLocationChange}
+                required={required}
+            >
+            </lightning-input-location>
+        </div>
+        <div class="slds-col slds-size_1-of-1" if:true={hasCoordinates}>
+            <p class="slds-text-body_regular" if:false={readOnly}>
+                Please ensure the marker is in the correct location before
+                continuing.
+            </p>
+            <lightning-map zoom-level={zoomLevel} map-markers={mapMarkers}>
+            </lightning-map>
+        </div>
+    </div>
+</template>

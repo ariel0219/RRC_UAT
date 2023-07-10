@@ -1,0 +1,30 @@
+<aura:component
+    implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,force:lightningQuickActionWithoutHeader,flexipage:availableForRecordHome,lightning:isUrlAddressable"
+    access="global"
+    controller="IETRS_UpdateInspectionResults"
+>
+    <!-- SETUP -->
+    <aura:handler name="init" action="{!c.handleInit}" value="{!this}" />
+
+    <!-- handle saving/discarding unsaved changes -->
+    <lightning:unsavedChanges aura:id="unsaved" onsave="{!c.handleSaveChanges}" ondiscard="{!c.handleDiscardChanges}" />
+
+    <!-- for interacting with the console api -->
+    <lightning:workspaceAPI aura:id="workspace" />
+
+    <!-- END SETUP -->
+
+    <!-- CMP MARKUP -->
+    <div class="container">
+        <aura:if isTrue="{!v.recordId}">
+            <c:ietrsInspectionResults
+                aura:id="inspectionResults"
+                recordId="{!v.recordId}"
+                onunsavedchange="{!c.handleUnsavedChange}"
+                onclearunsavedchange="{!c.handleClearUnsavedChange}"
+                onclosetab="{!c.handleCloseTab}"
+            />
+        </aura:if>
+    </div>
+    <!-- END CMP MARKUP -->
+</aura:component>

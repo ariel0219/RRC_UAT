@@ -1,0 +1,22 @@
+<apex:component access="global" controller="IETRS_CaseDocumentsController">
+    <!-- Attributes -->
+    <apex:attribute name="userId" type="String" description="The subscribed user's id" assignTo="{!cntrlUserId}" />
+    <apex:attribute name="documentDate" type="String" description="Show case documents created on this date formatted as yyyy-mm-dd. Defaults to yesterday."
+        assignTo="{!cntrlDocumentDate}" />
+    <apex:attribute name="duration" type="Integer" description="Number of days from the date to show case documents." default="1"
+        assignTo="{!cntrlDuration}" />
+
+    <!-- Cmp markup -->
+    <apex:dataList value="{!caseDocuments}" var="cd">
+        New
+        <strong>{!cd.IETRS_Document_Type__c}</strong> Document added to&nbsp;
+        <apex:outputLink value="{!siteUrl + cd.IETRS_Case__c}">Case&nbsp;
+            <apex:outputText value="{!cd.IETRS_Case__r.CaseNumber}" />
+        </apex:outputLink>
+        {!IF(ISBLANK(cd.IETRS_Case__r.IETRS_Primary_Account_Assignment__r), '', '(' + cd.IETRS_Case__r.IETRS_Primary_Account_Assignment__r.Name
+        + ')')} on
+        <apex:outputText value=" {!cd.CreatedDate}" />:&nbsp;
+        <apex:outputLink value="{!siteUrl + cd.Id}">{!cd.IETRS_Original_File_Name__c}</apex:outputLink>
+    </apex:dataList>
+
+</apex:component>

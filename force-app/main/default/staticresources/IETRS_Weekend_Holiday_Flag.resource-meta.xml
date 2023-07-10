@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StaticResource xmlns="http://soap.sforce.com/2006/04/metadata">
+    <cacheControl>Public</cacheControl>
+    <contentType>image/png</contentType>
+    <description>Flag prompting users to check/verify that an automatically generated tracking date record does not fall on a weekend or RRC holiday.</description>
+</StaticResource>

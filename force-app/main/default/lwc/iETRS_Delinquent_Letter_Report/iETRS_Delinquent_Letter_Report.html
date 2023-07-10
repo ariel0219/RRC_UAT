@@ -1,0 +1,16 @@
+<template>
+
+    <lightning-card title="Delinquent Report">
+
+        <div class="slds-m-around_medium">
+
+            <lightning-datatable key-field=id data={data} columns={columns} onrowaction={handleRowAction}
+            hide-checkbox-column="true" show-row-number-column="true" sorted-by={sortBy}
+                sorted-direction={sortDirection} onsort={handleSortdata}>
+            </lightning-datatable>
+
+        </div>
+
+    </lightning-card>
+
+</template>

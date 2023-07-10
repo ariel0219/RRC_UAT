@@ -1,0 +1,82 @@
+<aura:component implements="flexipage:availableForAllPageTypes" access="global" controller="IETRS_InspectionSearchCtrl">
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+    <!-- define the attributes to be used in the component -->
+    <aura:attribute name="theObject" type="Aura.Component[]" />
+    <aura:attribute name="sObjectName" type="Object" default="{}" />
+    <aura:attribute name="sObjText" type="String" />
+    <aura:attribute name="sObjectList" type="String[]" />
+    <aura:attribute name="fieldSetList" type="String[]" />
+    <aura:attribute name="resultList" type="SObject[]" />
+    <aura:attribute name="colList" type="List" />
+    <aura:attribute name="loading" type="Boolean" default="false" />
+    <aura:attribute name="hasSearched" type="Boolean" default="false" />
+    <aura:attribute name="columnsByFieldName" type="Object" />
+
+    <!-- the attribute where we will set all the component related to Field Set-->
+    <aura:attribute name="theForm" type="Aura.Component[]" />
+
+    <lightning:card
+        title="Search Options (Search TIP *  Enter search criteria and click Find.  Use the * wildcard to find non-exact matches)"
+        class="slds-is-relative"
+                    >
+        <aura:If isTrue="{!v.loading}">
+            <lightning:spinner alternativeText="Loading" />
+        </aura:If>
+        <div class="slds-grid slds-wrap slds-gutters slds-p-around_small">
+            <div class="slds-col slds-size_1-of-2 slds-p-bottom_large">
+                <lightning:select
+                    value="{!v.sObjText}"
+                    name="selectObject"
+                    aura:id="selectObject"
+                    label="Select an Object"
+                    onchange="{!c.doSelectChange}"
+                >
+                    <aura:iteration items="{!v.sObjectList}" var="obj">
+                        <option value="{!obj.value}">{!obj.label}</option>
+                    </aura:iteration>
+                </lightning:select>
+            </div>
+            <div class="slds-col slds-size_1-of-2"></div>
+
+            <aura:iteration items="{!v.theForm}" var="facet">
+                <div class="slds-col slds-size_1-of-2 slds-p-bottom_small">
+                    {!facet}
+                </div>
+            </aura:iteration>
+        </div>
+        <aura:set attribute="actions">
+            <aura:if isTrue="{!not(empty(v.sObjText))}">
+                <aura:if isTrue="{! v.sObjText != 'None'}">
+                    <lightning:button label="Reset" onclick="{!c.resetClick}" />
+                    <lightning:button label="Find" onclick="{!c.searchClick}" variant="brand" />
+                </aura:if>
+            </aura:if>
+        </aura:set>
+    </lightning:card>
+    <br />
+    <aura:if isTrue="{!v.hasSearched}">
+        <lightning:card
+            title="{!'Search Results (' + (not(empty(v.resultList)) ? v.resultList.length : '0') + ')'}"
+            class="slds-is-relative"
+        >
+            <aura:If isTrue="{!v.loading}">
+                <lightning:spinner alternativeText="Loading" />
+            </aura:If>
+            <aura:if isTrue="{!not(empty(v.resultList))}">
+                <c:dynamicTableComp
+                    dataList="{#v.resultList}"
+                    cols="{#v.colList}"
+                    columnsByFieldName="{#v.columnsByFieldName}"
+                    sObjText = "{#v.sObjText}"
+                    sObjectName = "{#v.sObjectName}"                
+                />
+            </aura:if>
+            <aura:if isTrue="{!empty(v.resultList)}">
+                <div class="slds-text-longform slds-text-align_center slds-p-around_large">
+                    <h3 class="slds-text-heading_medium">No Search Results</h3>
+                    <p class="slds-text-body_regular">Thare are no records that match the selected search criteria.</p>
+                </div>
+            </aura:if>
+        </lightning:card>
+    </aura:if>
+</aura:component>

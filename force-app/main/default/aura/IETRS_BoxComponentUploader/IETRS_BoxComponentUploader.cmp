@@ -1,0 +1,43 @@
+<!--
+  @Component Name     : IETRS_BoxComponentUploader.cmp
+  @Description        : 
+  @Author             : Kevin Lu
+  @Group              : 
+  @Last Modified By   : Kevin Lu
+  @Last Modified On   : 5/19/2020, 11:27:39 AM
+  @Modification Log   : 
+  ==============================================================================
+  Ver         Date                      Author      		      Modification
+  ==============================================================================
+  1.0         8/22/2019, 2:19:19 PM     Kevin Lu              Initial Version
+  2.0         03/13/2020                Kevin Lu              Added attributes
+                                                              Enabled for Flows
+  3.0         03/31/2020                Kevin Lu              Converted to using an iframed VF page to avoid JS limitations
+-->
+<aura:component implements="lightning:availableForFlowScreens" controller="IETRS_BoxUploaderController">
+  <aura:attribute name="accessToken" type="String" description="The downscoped access token" />
+  <aura:attribute name="folderId" type="String" description="The folder that the file will be uploaded to" default="0" />
+  <aura:attribute name="fcRecordId" type="String" description="The target Files and Corrsepondence record" />
+  <aura:attribute name="fileId" type="String" description="The resulting Box File Id" />
+  <aura:attribute name='message' type="String" description="A message if the file upload had an error or was closed" />
+  <aura:attribute name="vFrameURL" type="String" description="The URL of the VisualForce page to Iframe" default="https://rrctx.visualforce.com/apex/IETRS_BoxContentUploader" />
+  <aura:attribute name="auraSourceURL" type="String" description="The base URL of Lightning Aura Component" default="https://rrctx.lightning.force.com" />
+  <aura:attribute name="VFSourceURL" type="String" description="The base URL of Visualforce Pages" default="https://rrctx.visualforce.com" />
+
+  <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+  <!-- 
+  <ltng:require 
+      scripts="{!$Resource.BoxContentUploader}" 
+      styles="{!$Resource.BoxContentUploaderCSS}" 
+      afterScriptsLoaded="{!c.scriptsLoaded}"
+  />
+  <div class="upload-container" style="height:300px"></div>
+
+  LEFT({!$Api.Partner_Server_URL_480}, FIND('/services', $Api.Partner_Server_URL_480))
+  -->
+  <div style="overflow:hidden; position:relative; padding-top:66.66%;">
+    <iframe aura:id="vFrame" src="{!v.vFrameURL}" height="100%" width="100%" style="border:none; position:absolute; left:0; top:0;" onload="{!c.vFrameLoaded}" />
+    <!-- <iframe aura:id="vFrame" src="https://pipesdev-rrctx.cs33.force.com/apex/IETRS_BoxContentUploader" height="100%" width="100%" style="border:none; position:absolute; left:0; top:0;" onload="{!c.vFrameLoaded}" /> -->
+  </div>
+  
+</aura:component>

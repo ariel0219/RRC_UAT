@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata" fqn="IETRS_Conga_Composer_Other_Reports_Card">
+    <apiVersion>46.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>IETRS_Conga_Composer_Other_Reports_Card</masterLabel>
+    <targets>
+        <target>lightning__AppPage</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__AppPage">
+            <property name="templateID"
+                      label="Conga Template ID" 
+                      type="string" 
+                      description="Conga Template ID" 
+                      required="true"/>
+            <property name="congaQueries"
+                      label="Conga Query String" 
+                      type="string" 
+                      description="Conga query string, ex. [Inspection]a1300000xBHMAAY,[InspectionPackage]a13r000000HRAAY, etc. If you would like to use the As of Date as a query parameter, use the merge field {asofdate} and it will be replaced with the date selected." 
+                      required="true"/>
+            <property name="recordID"
+                      label="Record ID" 
+                      type="string" 
+                      description="Record ID against which the report should be run, ex. 001r000000DeqDXAAZ"/>
+            <property name="cardTitle"
+                      label="Lightning Card Title" 
+                      type="string" 
+                      description="Title for the Lightning Card, usually the report name" 
+                      required="true"
+                      default="Card Title"/>
+            <property name="reportDescription"
+                      label="Card Description Text" 
+                      type="string" 
+                      description="Description of the report"/>
+            <property name="showAsOfDate"
+                      label="Show As Of Date Field" 
+                      type="boolean" 
+                      description="Select if you would like to show the as of date field on the card for use as a parameter in the Conga query"/>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

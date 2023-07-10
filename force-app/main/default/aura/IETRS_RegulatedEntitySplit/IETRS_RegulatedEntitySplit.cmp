@@ -1,0 +1,359 @@
+<aura:component
+    implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction"
+    access="global"
+    controller="IETRS_Account_Split"
+>
+    <aura:html tag="style">
+        .slds-modal__container { width : 70% !important; max-width: none; } .cuf-content { //padding: 0 0rem !important;
+        } .slds-p-around--medium { padding: 0rem !important; } .slds-modal__content{ overflow-y:auto !important;
+        height:unset !important; max-height:unset !important; }
+    </aura:html>
+
+    <aura:attribute name="recordId" type="Id" />
+    <aura:attribute name="sourceAccountId" type="Id" />
+    <aura:attribute name="accountDetails" type="Object" />
+    <aura:attribute name="SelectedObj" type="Object" />
+    <aura:attribute name="counties" type="List" default="[]" />
+    <aura:attribute name="countiesToDelete" type="List" default="[]" />
+    <aura:attribute name="isFirstPage" type="boolean" default="true" />
+    <aura:attribute name="isSecondPage" type="boolean" default="false" />
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+    <aura:registerEvent name="selectedLookupRemoved" type="c:IETRS_SelectedLookupRemoved" />
+    <aura:attribute name="statusList" type="List" />
+    <aura:attribute name="judList" type="List" />
+    <aura:attribute name="intStateList" type="List" />
+    <aura:attribute name="entCodeList" type="List" />
+    <aura:attribute name="isLoading" type="boolean" />
+    <aura:attribute name="oldInputMiles" type="Double" />
+    <aura:attribute name="newInputMiles" type="Double" />
+
+    <div style="overflow:scroll;" class="c-container">
+        <aura:if isTrue="{!v.isLoading}">
+            <lightning:spinner alternativeText="Loading" />
+        </aura:if>
+        <lightning:card title="Split Regulated Entity">
+            <aura:renderIf isTrue="{!v.isFirstPage}">
+                <div>
+                    <div class="custom-box">
+                        <lightning:layout>
+                            <lightning:layoutItem padding="around-small" flexibility="auto" size="3">
+                                <div style="float: left;color:cadetblue"><b>RegulatedEntity name </b></div>
+                            </lightning:layoutItem>
+                            <lightning:layoutItem padding="around-small" flexibility="auto">
+                                <div style="float: left;color:cadetblue"><b>{!v.accountDetails.Name} </b></div>
+                            </lightning:layoutItem>
+                        </lightning:layout>
+                        <lightning:layout>
+                            <lightning:layoutItem padding="around-small" flexibility="auto" size="3">
+                                <div style="float: left;color:cadetblue"><b>Unit name </b></div>
+                            </lightning:layoutItem>
+                            <lightning:layoutItem padding="around-small" flexibility="auto">
+                                <div style="float: left;color:cadetblue"
+                                     ><b>
+                                    <aura:renderIf isTrue="{!v.accountDetails.IETRS_Unit_Parent__c != null}">
+                                        <!--  {!v.accountDetails.IETRS_Unit_Parent__r.IETRS_Unit_ID__c} -->
+                                        {!v.accountDetails.IETRS_Unit_Parent__r.Name}
+                                    </aura:renderIf>
+                                    </b></div
+                                    >
+                            </lightning:layoutItem>
+                        </lightning:layout>
+                        <lightning:layout>
+                            <lightning:layoutItem padding="around-small" flexibility="auto" size="3">
+                                <div style="float: left;color:cadetblue"><b>Original Regulated Entity Total Mileage </b></div>
+                            </lightning:layoutItem>
+                            <lightning:layoutItem padding="around-small" flexibility="auto">
+                                <div style="float: left;color:cadetblue"
+                                     ><b>
+                                    <aura:renderIf isTrue="{!v.accountDetails.IETRS_Total_Miles__c != null}">
+                                        {!v.accountDetails.IETRS_Total_Miles__c}
+                                    </aura:renderIf>
+                                    </b></div
+                                    >
+                            </lightning:layoutItem>
+                        </lightning:layout>
+                        
+<center>
+                        <lightning:layout>
+                            <lightning:layoutItem>
+                                <div style="float: left;color:cadetblue">
+                                <lightning:input type="text" name="inputSplit" required="true" value="{!v.oldInputMiles}" label="Original Regulated Entity Total Miles" />
+                                </div>
+                                </lightning:layoutItem>
+                        </lightning:layout>
+                        <br/>
+                        <lightning:layout>
+                            <lightning:layoutItem>
+                                 <div style="float: left;color:cadetblue">
+                                <lightning:input type="text" name="newInputSplit" required="true" value="{!v.newInputMiles}" label="New Regulated Entity Total Miles" />
+                                </div>
+                                </lightning:layoutItem>
+                            <!-- start commented as part of 12643 bug
+							<lightning:layoutItem padding="around-small" flexibility="auto" size="4">
+                                <div style="float: left;color:cadetblue"><b>Counties - Original System Mileage</b></div>
+                            </lightning:layoutItem>
+                            <lightning:layoutItem padding="around-small" flexibility="auto" size="9">
+                                <table
+                                    aria-multiselectable="true"
+                                    class="slds-table slds-table_bordered slds-table_fixed-layout slds-table_resizable-cols"
+                                    role="grid"
+                                >
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">
+                                                Name
+                                            </th>
+                                            <th scope="col">
+                                                County
+                                            </th>
+                                            end--><!-- <th scope="col">
+                                            Regulated Entity 
+                                        </th>-->
+                                            <!--start
+											<th scope="col">
+                                                Miles
+                                            </th>
+                                            <th scope="col">
+                                                Delete
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <aura:iteration items="{!v.counties}" var="count">
+                                            <tr aria-selected="false" class="slds-hint-parent">
+                                                <td role="gridcell">
+                                                    <div class="slds-truncate">{!count.Name}</div>
+                                                </td>
+                                                <td role="gridcell">
+                                                    <div class="slds-truncate">{!count.countyName}</div>
+                                                </td> end--> 
+                                                <!--<td role="gridcell">
+                                        <div class="slds-truncate">{!count.account}</div>
+                                      </td>-->
+
+                                                <!--start<td role="gridcell">
+                                                    <div class="slds-truncate">
+                                                        <ui:inputText class="field" value="{!count.IETRS_Miles__c}" />
+                                                    </div>
+                                                </td>
+                                                <td role="gridcell"
+                                                    >&nbsp;&nbsp;&nbsp;
+                                                    <div
+                                                        style="display:inline-block;margin-right:10px;cursor: pointer;"
+                                                        onclick="{!c.addDeleteEntities}"
+                                                        data-produto="{!count.Name}"
+                                                    >
+                                                        <lightning:icon
+                                                            iconName="utility:delete"
+                                                            size="x-small"
+                                                            alternativeText="delete"
+                                                        />
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </aura:iteration>
+                                    </tbody>
+                                </table>
+                            </lightning:layoutItem>end-->
+                        </lightning:layout>
+                        </center>
+                       <!-- start commented as a part of 12643
+						 <lightning:layout>
+                            <lightning:layoutItem padding="around-small" flexibility="auto" size="3">
+                            </lightning:layoutItem>
+                            <lightning:layoutItem padding="around-small" flexibility="auto" size="5">
+                                <div style="float: left;color:cadetblue"><b>Select Miles by County </b></div> <br />
+                                <c:IETRS_Lookup
+                                    objectName="IETRS_Insp_Miles_by_County__c"
+                                    fieldSet="['Name','Id','IETRS_Miles__c','IETRS_Regulated_Entity__c','IETRS_County__c','IETRS_County__r.Name','IETRS_Regulated_Entity__r.Name','IETRS_County_Name__c']"
+                                    whereCondition="{! ' AND IETRS_County__c != null AND IETRS_Regulated_Entity__c !=\''+ v.sourceAccountId+'\'' }"
+                                    limit="20"
+                                    alternateDisplayField="['IETRS_County__r.Name','IETRS_Regulated_Entity__r.Name']"
+                                    comparisonField="IETRS_County__r.Name"
+                                    primaryDisplayField="IETRS_County_Name__c"
+                                    uniqueLookupIdentifier="testMile1"
+                                    aura:id="childComp"
+                                    fieldLabel=""
+                                    lookupSelected="{!c.getSelectedsourceRegRecord}"
+                                />
+                            </lightning:layoutItem>
+                            <lightning:layoutItem padding="around-small" flexibility="auto" size="1">
+                                <br /> <br />
+                                <div
+                                    style="display:inline-block;margin-right:10px;cursor: pointer;"
+                                    onclick="{!c.addDeleteEntities}"
+                                >
+                                    <lightning:icon
+                                        iconName="action:new"
+                                        size="x-small"
+                                        alternativeText="add"
+                                        onclick="{!c.addcountRecord}"
+                                    />
+                                </div>
+                            </lightning:layoutItem>
+                        </lightning:layout>end-->
+                    </div>
+                </div>
+                <br /><br />
+                <lightning:layout>
+                    <lightning:layoutItem size="2"> </lightning:layoutItem>
+
+                    <lightning:layoutItem size="3"> </lightning:layoutItem>
+                    <lightning:layoutItem>
+                        <lightning:button variant="destructive-text" label="Undo" onclick="{!c.unDo}" />
+
+                        <lightning:button label="Next" variant="brand" onclick="{!c.continueFlag}" />
+                    </lightning:layoutItem>
+                </lightning:layout>
+            </aura:renderIf>
+            <aura:renderIf isTrue="{!v.isSecondPage}">
+                <div class="c-container">
+                    <div class="custom-box">
+                        <lightning:layout>
+                            <lightning:layoutItem padding="around-small" flexibility="auto" size="4">
+                                <div style="float: left;color:cadetblue"><b>Split system name </b></div>
+                            </lightning:layoutItem>
+                            <lightning:layoutItem padding="around-small" flexibility="auto">
+                                <div style="float: left;">
+                                    <ui:inputText aura:id="accName" />
+                                </div>
+                            </lightning:layoutItem>
+                        </lightning:layout>
+                        <lightning:layout>
+                            <lightning:layoutItem padding="around-small" flexibility="auto" size="4">
+                                <div style="float: left;color:cadetblue"><b> Event notes</b></div>
+                            </lightning:layoutItem>
+
+                            <lightning:layoutItem>
+                                <ui:inputTextArea aura:id="notesid" rows="5" class="notestyle" />
+                            </lightning:layoutItem>
+                        </lightning:layout>
+                        <div class="custom-box">
+                            &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                            <div style="color:cadetblue"><b> Source Regulated Entity details </b></div><br />
+                            <table
+                                class="slds-table slds-table--bordered slds-table--cell-buffer slds-table--fixed-layout slds-table--striped "
+                                style="color: #54698d;height:150px;overflow:auto;"
+                            >
+                                <tr>
+                                    <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">
+                                        Regulated Enity Name</td
+                                    >
+                                    <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">
+                                        <ui:inputText value="{!v.accountDetails.Name}" />
+                                    </td>
+                                    <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">Status</td>
+                                    <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">
+                                        <lightning:select
+                                            aura:id="status"
+                                            value="{!v.accountDetails.IETRS_Status__c}"
+                                            name="statusPicklist"
+                                        >
+                                            <option value="">--None--</option>
+                                            <aura:iteration items="{!v.statusList}" var="statVal">
+                                                <!--<option text="{!st1.value}" value="{!st1.key}" />-->
+                                                <option value="{!statVal}">{!statVal}</option>
+                                            </aura:iteration>
+                                        </lightning:select>
+                                    </td>
+                                    <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">Jurisdiction</td>
+                                    <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">
+                                        <lightning:select
+                                            aura:id="jud"
+                                            value="{!v.accountDetails.IETRS_Jurisdiction__c}"
+                                            name="judPicklist"
+                                        >
+                                            <option value="">--None--</option>
+                                            <aura:iteration items="{!v.judList}" var="judVal">
+                                                <!--<option text="{!st1.value}" value="{!st1.key}" />-->
+                                                <option value="{!judVal}">{!judVal}</option>
+                                            </aura:iteration>
+                                        </lightning:select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">Intra-Interstate</td>
+                                    <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">
+                                        <lightning:select
+                                            aura:id="intState"
+                                            value="{!v.accountDetails.IETRS_Intra_Interstate__c}"
+                                            name="intSTPicklist"
+                                        >
+                                            <option value="">--None--</option>
+                                            <aura:iteration items="{!v.intStateList}" var="intVal">
+                                                <!--<option text="{!st1.value}" value="{!st1.key}" />-->
+                                                <option value="{!intVal}">{!intVal}</option>
+                                            </aura:iteration>
+                                        </lightning:select>
+                                    </td>
+                                    <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">Entity Code</td>
+                                    <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">
+                                        <lightning:select
+                                            aura:id="entCode"
+                                            value="{!v.accountDetails.IETRS_Entity_Code__c}"
+                                            name="entPicklist"
+                                        >
+                                            <option value="">--None--</option>
+                                            <aura:iteration items="{!v.entCodeList}" var="entVal">
+                                                <!--<option text="{!st1.value}" value="{!st1.key}" />-->
+                                                <option value="{!entVal}">{!entVal}</option>
+                                            </aura:iteration>
+                                        </lightning:select>
+                                    </td>
+                                    <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">Install Year</td>
+                                    <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">
+                                        <ui:inputText value="{!v.accountDetails.IETRS_Install_Year__c}" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="15%" class="slds-cell-buffer_left slds-cell-wrap "> T4 permit</td>
+                                    <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">
+                                        <ui:inputText value="{!v.accountDetails.IETRS_T4_Permit__c}" />
+                                    </td>
+                                    <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">Region</td>
+                                    <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">
+                                        <c:IETRS_Lookup
+                                            objectName="IETRS_County_Group__c"
+                                            fieldSet="['Name','Id']"
+                                            limit="20"
+                                            alternateDisplayField="['Name']"
+                                            whereCondition="{! ' AND IETRS_Group_Type__c =\'Region\'' }"
+                                            comparisonField="Name"
+                                            primaryDisplayField="Name"
+                                            uniqueLookupIdentifier="testMile3"
+                                            aura:id="childComp2"
+                                            fieldLabel=""
+                                            lookupSelected="{!c.getSelectedRegion}"
+                                        />
+                                        <!--<ui:inputText value="{!v.accountDetails.IETRS_Region__r.Name}"   /> -->
+                                    </td>
+                                    <!--td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">County</td>
+                                    <td width="15%" class="slds-cell-buffer_left slds-cell-wrap ">
+                                        <c:IETRS_Lookup
+                                            objectName="IETRS_County__c"
+                                            fieldSet="['Name','Id']"
+                                            limit="20"
+                                            alternateDisplayField="['Name']"
+                                            comparisonField="Name"
+                                            primaryDisplayField="Name"
+                                            uniqueLookupIdentifier="testMile2"
+                                            aura:id="childComp1"
+                                            fieldLabel=""
+                                            lookupSelected="{!c.getSelectedCountyRec}"
+                                        /-->
+                                        <!--<ui:inputText value="{!v.accountDetails.IETRS_County__r.Name}"   />-->
+                                    <!--/td-->
+                                </tr>
+                            </table>
+                        </div>
+                        <br />
+
+                        <br />
+                        <div class="slds-align_absolute-center">
+                            <lightning:button label="Previous" variant="neutral" onclick="{!c.backFlag}" />
+                            <lightning:button label="Split" variant="success" onclick="{!c.doSplit}" /> </div></div
+                ></div>
+            </aura:renderIf>
+        </lightning:card>
+    </div>
+</aura:component>

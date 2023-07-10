@@ -1,0 +1,12 @@
+<template>
+        <lightning-card  title={cardTitle}>
+            <!--<lightning-button label="New" slot="actions"></lightning-button>-->
+            <p class="slds-p-horizontal_small">{reportDescription}</p>
+            <template if:true={showAsOfDate}>
+                <div class="slds-m-horizontal_medium slds-m-vertical_small">
+                        <lightning-input type="date" name="AsOfDate" value={asofDate} label="As Of Date" onchange={handleDateInput}></lightning-input>
+                </div>
+            </template>
+            <lightning-button label="Generate Report" title="Generate Report" onclick={buttonHandlerGenerateReport} class="slds-m-left_small"></lightning-button>
+        </lightning-card>
+    </template>

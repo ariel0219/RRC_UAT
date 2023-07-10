@@ -1,0 +1,28 @@
+<apex:page lightningStylesheets="true" >
+
+    
+    <p>
+        Thank you for your payment!
+        
+     </p>
+     
+     <p>
+       <br>IMPORTANT: Your registration is not yet complete.</br>
+       
+       <br>To complete your registration, you MUST close this window by clicking "X" on this tab labeled "EEM_Payment_Confirmation"</br>
+       <br> and follow the instructions on the next screen you see.</br>
+
+ <style type="text/css">
+          p{ font-weight: bolder;
+            text-align:center;
+            width :100%;
+            font-size:18px;
+            } 
+        </style>
+
+     </p>
+     
+  
+  
+  
+</apex:page>

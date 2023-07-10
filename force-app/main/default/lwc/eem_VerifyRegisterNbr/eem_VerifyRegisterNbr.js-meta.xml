@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+	<apiVersion>54.0</apiVersion>
+	<isExposed>true</isExposed>
+	<targets>
+		<target>lightning__FlowScreen</target>
+	</targets>
+	<targetConfigs>
+
+        <targetConfig targets="lightning__FlowScreen">
+
+            <property name="register_nbr" type="String" required="required"   label="Register Number" description="Register Number"/>
+            <property name="manual_amount" type="Integer" required="required" label="Manual Amount Paid" description="Manual Amount Paid"/> 
+
+        </targetConfig>
+
+    </targetConfigs>
+</LightningComponentBundle>

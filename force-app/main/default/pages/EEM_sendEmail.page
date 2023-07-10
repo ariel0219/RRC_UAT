@@ -1,0 +1,26 @@
+<apex:page standardController="EEM_Event__c" extensions="EEM_EmailSendingController" title="Custom Email For Event Registrants" applyHtmlTag="true" renderAs="HTML">
+    <html>
+        <head>
+<style>
+h1 {text-align: center;}
+</style>
+</head>   
+ <body>     
+    <h1>Custom Email For Events</h1>
+    <Br></Br><Br></Br>
+    <apex:pageMessages id="showmsg"></apex:pageMessages>
+    <apex:form rendered="{!userAccessCheck}">       
+        <apex:panelGrid columns="2" style="float:left;" rendered="{!registrantCheck}">
+        <apex:outputLabel value=" Email To  : " for="To"/><apex:inputText value="{!toMail}" id="To"  />
+        <apex:outputLabel value=" Email To All Registrants  : " for="All"/><apex:inputCheckbox selected="true" value="{!All}"    id="All" />
+        <apex:outputLabel value=" Cc : " for="cc"/><apex:inputText value="{!ccMail}" id="cc" />
+        <apex:outputLabel value=" Subject : " for="subject"/><apex:inputText value="{!subjectMail}" id="subject" /><br/>
+        <Br></Br>
+        <apex:inputTextarea label="Body Text" richtext="true" value="{!htmlBodyMail}" id="bodyText" /><br/>
+        <apex:commandButton action="{!sendMail}" value="Send Email" rendered="{!registrantCheck}"/>
+       </apex:panelGrid>
+    </apex:form>
+
+</body>
+</html>
+</apex:page>

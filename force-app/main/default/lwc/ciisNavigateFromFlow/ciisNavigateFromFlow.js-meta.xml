@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>57.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Navigate From Flow</masterLabel>
+    <description>Use this component to navigate to a page by providing a JSON PageReference. See PageReference documentation: https://developer.salesforce.com/docs/component-library/documentation/en/lwc/reference_page_reference_type</description>
+    <targets>
+        <target>lightning__FlowScreen</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__FlowScreen">
+            <property name="pageReferenceJson" type="String" label="PageReference JSON String"
+                required="true" />
+            <property name="replaceHistory" type="Boolean"
+                label="If replace is set to true, the pageReference replaces the existing entry in the browser history so the user doesn’t have to press the back button twice. The default value is false."
+                default="false" />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

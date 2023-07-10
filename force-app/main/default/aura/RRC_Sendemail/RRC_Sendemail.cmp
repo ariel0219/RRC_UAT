@@ -1,0 +1,42 @@
+<aura:component controller="IETRS_RRC_Sendemail" implements="flexipage:availableForRecordHome,force:hasRecordId,force:lightningQuickActionWithoutHeader" access="global" >	        
+    
+    <aura:html tag="style">
+        
+        .cuf-content {
+        padding: 0 0rem !important;
+        }
+        .slds-p-around--medium {
+        padding: 0rem !important;
+        }       
+        .slds-modal__content{
+        overflow-y:auto !important;
+        <!-- height:unset !important;-->
+        max-height:unset !important;
+        }
+        
+    </aura:html>
+    <aura:attribute name="recordId" type="Id"/>
+    <aura:attribute name="showSpinner" type="Boolean" />
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+    <div class="modal-header slds-modal__header slds-size_1-of-1">
+        <h4 class="title slds-text-heading--medium">Send Email</h4>
+    </div>
+    <aura:If isTrue="{!v.showSpinner}">
+        <lightning:spinner style="height:266px;margin-top: 150px;width=300px;" aura:id="mySpinner" variant="brand" size="large" class="mySpinnerClass" />
+    </aura:If>
+    
+    <!--<div>
+          <br></br>
+         <br></br>
+         
+  Email Sent Successfully!
+         <br></br>
+         <br></br>
+          <br></br>
+        
+ </div>-->
+    <!--Modal Footer-->
+    <!--<div class="modal-footer slds-modal__footer slds-size_1-of-1">
+         <lightning:button variant="Brand" class="slds-button" label="Close" onclick="{!c.handleClose}"/>
+    </div>-->
+</aura:component>

@@ -1,0 +1,51 @@
+<!--
+  @Component Name     : IETRS_BoxDocusign.cmp
+  @Description        : 
+  @Author             : Mark Frizzell
+  @Group              : 
+  @Last Modified By   : Mark Frizzell
+  @Last Modified On   : 7/22/2019, 10:36:21 AM
+  @Modification Log   : 
+  ==============================================================================
+  Ver         Date                     Author      		      Modification
+  ==============================================================================
+  1.0    6/18/2019                 Mark Frizzell     Initial Version
+-->
+<aura:component controller="IETRS_BoxDocusignController" implements="force:lightningQuickActionWithoutHeader,force:hasRecordId">
+
+    <!-- ATTRIBUTES -->
+    <aura:attribute name="recordId" type="Id" />
+    <aura:attribute name="step" type="String" description="Current step in the process" />
+    
+    <!-- HANDLERS -->
+    <aura:handler name="init" value="{!this}" action="{!c.handleInit}"/>
+    <aura:handler name="change" value="{!v.step}" action="{!c.handleStepChange}"/>
+
+    <!-- COMPONENT MARKUP -->
+    <lightning:card>
+
+        <lightning:layoutItem class="slds-page-header" size="12">
+            <lightning:icon iconName="action:share" size="small" />
+            <span class="slds-text-heading_small slds-p-around_small">
+                Send with Docusign
+            </span>
+        </lightning:layoutItem>
+
+        <lightning:progressIndicator currentStep="{!v.step}" type="path" variant="base" class="slds-p-vertical_small">
+            <lightning:progressStep label="Download" value="1" />
+            <lightning:progressStep label="Send" value="2" />
+        </lightning:progressIndicator>
+
+        <aura:if isTrue="{!v.step == '1'}">
+            <p class="slds-align_absolute-center slds-p-vertical_medium">Please wait while the file is downloaded from Box...</p>
+            <lightning:icon iconName="utility:download" size="medium" class="slds-align_absolute-center" onclick="{!c.nextClick}" />
+        </aura:if>
+
+        <aura:if isTrue="{!v.step == '2'}">
+            <p class="slds-align_absolute-center slds-p-vertical_medium">The file is being prepared and sent with Docusign...</p>
+            <lightning:icon iconName="utility:share" size="medium" class="slds-align_absolute-center" onclick="{!c.nextClick}" />           
+        </aura:if>
+
+    </lightning:card>
+
+</aura:component>

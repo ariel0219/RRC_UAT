@@ -1,0 +1,5 @@
+.THIS .ietrs-data-container {
+    width: 100%;
+    overflow-y: scroll; 
+    max-height: 350px;
+}

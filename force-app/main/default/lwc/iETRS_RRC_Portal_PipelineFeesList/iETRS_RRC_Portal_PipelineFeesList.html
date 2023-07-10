@@ -1,0 +1,15 @@
+<template>
+    <!-- Main content -->
+    <lightning-card title="Your Organization's Pipeline Fees" icon-name="custom:custom63">
+        <lightning-datatable 
+                   key-field="Name"
+                    data= {data}
+                    columns={columns}
+                    sorted-by={sortBy}
+                    sorted-direction={sortDirection}
+                    onsort={handleSortdata}   
+                    hide-checkbox-column>
+                </lightning-datatable>
+                <p if:true={error}>{error}</p>
+    </lightning-card> 
+</template>

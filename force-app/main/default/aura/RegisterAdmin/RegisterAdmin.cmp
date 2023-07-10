@@ -1,0 +1,43 @@
+<aura:component controller="RegisterCtrl" implements="forceCommunity:availableForAllPageTypes,force:lightningQuickActionWithoutHeader,flexipage:availableForRecordHome,force:hasRecordId" access="global" >
+    <aura:attribute name="isOpen" type="Boolean" default="false" access="private"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:attribute name="permissionSet" type="String" access="global"/>
+    <aura:attribute name="profileName" type="String" access="global"/>
+    <!--lightning:button label="Register" title="Neutral action" onclick="{! c.handleClick }"/-->
+    
+    <aura:html tag="style">
+        
+        .slds-modal__container{ 
+        width: 200%; max-width: 100vh;
+        } 
+        .modal-body{ 
+        height : 100vh !important; 
+        max-height: 100vh !important; 
+        } 
+        .slds-modal__footer{ 
+        display: inline !important; 
+        }
+    </aura:html>
+    <aura:if isTrue="{!v.isOpen}">
+        <!--header class="slds-modal__header slds-modal__header_empty btn">
+                            <lightning:buttonIcon alternativeText="Close window." variant="border-filled" onclick="{!c.closeFlowModal}" size="large" iconName="utility:close" />
+                        </header-->
+        <!--div class="slds-modal__container"-->
+        <lightning:flow aura:id="flowData" onstatuschange="{!c.closeModalOnFinish}" />
+        <!--/div-->
+        <!--div >
+            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_small" >
+    
+                    <div class="slds-modal__container">
+                        <header class="slds-modal__header slds-modal__header_empty btn">
+                            <lightning:buttonIcon alternativeText="Close window." variant="border-filled" onclick="{!c.closeFlowModal}" size="large" iconName="utility:close" />
+                        </header>
+                        <div class="slds-modal__content slds-p-around_medium">
+                            <lightning:flow aura:id="flowData" onstatuschange="{!c.closeModalOnFinish}" />
+                        </div>
+                    </div>
+                </section>
+                <div class="slds-backdrop slds-backdrop_open"></div>
+            </div--> 
+    </aura:if>
+</aura:component>

@@ -1,0 +1,52 @@
+<!--
+  @Component Name     : IETRS_InspScheduleGenerate.cmp
+  @Description        : Quick Action component that fires the schedule generation process
+  @Author             : Mark Frizzell
+  @Group              : IETRS Inspection
+  @Last Modified By   : Mark Frizzell
+  @Last Modified On   : 9/9/2019, 10:51:32 PM
+  @Modification Log   : 
+  ==============================================================================
+  Ver         Date                     Author      		      Modification
+  ==============================================================================
+  1.0    7/18/2019, 12:52:56 PM   Mark Frizzell     Initial Version
+-->
+<aura:component controller="IETRS_InspScheduleGenerateController" implements="force:hasRecordId,force:lightningQuickActionWithoutHeader">
+    
+    <!-- ATTRIBUTES -->
+    <aura:attribute name="showWarning" type="Boolean" default="false"/>
+
+    <!-- HANDLERS -->
+    <aura:handler name="init" value="{!this}" action="{!c.handleInit}"/>
+    
+    <!-- CMP MARKUP -->
+    <ltng:require styles="{!$Resource.IETRS_Dev_Res + '/css/toast-multiline.css'}"/>
+    
+    <aura:if isTrue="{! !v.showWarning}">
+        <div class="slds-p-around_medium slds-text-align_center">
+            <p class="slds-text-heading_small">Please wait while the schedule generation starts.</p>
+            <p class="slds-text-heading_small">This may take a few moments...</p>
+            <div class="spinner-container slds-m-around_xx-large">
+                <lightning:spinner alternativeText="Please wait..." size="medium"/>
+            </div>
+        </div>
+    </aura:if>
+
+    <aura:if isTrue="{!v.showWarning}">
+        <span class="slds-text-align_center">
+            <p class="slds-m-around_medium slds-text-color_error slds-text-heading_small">
+                <lightning:icon iconName="utility:warning" variant="error" class="slds-p-horizontal_small"/>
+                Schedules Already Generated
+            </p>
+            <p class="sdls-m-around_small">
+                If you continue, all related schedules without an Inspection Package will be overwritten.<br/>
+                <b><u>THIS CANNOT BE UNDONE</u></b>.
+            </p>
+        </span>
+        <span class="slds-align_absolute-center slds-m-around_medium">
+            <lightning:button variant="neutral" label="Cancel" onclick="{!c.cancelClick}" class="slds-m-around_medium"/>
+            <lightning:button variant="brand" label="Re-Generate Schedules" onclick="{!c.generateClick}" class="slds-m-around_medium"/>
+        </span>
+    </aura:if>
+
+</aura:component>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>57.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Supply Chain Accounts Table</masterLabel>
+    <targets>
+        <target>lightning__FlowScreen</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig
+            targets="lightning__FlowScreen"
+        >
+
+            <propertyType name="T" extends="sObject" label="sObject Type" />
+
+            <property
+                name="records"
+                type="{T[]}"
+                label="Records"
+            />
+
+            <property
+                name="supplyChainType"
+                type="String"
+                label="Supply Chain Type"
+                description="This value should match the label of the Supply Chain Type Setting custom metadata record."
+            />
+            <property
+                name="getData"
+                type="Boolean"
+                label="Allow this Component to Retrieve Data"
+                description="If true, the component will retrieve data based on the provided Supply Chain Type. If false, the component will use the provided records."
+            />
+
+            <property
+                name="operatorId"
+                type="String"
+                label="The Account Id of the Organization/Operator"
+                description="This is used to filter the list of records."
+            />
+            <property name="whereClauseSuffix" type="String" label="Where Clause Suffix" />
+
+            <property name="hideCheckboxColumn" type="Boolean"
+                label="Hide Checkbox/Radio in First Column" default="false" />
+
+            <property name="multiselect" type="Boolean" label="Select Multiple Rows" default="false" />
+
+            <property name="keyField" type="String" label="Key to Use if Id is Null" default="Id" />
+
+            <property
+                name="selectedRows"
+                type="{T[]}"
+                label="Selected Records"
+                role="outputOnly"
+            />
+
+            <property
+                name="selectedRowIds"
+                type="String[]"
+                label="Selected Record Ids"
+                role="outputOnly"
+            />
+
+            <property name="forceRefresh" type="Boolean"
+                label="Clear cache and grab new data from server" default="false" />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

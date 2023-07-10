@@ -1,0 +1,14 @@
+<template>
+    <div class="slds-m-around_medium">
+<lightning-input type="text"     class="validate"  label="Register Number"   required="required" value={register_nbr}  onchange={handleRegisterChange}></lightning-input>
+<lightning-input type="currency" class="validate" label="Manual Amount Paid" required="required" value={manual_amount} onchange={handleManualAmountChange}></lightning-input>
+
+</div>
+<div class="slds-m-around_medium">
+    <lightning-button label="Verify Register Number" variant="brand" onclick={handleNumberChange}></lightning-button>
+</div>
+<div class="slds-s-top_large">
+    <lightning-formatted-rich-text value={myMsg}></lightning-formatted-rich-text>
+    
+</div>
+</template>

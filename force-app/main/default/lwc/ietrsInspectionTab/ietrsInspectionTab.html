@@ -1,0 +1,15 @@
+<template>
+    <li class={tabClass} title={label} role="presentation">
+        <a
+            class="slds-tabs_default__link"
+            href="#"
+            role="tab"
+            tabindex="0"
+            aria-selected={isActive}
+            aria-controls={ariaControls}
+            onclick={handleClick}
+            id={ariaId}
+            >{label}</a
+        >
+    </li>
+</template>

@@ -1,0 +1,314 @@
+<template>
+
+
+    <!--FOR SRC ONLY-->
+    <div class="slds-p-horizontal_small" if:true={isSRC}>
+        <div style="font-weight:bold;font-size:18px">SRC Reports by Regulated Entity
+        </div>
+        <div class="slds-float_right">
+
+            <button type="submit" disabled={disableButton} class="slds-m-left_x-small slds-button slds-button_brand "
+                onclick={openModal}>New</button>
+
+
+        </div>
+        Select a row below to see further details on the SRC report.<br />
+        If you need to file a new SRC report, click the New button to the right and<br />
+        follow the prompts.
+        <br /> <br />
+
+        <lightning-datatable data={getDataSRCreports} columns={columns} key-field="Id"
+            onrowselection={getSelectedRecords} onrowaction={handleRowAction} hide-checkbox-column="true">
+        </lightning-datatable>
+    </div>
+    <!--FOR IMP ONLY-->
+    <div class="slds-p-horizontal_small" if:false={isSRC}>
+        <div style="font-weight:bold;font-size:18px">IMP Reports by Regulated Entity
+        </div>
+        <div class="slds-float_right">
+
+            <button type="submit" disabled={disableButton} class="slds-m-left_x-small slds-button slds-button_brand "
+                onclick={openModal}>New</button>
+
+
+        </div>
+        Select a row below to see further details on the IMP report.<br />
+        If you need to file a new IMP report, click the New button to the right and<br />
+        follow the prompts.
+        <br /> <br />
+
+        <lightning-datatable data={getDataSRCreports} columns={columns} key-field="Id"
+            onrowselection={getSelectedRecords} onrowaction={handleRowAction} hide-checkbox-column="true">
+        </lightning-datatable>
+    </div>
+    <!--MODAL DIALOGUE-->
+
+    <template if:true={bShowModal}>
+        <section aria-describedby="modal-content-id-1" aria-labelledby="modal-heading-01" aria-modal="true"
+            class="slds-modal slds-fade-in-open" role="dialog" tabindex="-1">
+            <div class="slds-modal__container" style="width:120%">
+
+                <!-- modal header start -->
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        onclick={closeModal} title="Close">
+                        <lightning-icon alternative-text="close" icon-name="utility:close" size="small"
+                            variant="inverse"></lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 class="slds-text-heading_medium slds-hyphenate" id="modal-heading-01">
+                        <div style="font-size:22px;text-align:Center">
+                            <template if:true={showedit}>
+                                <!--lightning-record-edit-form object-api-name="IETRS_Insp_Notification_Detail__c"
+                                            record-id={recordId}-->
+                                Edit
+
+
+                                <!--lightning-record-edit-form-->
+                            </template>
+
+                            <template if:true={shownew}>
+                                <div if:true={isSRC}>
+                                    Safety Related Conditions
+                                </div>
+
+                                <div if:false={isSRC}>
+                                    IMP
+                                </div>
+                            </template>
+                        </div>
+                    </h2>
+                </header>
+
+                <div class="slds-modal__content slds-p-around_medium" if:true={shownew}>
+                    <lightning-record-edit-form object-api-name="IETRS_Insp_Notification__c"
+                        record-type-id={recordTypeId} onsuccess={handleSuccess} onerror={handleerror}>
+                       
+                        <lightning-messages  if:true={showError}></lightning-messages>
+                        <h3 class="slds-section__title slds-theme_shade">
+                            
+                            <span class="slds-truncate slds-p-horizontal_small" title="SRC Details" if:true={isSRC}>SRC
+                                Details</span>
+                            <span class="slds-truncate slds-p-horizontal_small" title="IMP Details" if:false={isSRC}>IMP
+                                Details</span>
+                        </h3>
+                        <div class="slds-grid slds-wrap">
+                            <div class="slds-col slds-size_1-of-2">
+                                <!-- <c-custom-lookup lookup-label="System Name"
+                                            object-api-name="account" icon-name="standard:account" placeholder=""
+                                            split-bln="fetchAccountsBasedontheRecordType" onrecordselection={onselectedPipleLineSystemName}
+                                            recordtype-name="Regulated Entity - PS" data-id="accid">
+                                        </c-custom-lookup>-->
+                                <!--<lightning-messages>-->
+                                    <lightning-input-field field-name="IETRS_Regulated_Entity__c" data-id="pipeSystemID"
+                                        value={systemName}>
+                                        <!--onchange={onchangeGetpipeId}-->
+                                    </lightning-input-field>
+                                <!--</lightning-messages>-->
+                            </div>
+                            <div class="slds-col slds-size_1-of-2">
+                                <lightning-input-field field-name="IETRS_Organization__c" value={operatorName}
+                                    data-id="UnitStreetAd1ID">
+                                </lightning-input-field>
+
+                            </div>
+
+                            <div class="slds-col slds-size_1-of-2" if:true={isSRC}>
+                                <lightning-input-field field-name="IETRS_PHMSA_SRC_ID__c" data-id="OperatorLeakID">
+                                </lightning-input-field>
+                            </div>
+                            <div class="slds-col slds-size_1-of-2" if:false={isSRC}>
+                                <lightning-input-field field-name="IETRS_PHMSA_IMP_ID__c" data-id="OperatorLeakID">
+                                </lightning-input-field>
+                            </div>
+                            <!--div class="slds-col slds-size_1-of-2">
+                                        <lightning-input-field field-name="IETRS_Regulated_Entity__c"
+                                            data-id="UnitStreetAd1ID">
+                                        </lightning-input-field>
+        
+                                    </div-->
+                            <div class="slds-col slds-size_1-of-2">
+                                <lightning-input-field field-name="IETRS_Inspector__c" data-id="UnitStreetAd1ID">
+                                </lightning-input-field>
+
+                            </div>
+                            <div class="slds-col slds-size_1-of-2">
+                                <lightning-input-field field-name="IETRS_Date_of_Discovery__c"
+                                    data-id="UnitStreetAd1ID">
+                                </lightning-input-field>
+
+                            </div>
+                            <div class="slds-col slds-size_1-of-2">
+                                <lightning-input-field field-name="IETRS_Status__c" data-id="UnitStreetAd1ID">
+                                </lightning-input-field>
+
+                            </div>
+                            <div class="slds-col slds-size_1-of-2">
+                                <lightning-input-field field-name="IETRS_Summary_of_Notification__c"
+                                    data-id="UnitStreetAd1ID">
+                                </lightning-input-field>
+
+                            </div>
+                            <div class="slds-col slds-size_1-of-2">
+                                <lightning-input-field field-name="IETRS_Summary_of_Corrective_Action__c"
+                                    data-id="UnitStreetAd1ID">
+                                </lightning-input-field>
+
+                            </div>
+                        </div>
+
+
+
+                        <!-- modal footer start-->
+                        <footer class="slds-modal__footer" style="text-align:center">
+                            <button class="slds-m-top_small slds-button slds-button_brand" value="SaveAndUpload"
+                                onclick={onClickofSaveAndUpload}>
+                                <!-- onclick={uploadFileEvent}-->
+                                Save & Attach file
+                            </button>
+                            <button class="slds-m-top_small slds-button slds-button_neutral " onclick={closeModal}>
+                                Cancel
+                            </button>
+                            <!--template if:true={shownew}>
+                                <button class="slds-m-top_small slds-button slds-button_neutral " onclick={saveandnewMethod}>
+                                    Save &amp; New
+                                </button>
+                            </template-->
+                            <button class="slds-m-top_small slds-button slds-button_brand" value="Save"
+                                onclick={onClickofSave}>
+                                <!--onclick={handleSuccess}-->
+                                Save
+                            </button>
+                            <!--lightning-button
+                            class="slds-m-top_small"
+                            type="submit"
+                            label="Create new">
+                        </lightning-button-->
+                        </footer>
+                    </lightning-record-edit-form>
+                </div>
+
+                <!--EDIT form-->
+                <div class="slds-modal__content slds-p-around_medium" if:true={showedit}>
+                    <lightning-record-edit-form object-api-name="IETRS_Insp_Notification__c"
+                        onsuccess={onsuccessofNotification} onerror={handleerror} record-id={recordId}>
+                        
+                        <lightning-messages  if:true={showError}></lightning-messages>
+                        <h3 class="slds-section__title slds-theme_shade">
+                            <span class="slds-truncate slds-p-horizontal_small" title="SRC Details" if:true={isSRC}>SRC
+                                Details</span>
+                            <span class="slds-truncate slds-p-horizontal_small" title="IMP Details" if:false={isSRC}>IMP
+                                Details</span>
+                        </h3>
+                        <div class="slds-grid slds-wrap">
+                            <div class="slds-col slds-size_1-of-2">
+                                <!-- <c-custom-lookup lookup-label="System Name"
+                                            object-api-name="account" icon-name="standard:account" placeholder=""
+                                            split-bln="fetchAccountsBasedontheRecordType" onrecordselection={onselectedPipleLineSystemName}
+                                            recordtype-name="Regulated Entity - PS" data-id="accid">
+                                        </c-custom-lookup>-->
+                                        
+                                <lightning-input-field field-name="IETRS_Regulated_Entity__c" data-id="pipeSystemID">
+                                    <!--onchange={onchangeGetpipeId}-->
+                                </lightning-input-field>
+                            </div>
+                            <div class="slds-col slds-size_1-of-2">
+                                <lightning-input-field field-name="IETRS_Organization__c" data-id="UnitStreetAd1ID">
+                                </lightning-input-field>
+
+                            </div>
+
+                            <div class="slds-col slds-size_1-of-2" if:true={isSRC}>
+                                <lightning-input-field field-name="IETRS_PHMSA_SRC_ID__c" data-id="OperatorLeakID">
+                                </lightning-input-field>
+                            </div>
+                            <div class="slds-col slds-size_1-of-2" if:false={isSRC}>
+                                <lightning-input-field field-name="IETRS_PHMSA_IMP_ID__c" data-id="OperatorLeakID">
+                                </lightning-input-field>
+                            </div>
+                            <!--div class="slds-col slds-size_1-of-2">
+                                        <lightning-input-field field-name="RecordTypeId"
+                                            data-id="UnitStreetAd2ID">
+                                        </lightning-input-field>
+                                    </div-->
+                            <!--div class="slds-col slds-size_1-of-2">
+                                        <lightning-input-field field-name="IETRS_Regulated_Entity__c"
+                                            data-id="UnitStreetAd1ID">
+                                        </lightning-input-field>
+        
+                                    </div-->
+                            <div class="slds-col slds-size_1-of-2">
+                                <lightning-input-field field-name="IETRS_Inspector__c" data-id="UnitStreetAd1ID">
+                                </lightning-input-field>
+
+                            </div>
+                            <div class="slds-col slds-size_1-of-2">
+                                <lightning-input-field field-name="IETRS_Date_of_Discovery__c"
+                                    data-id="UnitStreetAd2ID">
+                                </lightning-input-field>
+                            </div>
+                            <div class="slds-col slds-size_1-of-2">
+                                <lightning-input-field field-name="IETRS_Status__c" data-id="UnitStreetAd1ID">
+                                </lightning-input-field>
+
+                            </div>
+                            <div class="slds-col slds-size_1-of-2">
+                                <lightning-input-field field-name="IETRS_Summary_of_Corrective_Action__c"
+                                    data-id="UnitStreetAd1ID">
+                                </lightning-input-field>
+
+                            </div>
+                            <div class="slds-col slds-size_1-of-2">
+                                <lightning-input-field field-name="IETRS_Summary_of_Notification__c"
+                                    data-id="UnitStreetAd1ID">
+                                </lightning-input-field>
+
+                            </div>
+                            <div class="slds-col slds-size_1-of-2">
+                                <lightning-Output-field field-name="IETRS_Attached_File__c" data-id="UnitStreetAd1ID">
+                                </lightning-Output-field>
+
+                            </div>
+                            <!--div class="slds-col slds-size_1-of-2">
+                                        <lightning-input-field field-name="CreatedDate"
+                                            data-id="UnitStreetAd1ID">
+                                        </lightning-input-field>
+        
+                                    </div-->
+                            <!--div class="slds-col slds-size_1-of-2">
+                                        <lightning-input-field field-name="CreatedBy"
+                                            data-id="UnitStreetAd2ID">
+                                        </lightning-input-field>
+                                    </div-->
+
+                        </div>
+
+
+
+                        <!-- modal footer start-->
+                        <footer class="slds-modal__footer" style="text-align:center">
+                            <button class="slds-m-top_small slds-button slds-button_brand" value="SaveAndUpload"
+                                onclick={onClickofSaveAndUpload}>
+                                <!-- onclick={uploadFileEvent}-->
+                                Save & Attach file
+                            </button>
+                            <button class="slds-m-top_small slds-button slds-button_neutral " onclick={closeModal}>
+                                Cancel
+                            </button>
+                            <!--template if:true={shownew}>
+                                <button class="slds-m-top_small slds-button slds-button_neutral " onclick={saveandnewMethod}>
+                                    Save &amp; New
+                                </button>
+                            </template-->
+                            <button class="slds-m-top_small slds-button slds-button_brand"
+                                onclick={onsubmitNotification}>
+                                Save
+                            </button>
+
+                        </footer>
+                    </lightning-record-edit-form>
+                </div>
+            </div>
+        </section>
+    </template>
+</template>

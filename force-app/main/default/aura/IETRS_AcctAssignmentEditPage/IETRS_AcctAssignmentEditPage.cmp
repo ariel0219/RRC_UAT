@@ -1,0 +1,104 @@
+<!--
+  @Component Name     : IETRS_AcctAssignmentEditPage.cmp
+  @Description        : 
+  @Author             : Mark Frizzell
+  @Group              : 
+  @Last Modified By   : Mark Frizzell
+  @Last Modified On   : 8/9/2019, 12:36:06 PM
+  @Modification Log   : 
+  ==============================================================================
+  Ver         Date                     Author      		      Modification
+  ==============================================================================
+  1.0    7/31/2019, 10:14:18 PM   Mark Frizzell     Initial Version
+-->
+<aura:component implements="force:hasRecordId,lightning:actionOverride,lightning:isUrlAddressable" controller="IETRS_RecordEditController">
+    <aura:dependency resource="markup://IETRS_LookupField" type="COMPONENT"/>
+    
+    <!-- ATTRIBUTES -->
+    <aura:attribute name="layoutSections" type="List"/>
+    <aura:attribute name="disableSubmit" type="Boolean" default="false"/>
+    <aura:attribute name="saved" type="Boolean" default="false"/>
+    <aura:attribute name="fieldsLoaded" type="Boolean" default="false"/>
+    <aura:attribute name="isLoading" type="Boolean" default="true"/>
+
+    <aura:attribute name="relatedAccount" type="String"/>
+    <aura:attribute name="relatedCase" type="String"/>
+
+    <aura:attribute name="recordId" type="String"/>
+
+
+    <!-- HANDLERS -->
+    <aura:handler name="init" value="{!this}" action="{!c.handleInit}"/>
+    
+
+    <!-- COMPONENT MARKUP -->
+
+    <!-- Used to close the window when not launched from quick action -->
+    <lightning:workspaceAPI aura:id="recordEditCustomWorkspace"/>
+
+    <!-- Spinner -->
+    <aura:if isTrue="{!v.isLoading}">
+        <lightning:spinner size="medium" variant="brand" alternativeText="Loading record..."/>
+    </aura:if>
+
+    <!-- Header -->
+    <header class="slds-modal__header">
+        <h2 class="slds-text-heading_medium">{!if(v.recordId == null, 'New', 'Edit') + ' Secondary Account Assignment'}</h2>
+    </header>
+    
+    <!-- Body -->
+    <div class="slds-modal__content">
+
+        <lightning:recordEditForm 
+                aura:id="editForm" 
+                recordId="{!if(v.recordId, v.recordId, '')}" 
+                objectApiName="IETRS_Case_Secondary_Account_Assignment__c" 
+                onsubmit="{!c.handleSubmit}" 
+                onsuccess="{!c.handleSuccess}" 
+                onload="{!c.handleDataLoaded}" 
+                onerror="{!c.handleError}" 
+                density="comfy">
+                
+            <lightning:messages/>
+
+                <div class="slds-align_absolute-center slds-p-around_small slds-size_6-of-12"
+                    aura:id="lookupFieldPlaceholder" 
+                    data-fieldName="IETRS_Case__c" 
+                    data-label="Case" 
+                    data-objectName="Case" 
+                    data-allowMultiple="false" 
+                    data-allowImport="false" 
+                    data-iconName="standard:case" 
+                    data-required="true" 
+                    data-value="v.relatedCase">
+                </div>
+
+                <div class="slds-align_absolute-center slds-p-around_small slds-size_6-of-12"
+                    aura:id="lookupFieldPlaceholder" 
+                    data-fieldName="IETRS_Account__c" 
+                    data-label="Account" 
+                    data-objectName="Account" 
+                    data-allowMultiple="false" 
+                    data-allowImport="true" 
+                    data-iconName="standard:account" 
+                    data-required="true" 
+                    data-value="v.relatedAccount">
+                </div>
+
+            <!-- Need one field to make recordEditForm load -->
+            <lightning:inputField fieldName="Id" class="slds-hidden"/>
+
+            <div style="height:250px;"></div>
+            
+            <!-- Footer -->
+            <footer class="slds-align_absolute-center slds-p-around_small slds-size_6-of-12 slds-box slds-theme_shade">
+                <div class="">
+                    <lightning:button label="Cancel" onclick="{!c.cancelClick}" disabled="{!v.isLoading}" title="Cancel"/>
+                    <lightning:button label="Save" type="submit" disabled="{!v.isLoading}" variant="brand" title="Save the record"/>
+                </div>
+            </footer>
+                
+        </lightning:recordEditForm>
+    </div>
+
+</aura:component>

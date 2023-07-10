@@ -1,0 +1,14 @@
+<!--
+  @File Name          : IETRS_OpenExternalURL.cmp
+  @Description        : 
+  @Author             : Kevin Lu
+  @Group              : 
+  @Last Modified By   : Kevin Lu
+  @Last Modified On   : 4/29/2020, 1:16:30 PM
+  @Modification Log   : 
+  Ver       Date            Author      		    Modification
+  1.0       04/29/2020      Kevin Lu                Initial Version
+-->
+<aura:component implements="lightning:availableForFlowActions" description="Redirects users to an external URL">
+    <aura:attribute name="externalURL" type="String" />
+</aura:component>

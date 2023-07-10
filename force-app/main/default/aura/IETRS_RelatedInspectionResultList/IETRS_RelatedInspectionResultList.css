@@ -1,0 +1,159 @@
+.THIS th {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    z-index: 4;
+}
+.THIS th[scope='row'] {
+    background-color: #f3f2f2;
+    top: 25px;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Enough height on the loading container to cover the page */
+.THIS .slds-spinner_container {
+    height: calc(100vh - 150px);
+}
+
+/* Deal with weird textare positioning in tables */
+.THIS .textarea-container {
+    position: absolute;
+    width: calc(100% - 1.5rem);
+}
+.THIS textarea {
+    height: 32px;
+}
+
+.THIS .table-container,
+.THIS ul.slds-tabs_default__nav {
+    overflow: auto;
+}
+
+.THIS .input-col {
+    width: 250px;
+}
+
+.THIS .input-col_long {
+    width: 350px;
+}
+
+/* hide table labels */
+.THIS .slds-form-element__label {
+    display: none;
+}
+/* override padding applied outside of the component */
+.THIS.container {
+    margin: -0.75rem;
+}
+/* no top border */
+.THIS .border-top_none {
+    border-top: none;
+}
+
+/* style alternate row backgrounds */
+.THIS c-ietrs-inspection-results-item:nth-of-type(even),
+.THIS c-ietrs-inspection-results-violation-item:nth-of-type(even) {
+    background: #f3f2f2;
+}
+.THIS c-ietrs-inspection-results-item:nth-of-type(odd),
+.THIS c-ietrs-inspection-results-violation-item:nth-of-type(odd) {
+    background: #ffffff;
+}
+
+/* sobject search */
+.THIS .search-results {
+    max-height: 9rem;
+    left: 0;
+    right: 0;
+}
+
+.THIS .search-result {
+    padding: 0.1rem 0.25rem;
+}
+
+.THIS .search-result:hover,
+.THIS .search-result.selected {
+    background: #f4f6fe;
+}
+.THIS .spinner-container {
+    height: 3rem;
+}
+.THIS .dark-placeholder input::placeholder {
+    color: inherit;
+}
+.THIS .dark-placeholder input:not(.read-only):focus::placeholder {
+    color: #999;
+}
+
+.THIS .db {
+    display: block;
+}
+
+.THIS .ellipsis {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow-x: hidden;
+}
+
+.THIS .dif {
+    display: inline-flex;
+}
+
+.THIS .pos-a {
+    position: absolute;
+}
+.THIS .z3 {
+    z-index: 3;
+}
+.THIS .bg {
+    background-color: #fff;
+}
+.THIS .b {
+    border: 1px solid #dddbda;
+}
+
+.THIS .rc {
+    border-radius: 4px;
+}
+
+.THIS .ofy-a {
+    overflow-y: auto;
+}
+.THIS .df {
+    display: flex;
+}
+.THIS .nowrap {
+    white-space: nowrap;
+}
+.THIS .ai-center {
+    align-items: center;
+}
+.THIS .cptr {
+    cursor: pointer;
+}
+
+.THIS .pos-r {
+    position: relative;
+}
+.THIS .h100 {
+    height: 100%;
+}
+.THIS .w100 {
+    width: 100%;
+}
+
+.THIS .top0 {
+    top: 0;
+}
+
+.THIS .as-center {
+    align-self: center;
+}
+
+.THIS .right0 {
+    right: 0;
+}
+
+.THIS .z2 {
+    z-index: 2;
+}

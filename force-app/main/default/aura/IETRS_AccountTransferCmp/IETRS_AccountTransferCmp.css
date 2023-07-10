@@ -1,0 +1,11 @@
+.THIS .customRadioCls .slds-form-element__control .slds-radio {
+    display: inline-block !important;
+}
+.THIS .btnStyle {
+    margin-top: 23px;
+    margin-right: 0px;
+    margin-left: 5px;
+}
+.THIS .paddClass {
+    margin-top: 3px !important;
+}

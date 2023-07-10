@@ -1,0 +1,1511 @@
+<apex:page controller="IETRS_Custom_Report_PDF" renderAs="PDF" applyBodyTag="false" standardStylesheets="false">
+
+    <head>
+        <style>
+            @page {
+                size: A4;
+                margin: 15mm;
+                font-size: 10px;
+                @top-right {
+                    content: "Page " counter(page) " of " counter(pages);
+                }
+
+            }
+
+            .pBR1 {
+
+                page-break-after: always;
+            }
+
+            table {
+                -fs-table-paginate: paginate;
+                border-spacing: 0;
+            }
+        </style>
+    </head>
+
+    <body>
+        <apex:form >
+            <div id="customReport">
+                <!-- *********************** SUMMARY SYSTEM SCHEDULING *********************** -->
+                <div id="SummarySystemScheduling" style="display:{!if(SummarySch,'block','none')};font-size:10px;">
+                    <apex:variable var="regionTotal" value="{!0}" />
+                    <apex:variable var="schTotal" value="{!0}" />
+                    <apex:variable var="count" value="{!0}" />
+
+                    <apex:repeat value="{!systemTypeMap}" var="typeKey">
+                        <apex:variable value="{!count+1}" var="count" />
+                        <apex:variable value="{!0}" var="statewideTotal" />
+                        <!--add by ayesh -->
+                        <apex:variable value="{!0}" var="statewideScheduled" />
+                        <!--add by ayesh -->
+                        <apex:variable value="{!0}" var="statewideTotalp1" />
+                        <!--add by ayesh -->
+                        <apex:variable value="{!0}" var="statewideScheduledp1" />
+                        <!--add by ayesh -->
+                        <apex:variable value="{!0}" var="statewideTotalp2" />
+                        <!--add by ayesh -->
+                        <apex:variable value="{!0}" var="statewideScheduledp2" />
+                        <!--add by ayesh -->
+                        <apex:variable value="{!0}" var="statewideTotalp3" />
+                        <!--add by ayesh -->
+                        <apex:variable value="{!0}" var="statewideScheduledp3" />
+                        <!--add by ayesh -->
+
+
+                        <div style="display:{!IF(systemTypeMapSize==count,'','width:100%;page-break-after: always;')}">
+                            <!---->
+                            <div style="width: 90px;font-weight:bold;font-size:9px;font-family: SansSerif">
+                                <apex:outputText value="{0,date,M/d/yyyy h:mm a}">
+                                    <apex:param value="{!loggedInUserDateTime}" />
+                                </apex:outputText>
+                            </div>
+                            <div align="Center" style=" margin-left: 1px;font-size:17px;font-weight:bold;font-family: SansSerif">
+                                Railroad Commission of Texas
+                                <br/> Pipeline Evaluation System
+                                <br/> Summary of System Scheduling For Plan Year: {!selectedYear}
+                                <br/> System Type:{!typeKey}
+
+                                <!--<table style="width:100%">
+                                    <tr><th></th></tr>
+                                    <tr><th><h3>
+                                        Pipeline Evaluation System                                        
+                                        </h3></th></tr>
+                                    <tr><th><h3>
+                                        Summary of System Scheduling For Plan Year: {!selectedYear}
+                                        </h3></th></tr>
+                                    <tr><th><h3>
+                                        System Type:{!typeKey}
+                                        </h3></th></tr>
+                                </table>-->
+
+                            </div>
+                            <div>
+                                <table style="border-collapse: collapse; border-collapse: separate;border-spacing: 15px 10px;width: 100%;">
+                                    <thead>
+                                        <tr width="100%">
+                                            <th width="20%" style="border-bottom: 1px solid black; width: 31%;font-size:14px;font-weight:bold;font-family: SansSerif;text-align:center">Regions</th>
+                                            <th width="20%" style="border-bottom: 1px solid black; width: 17.25%;font-size:14px;font-weight:bold;font-family: SansSerif;text-align:center">Systems</th>
+                                            <th width="20%" style="border-bottom: 1px solid black; width: 17.25%;font-size:14px;font-weight:bold;font-family: SansSerif;text-align:center">Priority1</th>
+                                            <th width="20%" style="border-bottom: 1px solid black; width: 17.25%;font-size:14px;font-weight:bold;font-family: SansSerif;text-align:center">Priority2</th>
+                                            <th width="20%" style="border-bottom: 1px solid black; width: 17.25%;font-size:14px;font-weight:bold;font-family: SansSerif;text-align:center">Priority3</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <apex:repeat value="{!systemTypeMap[typeKey]}" var="SSW">
+                                            <apex:variable value="{!regionTotal+SSW.regionRecCount}" var="regionTotal" />
+                                            <apex:variable value="{!schTotal+SSW.schWrap.sch}" var="schTotal" />
+                                            <apex:variable value="{!statewideTotal+SSW.regionRecCount}" var="statewideTotal" />
+                                            <!--add by ayesh -->
+                                            <apex:variable value="{!statewideScheduled+SSW.schWrap.sch}" var="statewideScheduled" />
+                                            <!--add by ayesh -->
+
+                                            <apex:variable value="{!statewideTotalp1+SSW.priWrap.priority1}" var="statewideTotalp1" />
+                                            <!--add by ayesh -->
+                                            <apex:variable value="{!statewideScheduledp1+SSW.schWrap.priority1Sch}" var="statewideScheduledp1" />
+                                            <!--add by ayesh -->
+
+                                            <apex:variable value="{!statewideTotalp2+SSW.priWrap.priority2}" var="statewideTotalp2" />
+                                            <!--add by ayesh -->
+                                            <apex:variable value="{!statewideScheduledp2+SSW.schWrap.priority2Sch}" var="statewideScheduledp2" />
+                                            <!--add by ayesh -->
+
+                                            <apex:variable value="{!statewideTotalp3+SSW.priWrap.priority3}" var="statewideTotalp3" />
+                                            <!--add by ayesh -->
+                                            <apex:variable value="{!statewideScheduledp3+SSW.schWrap.priority3Sch}" var="statewideScheduledp3" />
+                                            <!--add by ayesh -->
+                                            <tr width="100%">
+                                                <td width="25%" style="text-align:left">
+                                                    <div style="margin-left:-2%">
+                                                        <table>
+                                                            <tr>
+                                                                <td style="font-size:13px;font-family: SansSerif;text-align:left">
+                                                                    <center>{!SSW.regionName}</center>
+                                                                </td>
+                                                            </tr>
+
+
+                                                        </table>
+                                                    </div>
+
+                                                    <table>
+                                                        <tr>
+                                                            <td style="font-size:13px;font-family: SansSerif;text-align:center">
+                                                                <table cellpading="8" cellspacing="8">
+                                                                    <tr>
+                                                                        <td>Scheduled:</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>Not Scheduled:</td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                                <td width="25%">
+                                                    <table>
+                                                        <tr>
+                                                            <td style="font-size:13px;font-family: SansSerif;text-align:center">{!SSW.regionRecCount}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>
+                                                                <table>
+                                                                    <tr>
+                                                                        <td style="font-size:13px;font-family: SansSerif;text-align:center">{!SSW.schWrap.sch}</td>
+                                                                        <td style=" opacity: 0;"></td>
+                                                                        <td style=" opacity: 0;"></td>
+                                                                        <td style=" opacity: 0;"></td>
+                                                                        <td style=" opacity: 0;"></td>
+                                                                        <td style=" opacity: 0;"></td>
+                                                                        <td style=" opacity: 0;"></td>
+                                                                        <td style="font-size:13px;font-family: SansSerif;text-align:center">{!If(SSW.regionRecCount==0,0,ROUND(((SSW.schWrap.sch/SSW.regionRecCount)*100),0))}%</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td style="font-size:13px;font-family: SansSerif;text-align:center">{!SSW.schWrap.NotSch}</td>
+                                                                        <td style=" opacity: 0;"></td>
+                                                                        <td style=" opacity: 0;"></td>
+                                                                        <td style=" opacity: 0;"></td>
+                                                                        <td style=" opacity: 0;"></td>
+                                                                        <td style=" opacity: 0;"></td>
+                                                                        <td style=" opacity: 0;"></td>
+                                                                        <td style="font-size:13px;font-family: SansSerif;text-align:center">{!If(SSW.regionRecCount==0,0,ROUND(((SSW.schWrap.NotSch/SSW.regionRecCount)*100),0))}%</td>
+                                                                    </tr>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                                <td width="25%">
+                                                    <table style="font-size:13px;font-family: SansSerif;text-align:center">
+                                                        <tr>
+                                                            <td>{!SSW.priWrap.priority1}</td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td>{!If(SSW.regionRecCount==0,0,ROUND(((SSW.priWrap.priority1/SSW.regionRecCount)*100),0))}%</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>{!SSW.schWrap.priority1Sch}</td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td>{!If(SSW.priWrap.priority1==0,0,ROUND(((SSW.schWrap.priority1Sch/SSW.priWrap.priority1)*100),0))}%</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>{!SSW.schWrap.priority1NotSch}</td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td>{!If(SSW.priWrap.priority1==0,0,ROUND(((SSW.schWrap.priority1NotSch/SSW.priWrap.priority1)*100),0))}%</td>
+                                                        </tr>
+
+                                                    </table>
+                                                </td>
+                                                <td width="25%">
+                                                    <table style="font-size:13px;font-family: SansSerif;text-align:center">
+                                                        <tr>
+                                                            <td>{!SSW.priWrap.priority2}</td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td>{!If(SSW.regionRecCount==0,0,ROUND(((SSW.priWrap.priority2/SSW.regionRecCount)*100),0))}%</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>{!SSW.schWrap.priority2Sch}</td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td>{!If(SSW.priWrap.priority2==0,0,ROUND(((SSW.schWrap.priority2Sch/SSW.priWrap.priority2)*100),0))}%</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>{!SSW.schWrap.priority2NotSch}</td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td>{!If(SSW.priWrap.priority2==0,0,ROUND(((SSW.schWrap.priority2NotSch/SSW.priWrap.priority2)*100),0))}%</td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                                <td width="25%">
+                                                    <table style="font-size:13px;font-family: SansSerif;text-align:center">
+                                                        <tr>
+                                                            <td>{!SSW.priWrap.priority3}</td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td>{!If(SSW.regionRecCount==0,0,ROUND(((SSW.priWrap.priority3/SSW.regionRecCount)*100),0))}%</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>{!SSW.schWrap.priority3Sch}</td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td>{!If(SSW.priWrap.priority3==0,0,ROUND(((SSW.schWrap.priority3Sch/SSW.priWrap.priority3)*100),0))}%</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>{!SSW.schWrap.priority3NotSch}</td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td style=" opacity: 0;"></td>
+                                                            <td>{!If(SSW.priWrap.priority3==0,0,ROUND(((SSW.schWrap.priority3NotSch/SSW.priWrap.priority3)*100),0))}%</td>
+                                                        </tr>
+
+                                                    </table>
+                                                </td>
+
+                                            </tr>
+
+                                        </apex:repeat>
+
+
+
+                                    </tbody>
+                                    <tfoot style="font-size:13px;font-family: SansSerif;">
+                                        <table style="border-collapse: collapse; border-collapse: separate;border-spacing: 15px 10px;width: 100%;font-size:13px;font-family: SansSerif;">
+                                            <tr>
+                                                <td style="width:31%">Statewide Total:</td>
+                                                <td style="width:17.25%">{!statewideTotal}</td>
+                                                <td style="width:17.25%"> {!statewideTotalp1} {!If(statewideTotal==0,0,ROUND(((statewideTotalp1/statewideTotal)*100),0))}%</td>
+                                                <td style="width:17.25%"> {!statewideTotalp2} {!If(statewideTotal==0,0,ROUND(((statewideTotalp2/statewideTotal)*100),0))}%</td>
+                                                <td style="width:17.25%"> {!statewideTotalp3} {!If(statewideTotal==0,0,ROUND(((statewideTotalp3/statewideTotal)*100),0))}%</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="width:31%">Statewide Scheduled: </td>
+                                                <td style="width:17.25%">{!statewideScheduled} {!If(statewideTotal==0,0,ROUND(((statewideScheduled/statewideTotal)*100),0))}%
+                                                </td>
+                                                <td style="width:17.25%"> {!statewideScheduledp1} {!If(statewideTotalp1==0,0,ROUND(((statewideScheduledp1/statewideTotalp1)*100),0))}%</td>
+                                                <td style="width:17.25%"> {!statewideScheduledp2} {!If(statewideTotalp2==0,0,ROUND(((statewideScheduledp2/statewideTotalp2)*100),0))}%</td>
+                                                <td style="width:17.25%"> {!statewideScheduledp3} {!If(statewideTotalp3==0,0,ROUND(((statewideScheduledp3/statewideTotalp3)*100),0))}%</td>
+                                            </tr>
+                                        </table>
+                                        <table style="{!IF(count==systemTypeMapSize,'display:block; border-collapse: collapse; border-collapse: separate;border-spacing: 15px 10px;width: 100%;font-size:13px;font-weight:bold;font-family: SansSerif;text-align:center','display:none')}">
+                                            <tr>
+                                                <td>Total number of systems prioritized and subject to scheduling:</td>
+                                                <td>{!regionTotal}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Total number scheduled:</td>
+                                                <td>{!schTotal}&nbsp;&nbsp; {!If(regionTotal==0,0,ROUND(((schTotal/regionTotal)*100),0))}%</td>
+                                            </tr>
+                                        </table>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+
+                    </apex:repeat>
+                </div>
+                <!-- ************************ EASTERN COASTLINE ADDRESS **************************** -->
+
+                <div id="Easter Coastline Address" style="display:{!if(CoastlineAddr,'block','none')};font-size:8px;">
+                    <apex:repeat value="{!County_ECW_Map}" var="County_Key">
+                        <apex:variable value="{!0}" var="iteration" />
+                        <div style="width:100%;page-break-after:always;">
+
+                            <table style="border-collapse: collapse; border-collapse: separate;width: 100%;-fs-table-paginate: paginate;  border-spacing: 0">
+                                <thead>
+                                    <tr>
+                                        <td style="width:100%">
+
+                                            <table style="width:100%">
+                                                <tr>
+                                                    <td align="left" style="width:15%;font-weight:bold">
+                                                        <apex:outputText value="{0,date,M/d/yyyy h:mm a}">
+                                                            <apex:param value="{!loggedInUserDateTime}" />
+                                                        </apex:outputText>
+                                                    </td>
+                                                    <td align="center" style="width:70%">
+                                                        <table style="width:100%;">
+                                                            <tr>
+                                                                <th>Railroad Commission of Texas</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>Pipeline Evaluation System</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>Operators/Counties on the Eastern Texas Coastline</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>{!County_Key} COUNTY</th>
+                                                            </tr>
+                                                        </table>
+                                                    </td>
+                                                    <td align="left" style="width:20%">
+
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width:100%">
+                                            <table style="border-collapse: collapse; border-collapse: separate; border-spacing: 15px 10px;width: 100%;">
+                                                <tr>
+                                                    <th style="text-decoration: underline;width:11%">Company ID</th>
+                                                    <th style="text-decoration: underline;width:25%">Operator</th>
+                                                    <th style="text-decoration: underline;width:25%">Contact Person</th>
+                                                    <th style="text-decoration: underline;width:25%">Contact Phone Numbers</th>
+                                                    <!--
+                                                    <th style="border-bottom: 1px solid black;width:11%">Company ID</th>
+                                                    <th style="border-bottom: 1px solid black;width:25%">Operator</th>
+                                                    <th style="border-bottom: 1px solid black;width:25%">Contact Person</th>
+                                                    <th style="border-bottom: 1px solid black;width:25%">Contact Phone Numbers</th>
+-->
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="width:100%">
+                                            <table style="border-collapse: collapse; border-collapse: separate;border-spacing: 15px 10px;width: 100%;">
+                                                <apex:repeat value="{!County_ECW_Map[County_Key]}" var="ECWAccKey">
+                                                    <apex:variable value="{!iteration+1}" var="iteration" />
+                                                    <tr>
+                                                        <td style="width:11%">{!County_ECW_Map[County_Key][ECWAccKey].companyId}</td>
+
+                                                        <td style="width:26%">
+                                                            <apex:outputLabel value="{!SUBSTITUTE(JSENCODE(County_ECW_Map[County_Key][ECWAccKey].operator), '\\n', '<br/>')}" escape="false"
+                                                            />
+                                                        </td>
+                                                        <td style="width:26%">
+                                                            {!County_ECW_Map[County_Key][ECWAccKey].contactPerson}
+                                                        </td>
+                                                        <td style="width:26%">
+                                                            {!County_ECW_Map[County_Key][ECWAccKey].phone}
+                                                            <br/>{!County_ECW_Map[County_Key][ECWAccKey].fax}
+                                                            <br/>{!County_ECW_Map[County_Key][ECWAccKey].Hour_Phone}
+                                                        </td>
+                                                    </tr>
+                                                    <!-- <p style="{!IF(iteration==10,'page-break-after: always;','display:none')}"/> -->
+                                                    <apex:variable value="{!IF(iteration==10,'0',iteration)}" var="iteration" />
+                                                </apex:repeat>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </apex:repeat>
+                </div>
+                <!-- ************************ PERFORMANCE QUARTER ******************************* -->
+                <div id="Performance Quarter" style="display:{!if(PerfomanceQtr,'block','none')};font-size:10px;">
+
+                    <div id="div_Set_1" style="page-break-after: always;">
+                        <div id="div_Set_3">
+                            <table style="border-collapse: collapse; border-collapse: separate;width: 100%;-fs-table-paginate: paginate;  border-spacing: 0">
+                                <thead>
+                                    <tr>
+                                        <td style="width:100%">
+
+                                            <table style="width:100%">
+                                                <tr>
+                                                    <td align="left" style="width:15%;font-weight:bold">
+                                                        <apex:outputText value="{0,date,M/d/yyyy h:mm a}">
+                                                            <apex:param value="{!loggedInUserDateTime}" />
+                                                        </apex:outputText>
+                                                    </td>
+                                                    <td align="center" style="width:60%">
+                                                        <table style="width:100%;">
+                                                            <tr>
+                                                                <th>Railroad Commission of Texas</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>Pipeline Evaluation System</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>Performance Measure Report</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>For the Quarter Ending: {!QtrVFEndDate}</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>Symmary by Classification</th>
+                                                            </tr>
+                                                        </table>
+
+                                                    </td>
+                                                    <td align="left" style="width:20%">
+
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width:100%">
+                                            <table style="border-collapse: collapse; border-collapse: separate;border-spacing: 3px 3px;width: 100%;">
+                                                <tr>
+                                                    <th style="border-bottom: 1px solid black;width:10%">Activity</th>
+                                                    <th style="border-bottom: 1px solid black;width:30%">Classification</th>
+                                                    <th style="border-bottom: 1px solid black;width:20%">Inspections Performed</th>
+                                                    <th style="border-bottom: 1px solid black;width:20%">Miles Evaluated</th>
+                                                    <th style="border-bottom: 1px solid black;width:20%">Total Voilations </th>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="width:100%">
+                                            <table style="border-collapse: collapse; border-collapse: separate;border-spacing: 3px 3px;width: 100%;">
+                                                <apex:variable var="Grandtotal_Insp_Performed" value="{!0}" />
+                                                <apex:variable var="Grandtotal_Miles_Evaluated" value="{!0}" />
+                                                <apex:variable var="Grandtotal_Voilations" value="{!0}" />
+                                                <apex:repeat value="{!Inspection_WrapperMap[classficationKey]}" var="Ins_Wrap_Activity_key">
+                                                    <tr>
+                                                        <td style="width:10%">{!Ins_Wrap_Activity_key}</td>
+                                                        <td style="width:30%">{!classficationKey}</td>
+                                                        <td style="width:20%;text-align: right;">
+                                                            <apex:outputText value="{0, number, ###,##0}">
+                                                                <apex:param value="{!Inspection_WrapperMap[classficationKey][Ins_Wrap_Activity_key].total_Insp_Performed}" />
+                                                            </apex:outputText>
+                                                        </td>
+                                                        <td style="width:20%;text-align: right;">
+                                                            <apex:outputText value="{0, number, ###,###.###}">
+                                                                <apex:param value="{!Inspection_WrapperMap[classficationKey][Ins_Wrap_Activity_key].total_Miles_Evaluated}" />
+                                                            </apex:outputText>
+                                                        </td>
+                                                        <td style="width:20%;text-align: right;">
+                                                            <apex:outputText value="{0, number, ###,##0}">
+                                                                <apex:param value="{!Inspection_WrapperMap[classficationKey][Ins_Wrap_Activity_key].total_Voilations}" />
+                                                            </apex:outputText>
+                                                        </td>
+                                                    </tr>
+                                                    <apex:variable value="{!Inspection_WrapperMap[classficationKey][Ins_Wrap_Activity_key].total_Insp_Performed+Grandtotal_Insp_Performed}"
+                                                        var="Grandtotal_Insp_Performed" />
+                                                    <apex:variable value="{!Inspection_WrapperMap[classficationKey][Ins_Wrap_Activity_key].total_Miles_Evaluated+Grandtotal_Miles_Evaluated}"
+                                                        var="Grandtotal_Miles_Evaluated" />
+                                                    <apex:variable value="{!Inspection_WrapperMap[classficationKey][Ins_Wrap_Activity_key].total_Voilations+Grandtotal_Voilations}"
+                                                        var="Grandtotal_Voilations" />
+                                                </apex:repeat>
+                                                <tr>
+                                                    <td></td>
+                                                    <td>{!classficationKey} Totals:</td>
+                                                    <td style="border-bottom: 1px solid black;border-top: 1px solid black;text-align: right;">
+                                                        <apex:outputText value="{0, number, ###,##0}">
+                                                            <apex:param value="{!Grandtotal_Insp_Performed}" />
+                                                        </apex:outputText>
+                                                    </td>
+                                                    <td style="border-bottom: 1px solid black;border-top: 1px solid black;text-align: right;">
+                                                        <apex:outputText value="{0, number, ###,###.###}">
+                                                            <apex:param value="{!Grandtotal_Miles_Evaluated}" />
+                                                        </apex:outputText>
+                                                    </td>
+                                                    <td style="border-bottom: 1px solid black;border-top: 1px solid black;text-align: right;">
+                                                        <apex:outputText value="{0, number, ###,##0}">
+                                                            <apex:param value="{!Grandtotal_Voilations}" />
+                                                        </apex:outputText>
+                                                    </td>
+                                                </tr>
+                                                <apex:variable var="Grandtotal_Insp_Performed_1" value="{!0}" />
+                                                <apex:variable var="Grandtotal_Miles_Evaluated_1" value="{!0}" />
+                                                <apex:variable var="Grandtotal_Voilations_1" value="{!0}" />
+
+                                                <apex:repeat value="{!Inspection_WrapperMap}" var="Ins_Wrap_Class_key">
+                                                    <apex:repeat value="{!Inspection_WrapperMap[Ins_Wrap_Class_key]}" var="Ins_Wrap_Activity_key">
+
+                                                        <tr style="display: {!if(Ins_Wrap_Class_key==classficationKey,'none','')};">
+                                                            <td>{!Ins_Wrap_Activity_key}</td>
+                                                            <td>{!Ins_Wrap_Class_key}</td>
+                                                            <td style="text-align: right;">
+                                                                <apex:outputText value="{0, number, ###,##0}">
+                                                                    <apex:param value="{!Inspection_WrapperMap[Ins_Wrap_Class_key][Ins_Wrap_Activity_key].total_Insp_Performed}" />
+                                                                </apex:outputText>
+                                                            </td>
+                                                            <td style="text-align: right;">
+                                                                <apex:outputText value="{0, number, ###,##0.000}">
+                                                                    <apex:param value="{!Inspection_WrapperMap[Ins_Wrap_Class_key][Ins_Wrap_Activity_key].total_Miles_Evaluated}" />
+                                                                </apex:outputText>
+                                                            </td>
+                                                            <td style="text-align: right;">
+                                                                <apex:outputText value="{0, number, ###,##0}">
+                                                                    <apex:param value="{!Inspection_WrapperMap[Ins_Wrap_Class_key][Ins_Wrap_Activity_key].total_Voilations}" />
+                                                                </apex:outputText>
+                                                            </td>
+                                                        </tr>
+                                                        <apex:variable value="{!Inspection_WrapperMap[Ins_Wrap_Class_key][Ins_Wrap_Activity_key].total_Insp_Performed+Grandtotal_Insp_Performed_1}"
+                                                            var="Grandtotal_Insp_Performed_1" />
+                                                        <apex:variable value="{!Inspection_WrapperMap[Ins_Wrap_Class_key][Ins_Wrap_Activity_key].total_Miles_Evaluated+Grandtotal_Miles_Evaluated_1}"
+                                                            var="Grandtotal_Miles_Evaluated_1" />
+                                                        <apex:variable value="{!Inspection_WrapperMap[Ins_Wrap_Class_key][Ins_Wrap_Activity_key].total_Voilations+Grandtotal_Voilations_1}"
+                                                            var="Grandtotal_Voilations_1" />
+                                                    </apex:repeat>
+                                                </apex:repeat>
+                                                <tr>
+                                                    <td></td>
+                                                    <td>Incident and Special Investigation Totals:</td>
+                                                    <td style="border-bottom: 1px solid black;border-top: 1px solid black;text-align: right;">
+                                                        <apex:outputText value="{0, number, ###,##0}">
+                                                            <apex:param value="{!Grandtotal_Insp_Performed_1-Grandtotal_Insp_Performed}" />
+                                                        </apex:outputText>
+                                                    </td>
+                                                    <td style="border-bottom: 1px solid black;border-top: 1px solid black;text-align: right;">
+                                                        <apex:outputText value="{0, number, ###,###.###}">
+                                                            <apex:param value="{!Grandtotal_Miles_Evaluated_1-Grandtotal_Miles_Evaluated}" />
+                                                        </apex:outputText>
+                                                    </td>
+                                                    <td style="border-bottom: 1px solid black;border-top: 1px solid black;text-align: right;">
+                                                        <apex:outputText value="{0, number, ###,##0}">
+                                                            <apex:param value="{!Grandtotal_Voilations_1-Grandtotal_Voilations}" />
+                                                        </apex:outputText>
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td></td>
+                                                    <td>Summary Totals:</td>
+                                                    <td style="border-bottom: 1px solid black;border-top: 1px solid black;text-align: right;">
+                                                        <apex:outputText value="{0, number, ###,##0}">
+                                                            <apex:param value="{!Grandtotal_Insp_Performed_1}" />
+                                                        </apex:outputText>
+                                                    </td>
+                                                    <td style="border-bottom: 1px solid black;border-top: 1px solid black;text-align: right;">
+                                                        <apex:outputText value="{0, number, ###,###.###}">
+                                                            <apex:param value="{!Grandtotal_Miles_Evaluated_1}" />
+                                                        </apex:outputText>
+                                                    </td>
+                                                    <td style="border-bottom: 1px solid black;border-top: 1px solid black;text-align: right;">
+                                                        <apex:outputText value="{0, number, ###,##0}">
+                                                            <apex:param value="{!Grandtotal_Voilations_1}" />
+                                                        </apex:outputText>
+                                                    </td>
+                                                </tr>
+
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width:100%">
+                                            <table style="border-collapse: collapse; border-collapse: separate;border-spacing: 3px 3px;width: 100%;">
+
+                                                <tr style="width:80%">
+                                                    <td>Outcome-2.1.1.1 Number of Pipeline Safety Inspections Performed:</td>
+                                                    <td style="width:20%">{!Grandtotal_Insp_Performed}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="width:80%">Number of Inspectors Conducting Evaluations This Quarter:</td>
+                                                    <td style="width:20%">
+                                                        <apex:outputText value="{0, number,##0.00}">
+                                                            <apex:param value="{!leadInspectorsCount}" />
+                                                        </apex:outputText>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="width:80%">Efficiency-2.1.1.1 Average Number of Pipeline Field Inspections per Field
+                                                        Inspector:
+                                                    </td>
+                                                    <td style="width:20%">
+                                                        <apex:outputText value="{0, number, ###,###.##}">
+                                                            <apex:param value="{!ROUND(Grandtotal_Insp_Performed/leadInspectorsCount,2)}" />
+                                                        </apex:outputText>
+
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="width:80%">Outcome-2.1.1.3 Number of Pipeline Safety Violations Identified Through
+                                                        Inspections:
+                                                    </td>
+                                                    <td style="width:20%">
+                                                        <apex:outputText value="{0, number, ###,##0}">
+                                                            <apex:param value="{!Grandtotal_Voilations_1}" />
+                                                        </apex:outputText>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="width:80%">Outcome-2.1.1.5 Number of Pipeline Incident and Special Investigations
+                                                        Performed:
+                                                    </td>
+                                                    <td style="width:20%">
+                                                        <apex:outputText value="{0, number, ###,##0}">
+                                                            <apex:param value="{!Grandtotal_Insp_Performed_1-Grandtotal_Insp_Performed}" />
+                                                        </apex:outputText>
+                                                    </td>
+                                                </tr>
+
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+
+                        </div>
+                    </div>
+
+                    <div id="div_Set_2" style="page-break-after: always;">
+                        <div id="div_Set_3">
+                            <table style="border-collapse: collapse; border-collapse: separate;width: 100%;-fs-table-paginate: paginate;  border-spacing: 0">
+                                <thead>
+                                    <tr>
+                                        <td style="width:100%">
+
+                                            <table style="width:100%">
+                                                <tr>
+                                                    <td align="left" style="width:15%">
+                                                        <apex:outputText value="{0,date,MM/dd/yyyy h:mm a}">
+                                                            <apex:param value="{!loggedInUserDateTime}" />
+                                                        </apex:outputText>
+                                                    </td>
+                                                    <td align="center" style="width:60%">
+                                                        <table style="width:100%;">
+                                                            <tr>
+                                                                <th>Railroad Commission of Texas</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>Pipeline Evaluation System</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>Performance Measure Report</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>For the Quarter Ending: {!QtrVFEndDate}</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>Symmary by Classification</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <th style="margin-top:10% ; font-size: medium">Miles of Pipe by Type</th>
+                                                            </tr>
+                                                        </table>
+
+                                                    </td>
+                                                    <td align="left" style="width:20%">
+
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width:100%">
+                                            <table style="border-collapse: collapse; border-collapse: separate;border-spacing: 3px 3px;width: 100%;">
+                                                <tr>
+                                                    <th style="border-bottom: 1px solid black;width:20%">System Type</th>
+                                                    <th style="border-bottom: 1px solid black;width:20%">Inspections Performed</th>
+                                                    <th style="border-bottom: 1px solid black;width:20%">Miles Evaluated</th>
+                                                    <th style="border-bottom: 1px solid black;width:20%">Total Violations</th>
+                                                    <th style="border-bottom: 1px solid black;width:20%">Average Violations Per 100 Miles</th>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="width:100%">
+                                            <table style="border-collapse: collapse; border-collapse: separate;border-spacing: 3px 3px;width: 100%;">
+                                                <apex:variable var="milesType_total_Insp_Performed" value="{!0}" />
+                                                <apex:variable var="milesType_total_Miles_Evaluated" value="{!0}" />
+                                                <apex:variable var="milesType_total_Voilations" value="{!0}" />
+                                                <apex:repeat value="{!milesTypeWrapperMap}" var="milesTypeKey">
+                                                    <tr>
+                                                        <td style="width:20%">{!milesTypeKey}</td>
+                                                        <td style="width:20%;text-align: center;">
+                                                            <apex:outputText value="{0, number, ###,##0}">
+                                                                <apex:param value="{!milesTypeWrapperMap[milesTypeKey].total_Insp_Performed}" />
+                                                            </apex:outputText>
+                                                        </td>
+                                                        <td style="width:20%;text-align: center;">
+                                                            <apex:outputText value="{0, number, ###,###.###}">
+                                                                <apex:param value="{!milesTypeWrapperMap[milesTypeKey].total_Miles_Evaluated}" />
+                                                            </apex:outputText>
+                                                        </td>
+                                                        <td style="width:20%;text-align: center;">
+                                                            <apex:outputText value="{0, number, ###,##0}">
+                                                                <apex:param value="{!milesTypeWrapperMap[milesTypeKey].total_Voilations}" />
+                                                            </apex:outputText>
+                                                        </td>
+                                                        <td style="width:20%;text-align: center;">
+                                                            <apex:outputText value="{0, number, ###,###.###}">
+                                                                <apex:param value="{!If(milesTypeWrapperMap[milesTypeKey].total_Miles_Evaluated==0.000,0,ROUND((milesTypeWrapperMap[milesTypeKey].total_Voilations*100)/(milesTypeWrapperMap[milesTypeKey].total_Miles_Evaluated),2))}"
+                                                                />
+                                                            </apex:outputText>
+                                                        </td>
+                                                    </tr>
+                                                    <apex:variable value="{!milesTypeWrapperMap[milesTypeKey].total_Insp_Performed+milesType_total_Insp_Performed}" var="milesType_total_Insp_Performed"
+                                                    />
+                                                    <apex:variable value="{!milesTypeWrapperMap[milesTypeKey].total_Miles_Evaluated+milesType_total_Miles_Evaluated}" var="milesType_total_Miles_Evaluated"
+                                                    />
+                                                    <apex:variable value="{!milesTypeWrapperMap[milesTypeKey].total_Voilations+milesType_total_Voilations}" var="milesType_total_Voilations"
+                                                    />
+
+                                                </apex:repeat>
+                                                <tr>
+                                                    <td>Miles of Pipe by Type Totals:</td>
+                                                    <td style="border-bottom: 1px solid black;border-top: 1px solid black;text-align: center;">
+                                                        <apex:outputText value="{0, number, ###,##0}">
+                                                            <apex:param value="{!milesType_total_Insp_Performed}" />
+                                                        </apex:outputText>
+                                                    </td>
+                                                    <td style="border-bottom: 1px solid black;border-top: 1px solid black;text-align: center;">
+                                                        <apex:outputText value="{0, number, ###,##0}">
+                                                            <apex:param value="{!milesType_total_Miles_Evaluated}" />
+                                                        </apex:outputText>
+
+                                                    </td>
+                                                    <td style="border-bottom: 1px solid black;border-top: 1px solid black;text-align: center;">
+                                                        <apex:outputText value="{0, number, ###,##0}">
+                                                            <apex:param value="{!milesType_total_Voilations}" />
+                                                        </apex:outputText>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width:100%">
+                                            <table style="border-collapse: collapse; border-collapse: separate;border-spacing: 3px 3px;width: 100%;">
+                                                <tr>
+                                                    <td style="width:80%">Outcome 2.1.1 Average Number of Pipelnie Safety Violations per Equivalent
+                                                        100 Miles of Pipe Identified Through Inspections (Excluding Master
+                                                        Meters):
+                                                    </td>
+
+                                                    <td style="width:20%;text-align: center;">
+                                                        <apex:outputText value="{0, number, ###,###.##}">
+                                                            <apex:param value="{!If(milesType_total_Miles_Evaluated==0.000,0,ROUND((milesType_total_Voilations*100)/(milesType_total_Miles_Evaluated),2))}"
+                                                            />
+                                                        </apex:outputText>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="div_Set_3">
+                        <table style="border-collapse: collapse; border-collapse: separate;width: 100%;-fs-table-paginate: paginate; border-spacing: 0;">
+                            <thead>
+                                <tr>
+                                    <td style="width:100%">
+
+                                        <table style="width:100%">
+                                            <tr>
+                                                <td align="left" style="width:15%;font-size:10px">
+                                                    <apex:outputText value="{0,date,MM/dd/yyyy h:mm a}">
+                                                        <apex:param value="{!loggedInUserDateTime}" />
+                                                    </apex:outputText>
+                                                </td>
+                                                <td align="center" style="width:60%">
+                                                    <table style="width:100%;">
+                                                        <tr>
+                                                            <th>Railroad Commission of Texas</th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Pipeline Evaluation System</th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Performance Measure Report</th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>For the Quarter Ending: {!QtrVFEndDate}</th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Symmary by Classification</th>
+                                                        </tr>
+                                                    </table>
+
+                                                </td>
+                                                <td align="left" style="width:20%">
+
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width:100%">
+                                        <table style="border-collapse: collapse; border-collapse: separate;border-spacing: 3px 3px;width: 100%;font-size:8px">
+                                            <tr>
+                                                <th style="border-bottom: 1px solid black;width:12%">Package ID</th>
+                                                <th style="border-bottom: 1px solid black;width:12%">Evalution ID</th>
+                                                <th style="border-bottom: 1px solid black;width:7%">Begin Date</th>
+                                                <th style="border-bottom: 1px solid black;width:7%">End Date</th>
+                                                <th style="border-bottom: 1px solid black;width:25%">Activity/Classification</th>
+                                                <th style="border-bottom: 1px solid black;width:12%">System Type</th>
+                                                <th style="border-bottom: 1px solid black;width:12%">Lead Inspector</th>
+                                                <th style="border-bottom: 1px solid black;width:6%">Miles Evaluated</th>
+                                                <th style="border-bottom: 1px solid black;width:6%">Violations</th>
+
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="width:100%">
+                                        <table style="border-collapse: collapse; border-collapse: separate;border-spacing: 3px 3px;width: 100%;font-size:8px">
+                                            <apex:variable var="Total1" value="{!0}" />
+                                            <apex:variable var="Total2" value="{!0}" />
+
+                                            <apex:repeat value="{!Inspection_PKG_ActivityMap}" var="Avt_Class_key">
+                                                <apex:variable var="Miles_Evaluated_Total" value="{!0}" />
+                                                <apex:variable var="Violations_Total" value="{!0}" />
+
+                                                <apex:repeat value="{!Inspection_PKG_ActivityMap[Avt_Class_key]}" var="pkg_WrapperList">
+                                                    <apex:repeat value="{!pkg_WrapperList}" var="pkg_Wrapper">
+                                                        <tr>
+                                                            <td style="width:12%">{!pkg_Wrapper.package_ID}</td>
+                                                            <td style="width:12%">{!pkg_Wrapper.evalution_ID}</td>
+                                                            <td style="width:7%">
+                                                                <apex:outputText value="{0,date,MM/dd/yyyy}">
+                                                                    <apex:param value="{!pkg_Wrapper.begin_Date}" />
+                                                                </apex:outputText>
+                                                            </td>
+                                                            <td style="width:7%">
+                                                                <apex:outputText value="{0,date,MM/dd/yyyy}">
+                                                                    <apex:param value="{!pkg_Wrapper.end_Date}" />
+                                                                </apex:outputText>
+                                                            </td>
+                                                            <td style="width:25%;white-space:nowrap">{!pkg_Wrapper.Activity_Classification }</td>
+                                                            <td style="width:12%;white-space:nowrap">{!pkg_Wrapper.System_Type}</td>
+                                                            <td style="width:12%;white-space:nowrap">{!pkg_Wrapper.Lead_Inspector}</td>
+                                                            <td style="width:6%;text-align: right;">
+                                                                <apex:outputText value="{0, number, ###,###.###}">
+                                                                    <apex:param value="{!pkg_Wrapper.Miles_Evaluated}" />
+                                                                </apex:outputText>
+                                                            </td>
+                                                            <td style="width:6%;text-align: right;">
+                                                                <apex:outputText value="{0, number, ###,##0}">
+                                                                    <apex:param value="{!pkg_Wrapper.Violations}" />
+                                                                </apex:outputText>
+                                                            </td>
+                                                        </tr>
+                                                        <apex:variable value="{!Miles_Evaluated_Total+pkg_Wrapper.Miles_Evaluated}" var="Miles_Evaluated_Total" />
+                                                        <apex:variable value="{!Violations_Total+pkg_Wrapper.Violations}" var="Violations_Total" />
+                                                    </apex:repeat>
+                                                </apex:repeat>
+                                                <tr>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td>{!Avt_Class_key} Totals:</td>
+                                                    <td style="border-bottom: 1px solid black;border-top: 1px solid black;">
+                                                        <apex:outputText value="{0, number, ###,###.###}">
+                                                            <apex:param value="{!Miles_Evaluated_Total}" />
+                                                        </apex:outputText>
+                                                    </td>
+                                                    <td style="border-bottom: 1px solid black;border-top: 1px solid black;">
+                                                        <apex:outputText value="{0, number, ###,##0}">
+                                                            <apex:param value="{!Violations_Total}" />
+                                                        </apex:outputText>
+                                                    </td>
+                                                </tr>
+                                                <apex:variable value="{!Total1+Miles_Evaluated_Total}" var="Total1" />
+                                                <apex:variable value="{!Total2+Violations_Total}" var="Total2" />
+                                            </apex:repeat>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width:100%">
+                                        <table style="border-collapse: collapse; border-collapse: separate;border-spacing: 3px 3px;width: 100%;">
+                                            <tr>
+                                                <td style="width:75%">Number of Pipeline Safety Inspections: {!Grandtotal_Insp_Performed_1}</td>
+
+                                                <td style="width:7%">Totals:</td>
+                                                <td style="border-bottom: 1px solid black;border-top: 1px solid black;width:9%">
+                                                    <apex:outputText value="{0, number, ###,##0.000}">
+                                                        <apex:param value="{!Total1}" />
+                                                    </apex:outputText>
+                                                </td>
+                                                <td style="border-bottom: 1px solid black;border-top: 1px solid black;width:7%">
+                                                    <apex:outputText value="{0, number, ###,##0}">
+                                                        <apex:param value="{!Total2}" />
+                                                    </apex:outputText>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+
+
+                    </div>
+                </div>
+                <!-- ************************ OPERATOR ADDRESS ********************************** -->
+                <div id="Address Report" class="Address_Report" style="display:{!if(AddressReport,'block','none')};font-size:10px;">
+                   
+                   <apex:variable var="cnt" value="{!0}" /> 
+                    <apex:repeat value="{!operatorKeys}" var="OAWListKey">
+                     
+                        
+                        <div style="width:100%;{!if(cnt < operatorKeys.size-1, 'page-break-after: always;','page-break-after: avoid;')}">
+                             <apex:variable var="cnt" value="{!cnt+1}"/>
+                            <table style="border-collapse: collapse; border-collapse: separate;width: 100%;-fs-table-paginate: paginate;  border-spacing: 0">
+                                <thead>
+                                    <tr>
+                                        <td style="width:100%">
+
+                                            <table style="width:100%">
+                                                <tr>
+                                                    <td align="left" style="width:15%;font-weight:bold">
+                                                        <apex:outputText value="{0,date,MM/dd/yyyy h:mm a}">
+                                                            <apex:param value="{!loggedInUserDateTime}" />
+                                                        </apex:outputText>
+                                                    </td>
+                                                    <td align="center" style="width:70%">
+                                                        <table style="width:100%;">
+                                                            <tr>
+                                                                <th>RAILROAD COMMISSION OF TEXAS</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>OVERSIGHT AND SAFETY DIVISION</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>PIPELINE SAFETY</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>OPERATOR ADDRESS LIST</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>SEARCH CRITERIA: System Type: {!selectedSystemType}; County:
+                                                                    {!selectedCtry};
+                                                                </th>
+                                                            </tr>
+                                                        </table>
+
+                                                    </td>
+                                                    <td align="left" style="width:20%">
+
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width:100%">
+                                            <table style="border-collapse: collapse; border-collapse: separate;border-spacing: 15px 10px;width: 100%;">
+                                                <tr>
+                                                    <th style="text-decoration: underline;width:11%">Company ID</th>
+                                                    <th style="text-decoration: underline;width:26%">Operator</th>
+                                                    <th style="text-decoration: underline;width:8%">P5 Number</th>
+                                                    <th style="text-decoration: underline;width:20%">Contact Person</th>
+                                                    <th style="text-decoration: underline;width:20%">Contact Phone Numbers</th>
+                                                    <th style="text-decoration: underline;width:15%">Miles of Pipeline</th>
+                                                    <!--                                                    
+                                                    <th style="border-bottom: 1px solid black;width:11%">Company ID</th>
+                                                    <th style="border-bottom: 1px solid black;width:26%">Operator</th>
+                                                    <th style="border-bottom: 1px solid black;width:8%">P5 Number</th>
+                                                    <th style="border-bottom: 1px solid black;width:20%">Contact Person</th>
+                                                    <th style="border-bottom: 1px solid black;width:20%">Contact Phone Numbers</th>
+                                                    <th style="border-bottom: 1px solid black;width:15%">Miles of Pipeline</th>
+-->
+
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="width:100%">
+
+                                            <table style="border-collapse: collapse; border-collapse: separate;border-spacing: 15px 10px;width: 100%;">
+                                                <apex:repeat value="{!OAWListMap[OAWListKey]}" var="OAW">
+                                                    <tr>
+                                                        <td style="width:11%">{!OAW.companyId}</td>
+                                                        <td style="width:26%">
+                                                            <apex:outputLabel value="{!SUBSTITUTE(JSENCODE(OAW.operator), '\\n', '<br/>')}" escape="false" />
+                                                        </td>
+                                                        <td style="width:8%">{!OAW.p5Number}</td>
+                                                        <td style="width:20%">{!OAW.contactPerson}</td>
+                                                        <td style="width:20%">{!OAW.phone}
+                                                            <br/>{!OAW.Hour_Phone}
+                                                            <br/>{!OAW.fax}</td>
+                                                        <td style="width:15%;text-align: right;">
+                                                            <apex:outputText value="{0, number, ###,###,##0.00}">
+                                                                <apex:param value="{!OAW.totalMiles}" />
+                                                            </apex:outputText>
+                                                        </td>
+                                                    </tr>
+                                                </apex:repeat>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width:100%">
+                                            <table style="border-collapse: collapse; border-collapse: separate;border-spacing: 15px 10px;width: 100%;">
+                                                <tr>
+                                                    <td>{!operatorCountMap[OAWListKey]}</td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </apex:repeat>
+                </div>
+                <!-- ************************ SYSTEM MILES BY REGION **************************** -->
+                <div id="System Miles By Region" style="display:{!if(SystemMiles,'block','none')};font-size:8px;">
+                    <div style="width:100%;">
+                        <table style="border-collapse: collapse; border-collapse: separate;width: 100%;-fs-table-paginate: paginate;  border-spacing: 0">
+                            <apex:variable var="TitleSysMiles" value="{!IF(selectedMile == 'Jurisdictional','Regulated Pipelines','All Pipelines')}"
+                            />
+                            <thead>
+                                <tr>
+                                    <td style="width:100%">
+
+                                        <table style="width:100%">
+                                            <tr>
+                                                <td align="left" style="width:15%;font-weight:bold">
+                                                    <apex:outputText value="{0,date,MM/dd/yyyy h:mm a}">
+                                                        <apex:param value="{!loggedInUserDateTime}" />
+                                                    </apex:outputText>
+                                                </td>
+                                                <td align="center" style="width:60%">
+                                                    <table style="width:100%;">
+                                                        <tr>
+                                                            <th>RAILROAD COMMISSION OF TEXAS</th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Pipeline Evaluation System</th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>System Miles By Region - {!TitleSysMiles}</th>
+                                                        </tr>
+
+                                                    </table>
+
+                                                </td>
+                                                <td align="left" style="width:20%">
+
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width:100%">
+                                        <table style="border-collapse: collapse; border-collapse: separate;border-spacing: 3px 3px;width: 100%;">
+                                            <tr>
+                                                <th style="border-bottom: 1px solid black;width:22%">Product/Function/Sub-class/Sub-function</th>
+                                                <apex:repeat value="{!regionNames}" var="regName">
+                                                    <th style="border-bottom: 1px solid black;width:{!if(regName=='01-Lubbock','6.5%',if(regName=='02-Midland','6.5%',if(regName=='03-Kilgore','6.5%',if(regName=='06-Fort Worth','6%',if(regName=='08-San Antonio','5.8%',if(regName=='09-Multi-Regional (RETIRED)','9.5%',if(regName=='10-El Paso (RETIRED)','7%',if(regName='04-Austin','6.3%',if(regName=='05-Houston','7%',if(regName=='07-Corpus Christi','6%','5%'))))))))))};">{!regName}</th>
+                                                </apex:repeat>
+                                                <th style="border-bottom: 1px solid black;;width:4%">Total</th>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="width:100%">
+                                        <table style="border-collapse: collapse; border-collapse: separate;border-spacing: 3px 3px;width: 100%;">
+                                            <apex:variable var="pageBR" value="{!0}" />
+                                            <apex:repeat value="{!prodMap}" var="prodKey">
+                                                <apex:variable value="{!pageBR+1}" var="pageBR" />
+                                                <tr class="pBR{!pageBR}">
+                                                    <td style="width:100%">
+                                                        <table style="border-collapse: collapse; border-collapse: separate;border-spacing: 3px 3px;width: 100%;">
+                                                            <tr>
+                                                                <td style="width:22%; font-weight: bold">{!prodKey}</td>
+                                                            </tr>
+                                                            <apex:repeat value="{!prodMap[prodKey]}" var="prodSubKey">
+                                                                <tr>
+                                                                    <td style="width:22%; font-weight: bold">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {!prodSubKey}
+                                                                    </td>
+                                                                </tr>
+                                                                <apex:repeat value="{!prodMap[prodKey][prodSubKey]}" var="typeKey">
+                                                                    <tr>
+                                                                        <td style="width:22% ; font-weight: bold">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                                            {!typeKey}
+                                                                        </td>
+                                                                    </tr>
+                                                                    <apex:variable var="subtypeKeyTotal" value="{!0}" />
+                                                                    <apex:repeat value="{!prodMap[prodKey][prodSubKey][typeKey]}" var="subtypeKey">
+                                                                        <tr>
+                                                                            <td style="width:22%">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                                                {!subtypeKey}
+                                                                            </td>
+                                                                            <apex:variable var="Total1" value="{!0}" />
+                                                                            <apex:repeat value="{!regionNames}" var="regName">
+                                                                                <apex:variable var="EachRegValue" value="{!prodMap[prodKey][prodSubKey][typeKey][subtypeKey][regName]}" />
+                                                                                <td align="right" style="width:{!if(regName=='01-Lubbock','6.5%',if(regName=='02-Midland','6.5%',if(regName=='03-Kilgore','6.5%',if(regName=='06-Fort Worth','6%',if(regName=='08-San Antonio','5.8%',if(regName=='09-Multi-Regional (RETIRED)','9.5%',if(regName=='10-El Paso (RETIRED)','7%',if(regName='04-Austin','6.3%',if(regName=='05-Houston','7%',if(regName=='07-Corpus Christi','6%','5%'))))))))))};">
+                                                                                    <apex:outputText value="{0, number, ###,##0}">
+                                                                                        <apex:param value="{!EachRegValue}" />
+                                                                                    </apex:outputText>
+
+                                                                                </td>
+                                                                                <apex:variable value="{!Total1+EachRegValue}" var="Total1" />
+                                                                            </apex:repeat>
+                                                                            <td align="right" style="width:4%">
+                                                                                <apex:outputText value="{0, number, ###,##0}">
+                                                                                    <apex:param value="{!Total1}" />
+                                                                                </apex:outputText>
+
+                                                                            </td>
+                                                                        </tr>
+
+                                                                    </apex:repeat>
+                                                                    <tr>
+                                                                        <td style="width:22%">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                                            Total {!typeKey}
+                                                                        </td>
+                                                                        <apex:variable var="Total11" value="{!0}" />
+                                                                        <apex:repeat value="{!regionNames}" var="regName">
+                                                                            <apex:variable var="EachRegVal1" value="{!prodMapSubClassTotalMiles[prodKey][prodSubKey][typeKey][regName]}" />
+                                                                            <td align="right" style="border-top: 1px solid black;width:{!if(regName=='01-Lubbock','6.5%',if(regName=='02-Midland','6.5%',if(regName=='03-Kilgore','6.5%',if(regName=='06-Fort Worth','6%',if(regName=='08-San Antonio','5.8%',if(regName=='09-Multi-Regional (RETIRED)','9.5%',if(regName=='10-El Paso (RETIRED)','7%',if(regName='04-Austin','6.3%',if(regName=='05-Houston','7%',if(regName=='07-Corpus Christi','6%','5%'))))))))))};">
+                                                                                <apex:outputText value="{0, number, ###,##0}">
+                                                                                    <apex:param value="{!EachRegVal1}" />
+                                                                                </apex:outputText>
+
+                                                                            </td>
+                                                                            <apex:variable value="{!Total11+EachRegVal1}" var="Total11" />
+                                                                        </apex:repeat>
+                                                                        <td align="right" style="border-top: 1px solid black;width:4%">
+                                                                            <apex:outputText value="{0, number, ###,##0}">
+                                                                                <apex:param value="{!Total11}" />
+                                                                            </apex:outputText>
+
+                                                                        </td>
+                                                                    </tr>
+
+                                                                </apex:repeat>
+                                                                <tr>
+                                                                    <td style="width:22%">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Total {!prodSubKey}</td>
+                                                                    <apex:variable var="Total21" value="{!0}" />
+                                                                    <apex:repeat value="{!regionNames}" var="regName">
+                                                                        <apex:variable var="EachRegVal" value="{!prodMapTypeTotalMiles[prodKey][prodSubKey][regName]}" />
+                                                                        <td align="right" style="border-bottom: 1px solid black;width:{!if(regName=='01-Lubbock','6.5%',if(regName=='02-Midland','6.5%',if(regName=='03-Kilgore','6.5%',if(regName=='06-Fort Worth','6%',if(regName=='08-San Antonio','5.8%',if(regName=='09-Multi-Regional (RETIRED)','9.5%',if(regName=='10-El Paso (RETIRED)','7%',if(regName='04-Austin','6.3%',if(regName=='05-Houston','7%',if(regName=='07-Corpus Christi','6%','5%'))))))))))};">
+                                                                            <apex:outputText value="{0, number, ###,##0}">
+                                                                                <apex:param value="{!EachRegVal}" />
+                                                                            </apex:outputText>
+
+                                                                        </td>
+                                                                        <apex:variable value="{!Total21+EachRegVal}" var="Total21" />
+                                                                    </apex:repeat>
+                                                                    <td align="right" style="border-bottom: 1px solid black;width:4%">
+                                                                        <apex:outputText value="{0, number, ###,##0}">
+                                                                            <apex:param value="{!Total21}" />
+                                                                        </apex:outputText>
+
+                                                                    </td>
+                                                                </tr>
+                                                            </apex:repeat>
+                                                            <tr>
+                                                                <td style="width:22%">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total {!prodKey}</td>
+                                                                <apex:variable var="Total23" value="{!0}" />
+                                                                <apex:repeat value="{!regionNames}" var="regName">
+                                                                    <apex:variable var="EachRegVal23" value="{!prodMapClassTotalMiles[prodKey][regName]}" />
+                                                                    <td align="right" style="border-bottom: 1px solid black;width:{!if(regName=='01-Lubbock','6.5%',if(regName=='02-Midland','6.5%',if(regName=='03-Kilgore','6.5%',if(regName=='06-Fort Worth','6%',if(regName=='08-San Antonio','5.8%',if(regName=='09-Multi-Regional (RETIRED)','9.5%',if(regName=='10-El Paso (RETIRED)','7%',if(regName='04-Austin','6.3%',if(regName=='05-Houston','7%',if(regName=='07-Corpus Christi','6%','5%'))))))))))};">
+                                                                        <apex:outputText value="{0, number, ###,##0}">
+                                                                            <apex:param value="{!EachRegVal23}" />
+                                                                        </apex:outputText>
+
+                                                                    </td>
+                                                                    <apex:variable value="{!Total23+EachRegVal23}" var="Total23" />
+                                                                </apex:repeat>
+                                                                <td align="right" style="border-bottom: 1px solid black;width:4%">
+                                                                    <apex:outputText value="{0, number, ###,##0}">
+                                                                        <apex:param value="{!Total23}" />
+                                                                    </apex:outputText>
+
+                                                                </td>
+
+
+                                                            </tr>
+                                                        </table>
+
+                                                    </td>
+
+
+                                                </tr>
+                                            </apex:repeat>
+
+
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width:100%">
+                                        <table style="border-collapse: collapse; border-collapse: separate;border-spacing: 3px 3px;width: 100%;">
+                                            <tr>
+                                                <td style="width:22%">Total Miles for All Systems:</td>
+                                                <apex:variable var="Total24" value="{!0}" />
+                                                <apex:repeat value="{!regionNames}" var="regName">
+                                                    <apex:variable var="EachRegVal24" value="{!TotalMiles[regName]}" />
+
+                                                    <td align="right" style="width:{!if(regName=='01-Lubbock','6.5%',if(regName=='02-Midland','6.5%',if(regName=='03-Kilgore','6.5%',if(regName=='06-Fort Worth','6%',if(regName=='08-San Antonio','5.8%',if(regName=='09-Multi-Regional (RETIRED)','9.5%',if(regName=='10-El Paso (RETIRED)','7%',if(regName='04-Austin','6.3%',if(regName=='05-Houston','7%',if(regName=='07-Corpus Christi','6%','5%'))))))))))};">
+                                                        <apex:outputText value="{0, number, ###,##0}">
+                                                            <apex:param value="{!EachRegVal24}" />
+                                                        </apex:outputText>
+                                                    </td>
+                                                    <apex:variable value="{!Total24+EachRegVal24}" var="Total24" />
+                                                </apex:repeat>
+                                                <td align="right" style="width:4%">
+                                                    <apex:outputText value="{0, number, ###,##0}">
+                                                        <apex:param value="{!Total24}" />
+                                                    </apex:outputText>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                </div>
+                <!-- NUMBER OF UNITS BY REGION -->
+                <div id="No of Units By Region" style="display:{!if(SystemUnits,'block','none')};font-size:8px;">
+
+                    <div style="width:100%;">
+                        <table style="border-collapse: collapse; border-collapse: separate;width: 100%;-fs-table-paginate: paginate;  border-spacing: 0">
+                            <apex:variable var="Title" value="{!IF(selectedUnit == 'Jurisdictional','Regulated Pipelines','All Pipelines')}" />
+                            <thead>
+                                <tr>
+                                    <td style="width:100%">
+
+                                        <table style="width:100%">
+                                            <tr>
+                                                <td align="left" style="width:15%;font-weight:bold">
+                                                    <apex:outputText value="{0,date,MM/dd/yyyy h:mm a}">
+                                                        <apex:param value="{!loggedInUserDateTime}" />
+                                                    </apex:outputText>
+                                                </td>
+                                                <td align="center" style="width:60%">
+                                                    <table style="width:100%;">
+                                                        <tr>
+                                                            <th>RAILROAD COMMISSION OF TEXAS</th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Pipeline Evaluation System</th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Number of Units By Region - {!Title}</th>
+                                                        </tr>
+
+                                                    </table>
+
+                                                </td>
+                                                <td align="left" style="width:20%">
+
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width:100%">
+                                        <table style="border-collapse: collapse; border-collapse: separate;border-spacing: 3px 3px;width: 100%;">
+                                            <tr>
+                                                <th style="border-bottom: 1px solid black;width:22%">Product/Function/Sub-class/Sub-function</th>
+                                                <apex:repeat value="{!regionNames}" var="reg">
+                                                    <th style="border-bottom: 1px solid black;width:{!if(reg=='01-Lubbock','6.5%',if(reg=='02-Midland','6.5%',if(reg=='03-Kilgore','6.5%',if(reg=='06-Fort Worth','6%',if(reg=='08-San Antonio','5.8%',if(reg=='09-Multi-Regional (RETIRED)','9.5%',if(reg=='10-El Paso (RETIRED)','7%',if(reg='04-Austin','6.3%',if(reg=='05-Houston','7%',if(reg=='07-Corpus Christi','6%','5%'))))))))))};">{!reg}</th>
+                                                </apex:repeat>
+                                                <th style="border-bottom: 1px solid black;width:4%">Total</th>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="width:100%">
+                                        <table style="border-collapse: collapse; border-collapse: separate;border-spacing: 3px 3px;width: 100%;">
+                                            <apex:variable var="pageBR" value="{!0}" />
+                                            <apex:repeat value="{!prodMapUnits}" var="prodKey">
+                                                <apex:variable value="{!pageBR+1}" var="pageBR" />
+                                                <tr class="pBR{!pageBR}">
+                                                    <td style="width:100%">
+                                                        <table style="border-collapse: collapse; border-collapse: separate;border-spacing: 3px 3px;width: 100%;">
+                                                            <tr>
+                                                                <td style="width:22%; font-weight: bold">{!prodKey}</td>
+                                                            </tr>
+                                                            <apex:repeat value="{!prodMapUnits[prodKey]}" var="prodSubKey">
+                                                                <tr>
+                                                                    <td style="width:22%; font-weight: bold">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {!prodSubKey}
+                                                                    </td>
+                                                                </tr>
+                                                                <apex:repeat value="{!prodMapUnits[prodKey][prodSubKey]}" var="typeKey">
+                                                                    <tr>
+                                                                        <td style="width:22%; font-weight: bold; font-weight: bold">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                                            {!typeKey}
+                                                                        </td>
+                                                                    </tr>
+                                                                    <apex:variable var="subtypeKeyTotal" value="{!0}" />
+                                                                    <apex:repeat value="{!prodMapUnits[prodKey][prodSubKey][typeKey]}" var="subtypeKey">
+                                                                        <tr>
+                                                                            <td style="width:22%">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                                                {!subtypeKey}
+                                                                            </td>
+                                                                            <apex:variable var="Total1" value="{!0}" />
+                                                                            <apex:repeat value="{!regionNames}" var="regName">
+                                                                                <apex:variable var="EachRegValue" value="{!prodMapUnits[prodKey][prodSubKey][typeKey][subtypeKey][regName]}" />
+                                                                                <td align="right" style="width:{!if(regName=='01-Lubbock','6.5%',if(regName=='02-Midland','6.5%',if(regName=='03-Kilgore','6.5%',if(regName=='06-Fort Worth','6%',if(regName=='08-San Antonio','5.8%',if(regName=='09-Multi-Regional (RETIRED)','9.5%',if(regName=='10-El Paso (RETIRED)','7%',if(regName='04-Austin','6.3%',if(regName=='05-Houston','7%',if(regName=='07-Corpus Christi','6%','5%'))))))))))};">
+                                                                                    <apex:outputText value="{0, number, ###,##0}">
+                                                                                        <apex:param value="{!EachRegValue}" />
+                                                                                    </apex:outputText>
+                                                                                </td>
+                                                                                <apex:variable value="{!Total1+EachRegValue}" var="Total1" />
+                                                                            </apex:repeat>
+                                                                            <td align="right" style="width:5%">
+                                                                                <apex:outputText value="{0, number, ###,##0}">
+                                                                                    <apex:param value="{!Total1}" />
+                                                                                </apex:outputText>
+                                                                            </td>
+                                                                        </tr>
+
+                                                                    </apex:repeat>
+                                                                    <tr>
+                                                                        <td style="width:22%">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                                            Total {!typeKey}
+                                                                        </td>
+                                                                        <apex:variable var="Total11" value="{!0}" />
+                                                                        <apex:repeat value="{!regionNames}" var="regName">
+                                                                            <apex:variable var="EachRegVal1" value="{!prodMapSubClassTotalUnits[prodKey][prodSubKey][typeKey][regName]}" />
+                                                                            <td align="right" style="border-top: 1px solid black;wdth:{!if(regName=='01-Lubbock','6.5%',if(regName=='02-Midland','6.5%',if(regName=='03-Kilgore','6.5%',if(regName=='06-Fort Worth','6%',if(regName=='08-San Antonio','5.8%',if(regName=='09-Multi-Regional (RETIRED)','9.5%',if(regName=='10-El Paso (RETIRED)','7%',if(regName='04-Austin','6.3%',if(regName=='05-Houston','7%',if(regName=='07-Corpus Christi','6%','5%'))))))))))};">
+                                                                                <apex:outputText value="{0, number, ###,##0}">
+                                                                                    <apex:param value="{!EachRegVal1}" />
+                                                                                </apex:outputText>
+                                                                            </td>
+                                                                            <apex:variable value="{!Total11+EachRegVal1}" var="Total11" />
+                                                                        </apex:repeat>
+                                                                        <td align="right" style="border-top: 1px solid black;width:4%">
+                                                                            <apex:outputText value="{0, number, ###,##0}">
+                                                                                <apex:param value="{!Total11}" />
+                                                                            </apex:outputText>
+                                                                        </td>
+                                                                    </tr>
+
+                                                                </apex:repeat>
+                                                                <tr>
+                                                                    <td style="width:22%">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Total {!prodSubKey}</td>
+                                                                    <apex:variable var="Total21" value="{!0}" />
+                                                                    <apex:repeat value="{!regionNames}" var="regName">
+                                                                        <apex:variable var="EachRegVal" value="{!prodMapTypeTotalUnits[prodKey][prodSubKey][regName]}" />
+                                                                        <td align="right" style="border-bottom: 1px solid black;width:{!if(regName=='01-Lubbock','6.5%',if(regName=='02-Midland','6.5%',if(regName=='03-Kilgore','6.5%',if(regName=='06-Fort Worth','6%',if(regName=='08-San Antonio','5.8%',if(regName=='09-Multi-Regional (RETIRED)','9.5%',if(regName=='10-El Paso (RETIRED)','7%',if(regName='04-Austin','6.3%',if(regName=='05-Houston','7%',if(regName=='07-Corpus Christi','6%','5%'))))))))))};">
+                                                                            <apex:outputText value="{0, number, ###,##0}">
+                                                                                <apex:param value="{!EachRegVal}" />
+                                                                            </apex:outputText>
+                                                                        </td>
+                                                                        <apex:variable value="{!Total21+EachRegVal}" var="Total21" />
+                                                                    </apex:repeat>
+                                                                    <td align="right" style="border-bottom: 1px solid black;width:4%">
+                                                                        <apex:outputText value="{0, number, ###,##0}">
+                                                                            <apex:param value="{!Total21}" />
+                                                                        </apex:outputText>
+                                                                    </td>
+                                                                </tr>
+                                                            </apex:repeat>
+                                                            <tr>
+                                                                <td style="width:22%">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total {!prodKey}</td>
+                                                                <apex:variable var="Total23" value="{!0}" />
+                                                                <apex:repeat value="{!regionNames}" var="regName">
+                                                                    <apex:variable var="EachRegVal23" value="{!prodMapClassTotalUnits[prodKey][regName]}" />
+                                                                    <td align="right" style="border-bottom: 1px solid black;width:{!if(regName=='01-Lubbock','6.5%',if(regName=='02-Midland','6.5%',if(regName=='03-Kilgore','6.5%',if(regName=='06-Fort Worth','6%',if(regName=='08-San Antonio','5.8%',if(regName=='09-Multi-Regional (RETIRED)','9.5%',if(regName=='10-El Paso (RETIRED)','7%',if(regName='04-Austin','6.3%',if(regName=='05-Houston','7%',if(regName=='07-Corpus Christi','6%','5%'))))))))))};">
+                                                                        <apex:outputText value="{0, number, ###,##0}">
+                                                                            <apex:param value="{!EachRegVal23}" />
+                                                                        </apex:outputText>
+                                                                    </td>
+                                                                    <apex:variable value="{!Total23+EachRegVal23}" var="Total23" />
+                                                                </apex:repeat>
+                                                                <td align="right" style="border-bottom: 1px solid black;width:4%">
+                                                                    <apex:outputText value="{0, number, ###,##0}">
+                                                                        <apex:param value="{!Total23}" />
+                                                                    </apex:outputText>
+                                                                </td>
+
+
+                                                            </tr>
+                                                        </table>
+
+                                                    </td>
+
+
+                                                </tr>
+                                            </apex:repeat>
+
+
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width:100%">
+                                        <table style="border-collapse: collapse; border-collapse: separate;border-spacing: 3px 3px;width: 100%;">
+                                            <tr>
+                                                <td style="width:22%">Total Units for All Systems:</td>
+                                                <apex:variable var="Total24" value="{!0}" />
+                                                <apex:repeat value="{!regionNames}" var="regName">
+                                                    <apex:variable var="EachRegVal24" value="{!TotalUnits[regName]}" />
+
+                                                    <td align="right" style="width:{!if(regName=='01-Lubbock','6.5%',if(regName=='02-Midland','6.5%',if(regName=='03-Kilgore','6.5%',if(regName=='06-Fort Worth','6%',if(regName=='08-San Antonio','5.8%',if(regName=='09-Multi-Regional (RETIRED)','9.5%',if(regName=='10-El Paso (RETIRED)','7%',if(regName='04-Austin','6.3%',if(regName=='05-Houston','7%',if(regName=='07-Corpus Christi','6%','5%'))))))))))};">
+                                                        <apex:outputText value="{0, number, ###,##0}">
+                                                            <apex:param value="{!EachRegVal24}" />
+                                                        </apex:outputText>
+                                                    </td>
+                                                    <apex:variable value="{!Total24+EachRegVal24}" var="Total24" />
+                                                </apex:repeat>
+                                                <td align="right" style="width:4%">
+                                                    <apex:outputText value="{0, number, ###,##0}">
+                                                        <apex:param value="{!Total24}" />
+                                                    </apex:outputText>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </apex:form>
+    </body>
+</apex:page>

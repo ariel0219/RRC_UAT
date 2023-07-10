@@ -1,0 +1,117 @@
+<template>
+    <p class="slds-p-horizontal_small">
+    To file new or view existing PS-95 reports please search by Organization Name or P5 Number and Reporting Period
+    </p>
+    <br></br>
+    <div class="lgc-border">
+        <lightning-layout horizontal-align="space" multiple-rows>
+            <lightning-layout-item size="4" padding="around-small">
+                <!--<p>Fill in Operator Name or Company ID:</p>
+             <lightning-input 
+                    type="text"
+                    value={operatorName}
+                    placeholder="Operator Name"
+                    onchange={operatorNameSearch}
+                    autocomplete=true>
+                </lightning-input>-->
+                
+                
+             
+                <c-custom-lookup lookup-label="Fill in Organization Name or P5 Number:" 
+                object-api-name="account" 
+                icon-name="standard:account" 
+                placeholder="Organization Name" 
+                onrecordselection={onOperatorNamechangeMethod} 
+                split-bln="fetchAccountsBasedontheRecordType" 
+                ondisablebuttonaction={onOperatordisablebuttonaction}
+                data-id="accid" 
+                recordtype-name="Organization">
+                </c-custom-lookup>
+                
+                <p style="text-align: center; padding-top: 17px">-or-</p>
+              
+                <c-custom-lookup 
+                lookup-label="" object-api-name="account" 
+                icon-name="standard:account" 
+                placeholder="P5 Number" 
+                onrecordselectionsecod={onP5NumberchangeMethod} 
+                split-bln="fetchp5numberBasedontheRecordType" 
+                ondisablebuttonaction={onP5disablebuttonaction}
+                data-id="psId"
+                recordtype-name="Organization">
+                </c-custom-lookup>
+             
+            </lightning-layout-item>            
+            <lightning-layout-item size="4" padding="around-small">
+                <p>Pick from the following reporting period dropdown:</p>
+                <!--<lightning-input 
+                    type="text"
+                    value={ReportPeriod}
+                    placeholder="Report Period"
+                    onchange={ReportPeriodSearch}>
+                </lightning-input>
+                
+                <div class="slds-form-element">
+                    <label class="slds-form-element__label">
+                        <template if:true={isAttributeRequired}>
+                            <abbr title="required">*</abbr>
+                        </template>
+                        <span class="">{fieldLabelName}</span>
+                    </label>
+                    <div class="slds-form-element__control">
+                        <div class="slds-select_container">
+                            <select class="slds-select" 
+                                    onchange={selectionChangeHandler} 
+                                    disabled={isPicklistDisabled}
+                                    required={isAttributeRequired}>
+                                <option value="Select">Select</option>
+                                <template for:each={options} for:item="option">
+                                    <option key={option.label} class="uiInputSelectOption" value={option.value}>{option.value}</option>
+                                </template>
+                            </select>
+                        </div>
+                    </div>
+                </div>-->
+                <div class="slds-form-element__control">
+                    <div class="slds-select_container">
+                        <select class="slds-select" 
+                                onchange={onReportPeriodChangeMethod} 
+                                disabled={isPicklistDisabled}
+                                required={isAttributeRequired}  >
+                            <option value="Report Period">Select Report Period</option>
+                            <template for:each={options} for:item="option">
+                                <option key={option} class="uiInputSelectOption" value={option}>
+                                    {option}
+                                </option>
+                            </template>
+                        </select>
+                    </div>
+                </div>
+            </lightning-layout-item> 
+     
+      <!--  <lightning-layout-item size="4" padding="around-small">
+                <p>Select Reporting year:</p>
+                <lightning-input 
+                    type="date"
+                    value={reportingYear}
+                    placeholder="Reporting Year"
+                    onchange={reportingYearSearch}>
+                </lightning-input>
+            </lightning-layout-item> -->
+            
+        </lightning-layout>  
+    </div>
+    <div class="slds-float_right" >
+        <!--- <lightning-button 
+            label="Search"
+            onclick={handleSearch}
+            variant="brand" 
+            padding="around-small">
+        </lightning-button>-->
+        <button type="submit" 
+        disabled={isSearchDisableBtn} 
+        class="slds-m-left_x-small slds-button slds-button_brand "
+         onclick={handleSearch}>Search</button>
+       
+    </div>                    
+ </template>
