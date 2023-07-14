@@ -104,7 +104,7 @@
             
             switch(searchType) {
                 case 'Operators':
-                    action = cmp.get('c.addOperators');
+                    action = cmp.get('c.addSingleOperatorWithoutUpdatingOfficer');
                     action.setParams({
                         'operatorsJSON' : '{"Operators":' + selectedJSON + '}'
                     });

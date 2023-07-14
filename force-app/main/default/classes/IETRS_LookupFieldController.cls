@@ -322,6 +322,15 @@ public with sharing class IETRS_LookupFieldController {
         return opAccounts;
     }
 
+    @AuraEnabled
+    public static List<Account> addSingleOperatorWithoutUpdatingOfficer(String operatorsJSON) {
+        Operators opsList = Operators.parse(operatorsJSON);
+        IETRS_P5_Controller p5Ctrl = new IETRS_P5_Controller();
+        List<Account> opAccounts = p5Ctrl.addOperator(opsList);
+
+        return opAccounts;
+    }
+
     /**
     * @description - Creates officer contact records with data from RRC
     * @author Mark Frizzell | 7/26/2019
