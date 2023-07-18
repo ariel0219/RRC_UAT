@@ -6,7 +6,7 @@ public class CIIS_Generate_SB3MAP_Letters_Test {
     public static void testMyBatchClass() {
     List<CIIS_Supply_Chain_Connection__c> testRecords = new List<CIIS_Supply_Chain_Connection__c>();
         for(Integer i = 0; i < 10; i++) {
-        testRecords.add(new CIIS_Supply_Chain_Connection__c(CIIS_Named_Supplier_Organization__c = '001BZ00000B2BX7YAN', CIIS_Receiver__c = '001BZ00000BYj6ZYAT', CIIS_Supplier_Type__c = 'Gas Transmission Pipeline'));
+        testRecords.add(new CIIS_Supply_Chain_Connection__c(CIIS_Named_Supplier_Organization__c = '001BZ00000B2BX7YAN', CIIS_Receiver__c = '001BZ00000BYj6ZYAT', CIIS_Supplier_Type__c = 'Gas Transmission Pipeline', CIIS_Supplier__c = '001BZ00000BYjBkYAL'));
         }
         insert testRecords;
         Test.StartTest();

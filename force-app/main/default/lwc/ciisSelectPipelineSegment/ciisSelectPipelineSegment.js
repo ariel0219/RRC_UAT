@@ -199,6 +199,7 @@ export default class CiisSelectPipelineSegment extends LightningElement {
                 }
             };
             this.zoomLevel = 12;
+            this.diameter = null;
             this.search(true);
         }
     }
@@ -534,13 +535,29 @@ export default class CiisSelectPipelineSegment extends LightningElement {
 
     handleFilterChange(event) {
         const filterName = event.target.dataset.filter;
-        const filterValue = event.detail.value;
+        let filterValue = event.detail.value;
+        console.log(filterName, filterValue);
+        if(filterName == 't4PermitNumber' && filterValue != null  && filterValue != '')
+            filterValue = filterValue.toString().padStart(5, '0'); 
         console.log(filterName, filterValue);
         this[filterName] = filterValue;
     }
 
     handleSearchClick() {
         this.search();
+    }
+
+    handleClearClick(){
+        this.t4PermitNumber = null;
+        this.gasCommodity = null;
+        this.county = '';
+        this.diameter = null;
+        this.systemName = null;
+        this.subSystemName = null;
+        this.pipesSystemName = null;
+        this.pipelineStatus = null;
+        this.pipelineId = null;
+
     }
 
     async search(searchByReceiverLocation) {
