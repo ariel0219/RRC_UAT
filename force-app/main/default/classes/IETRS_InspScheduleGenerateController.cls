@@ -78,11 +78,14 @@ public with sharing class IETRS_InspScheduleGenerateController {
             return 'Error: ' + dex.getMessage();
         }
 
+        System.debug('Pre Batch genRecord.IETRS_Schedule_Type__c  xzxz:' + genRecord.IETRS_Schedule_Type__c + ' And Id is: ' + genRecord.Id);
         // Call batch class
         if (genRecord.IETRS_Schedule_Type__c == 'Pipeline Specialized Schedule') {
+            System.debug('xz This Config going to Pipline Specialized Schedule batch route');
             IETRS_SpecializedInspScheduleBatch schedBatch = new IETRS_SpecializedInspScheduleBatch(genRecord);
             Database.executeBatch(schedBatch, 100);
         } else if (genRecord.IETRS_Schedule_Type__c == 'Pipeline Routine Schedule') {
+            System.debug('xz This Config going to Pipeline Routine Schedule batch route');
             IETRS_InspScheduleBatch schedBatch = new IETRS_InspScheduleBatch(genRecord);
             Database.executeBatch(schedBatch, 100);
         }

@@ -71,6 +71,7 @@ global class IETRS_InspApprovalsBatch implements Database.Batchable<SObject> {
                 when 'Unapprove' {
                     configRec.IETRS_Status__c = 'Generated';
                     System.debug('deleting inspection schedules. 4407');
+                    System.debug('quantity of scchedule deleting task size: ' + inspSchedule.size());
                     delete inspSchedule;
 
                     delete configRec;

@@ -28,7 +28,7 @@ public with sharing class IETRS_InspScheduleServices {
     private static final String OP_GREATER_THAN = 'Greater Than';
     private static final String OP_LESS_THAN = 'Less Than';
     private static final String OP_BETWEEN = 'Between';
-    private static final String CIISBA = 'Critical Infrastructure';
+    private static final String CIISBA = 'Critical Infrastructure'; //CIISBA => Critical Infrastructure Business Area
 
     public static final String RECTYPE_RISK_FACTOR = 'Risk_Factors_Setting';
     public static final List<String> RECTYPES_REG_ENTITY = new List<String>{
@@ -149,11 +149,14 @@ public with sharing class IETRS_InspScheduleServices {
 
         // Find the record type to business area conversion for this R.E.
         for (String recType : RECTYPE_BUSAREA_MAP.keySet()) {
+            System.debug('recType xzxz: '  + recType);
+            System.debug('regEntity.RecordType.DeveloperName xzxz: ' + regEntity.RecordType.DeveloperName);
             if (
                 regEntity.RecordType.DeveloperName == recType ||
-                config.IETRS_Business_Area__c == CIISBA
+                config.IETRS_Business_Area__c == CIISBA 
             ) {
                 String businessArea;
+                System.debug('businessArea xzxz: ' + businessArea);
                 if (
                     regEntity.RecordType.DeveloperName == recType
                 ) {
@@ -164,13 +167,15 @@ public with sharing class IETRS_InspScheduleServices {
                     businessArea = CIISBA;
                 }
 
+                System.debug('final businessArea xzxz: ' + businessArea);
+
                 System.debug('recType: ' + recType);
                 System.debug('businessArea: ' + businessArea);
 
                 // Loop through all risk factors (if any) for this business area
                 if (riskFactors.get(businessArea) != null) {
                     System.debug(
-                        'risk factors found: ' + 
+                        'risk factors found xzxz: ' + 
                         riskFactors.get(businessArea).size()
                         );
                     for (
@@ -321,6 +326,7 @@ public with sharing class IETRS_InspScheduleServices {
         } catch (Exception e) {
             result = new List<Account>();
         }
+        System.debug('xz IETRS_InspScheduleServices.getExcludedOrgs executed, with List of <Account> size of: ' + result.size());
         return result;
     }
 
@@ -354,7 +360,7 @@ public with sharing class IETRS_InspScheduleServices {
             riskFactors.put(config.IETRS_Business_Area__c, risks);
         }
 
-        System.debug('riskFactors: ' + riskFactors);
+        System.debug('IETRS_InspScheduleService.buildRiskMap yields riskFactors: ' + riskFactors);
         return riskFactors;
     }
 
@@ -527,6 +533,7 @@ public with sharing class IETRS_InspScheduleServices {
     public static Map<Id, IETRS_InspSchedule__c> buildScheduleMap(
         Id genRecordId
     ) {
+        System.debug('xz IETRS_InspScheduleServices.buildScheduleMap, genRecordId(AKA Config.Id): ' + genRecordId);
         Map<Id, IETRS_InspSchedule__c> resultsMap = new Map<Id, IETRS_InspSchedule__c>();
         for (IETRS_InspSchedule__c sched : [
             SELECT
@@ -543,6 +550,7 @@ public with sharing class IETRS_InspScheduleServices {
         ]) {
             resultsMap.put(sched.IETRS_Regulated_Entity__c, sched);
         }
+        System.debug('xz IETRS_InspScheduleServices.buidScheduleMap yields: map created with size of: ' + resultsMap.size());
         return resultsMap;
     }
 
