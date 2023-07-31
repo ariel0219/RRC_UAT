@@ -6,8 +6,15 @@ public class CIIS_MassUploadControllerTest {
         Account orgAcc = new Account(IETRS_P5_Number__c='345678',Name = 'Org', RecordTypeId = accOrgRecordTypeId, Type = 'Distribution');
         insert orgAcc;
 
-        Id accRegulatedEntityRecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName().get('Organization').getRecordTypeId();
+        Id accRegulatedEntityRecordTypeId =  Schema.SObjectType.Account.getRecordTypeInfosByName().get('Regulated Entity - PS').getRecordTypeId();
         Account RegulatedEntity = new Account(IETRS_P5_Number__c='123456',Name = 'TG-400, 12" HIGH BTU RETURN GAS', RecordTypeId = accRegulatedEntityRecordTypeId, Type = 'Transmission');
+        RegulatedEntity.IETRS_T4_Permit__c = '78520';
+        RegulatedEntity.IETRS_Install_Year__c = '2020';
+        RegulatedEntity.IETRS_Entity_Sub_Type__c = 'Transmission';
+        RegulatedEntity.IETRS_Total_Miles__c = 4.25;
+        RegulatedEntity.IETRS_On_Offshore__c = 'Onshore';
+        RegulatedEntity.IETRS_Product_Class__c = 'Gas';
+        RegulatedEntity.IETRS_Product_Sub_Class__c = 'Natural';
         insert RegulatedEntity;
         
         
@@ -18,7 +25,8 @@ public class CIIS_MassUploadControllerTest {
         CIIS_Supply_Chain_Connection__c gscObject=new CIIS_Supply_Chain_Connection__c();            
         gscObject.CIIS_Receiver__c=orgAcc.Id;
         gscObject.CIIS_Supplier__c=RegulatedEntity.Id;
-        gscObject.CIIS_Supplier_Type__c='Pipeline';
+        gscObject.CIIS_Supplier_Type__c='Pipeline Segment';
+        gscObject.CIIS_Named_Supplier_Organization__c = orgAcc.Id;
         gscObject.CIIS_Status__c='Pending';
         Insert gscObject;
     }

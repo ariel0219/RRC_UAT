@@ -3,7 +3,7 @@ public class CIIS_SupplyChainConnectionDBTest {
     @testSetup
     static void prepareData(){
         Id accOrgRecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName().get('Organization').getRecordTypeId();
-        Account orgAcc = new Account(Name = 'Org', RecordTypeId = accOrgRecordTypeId, Type = 'Distribution');
+        Account orgAcc = new Account(Name = 'Org', RecordTypeId = accOrgRecordTypeId, Type = 'Gas Transmission Pipeline');
         insert orgAcc;
 
         Id accRegulatedEntityRecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByDeveloperName().get('Organization').getRecordTypeId();
@@ -20,6 +20,7 @@ public class CIIS_SupplyChainConnectionDBTest {
         gscObject.CIIS_Supplier__c=RegulatedEntity.Id;
         gscObject.CIIS_Supplier_Type__c='Gas Transmission Pipeline';
         gscObject.CIIS_Status__c='Pending';
+        gscObject.CIIS_Named_Supplier_Organization__c = orgAcc.ID;
         Insert gscObject;
         
     }

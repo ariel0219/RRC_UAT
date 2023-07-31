@@ -30,6 +30,7 @@ public with sharing class CIIS_GscOperatorSelectionCtrl {
                 )
                 AND RecordType.DeveloperName = 'Organization'
             WITH SECURITY_ENFORCED
+            ORDER BY Name ASC
         ];
         return operatorList;
     }

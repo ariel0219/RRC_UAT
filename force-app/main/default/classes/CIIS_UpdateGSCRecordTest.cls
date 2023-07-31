@@ -21,6 +21,7 @@ public class CIIS_UpdateGSCRecordTest {
         gscObject.CIIS_Supplier__c=RegulatedEntity.Id;
         gscObject.CIIS_Supplier_Type__c='Gas Transmission Pipeline';
         gscObject.CIIS_Status__c='Pending';
+        gscObject.CIIS_Named_Supplier_Organization__c = orgAcc.Id;
         Insert gscObject;
     }
     

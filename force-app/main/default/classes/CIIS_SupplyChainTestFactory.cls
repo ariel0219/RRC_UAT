@@ -216,6 +216,7 @@ public class CIIS_SupplyChainTestFactory {
     public List<Account> getNewSupplyChainAccountInstances(
         String supplyChainType,
         Id orgId,
+        Id recordTypeId,
         Integer count
     ) {
         List<Account> supplyChainAccs = new List<Account>();
@@ -230,6 +231,7 @@ public class CIIS_SupplyChainTestFactory {
                 supplyChainAcc.put(orgField, orgId);
             }
             supplyChainAcc.ParentId = orgId;
+            supplyChainAcc.recordTypeId = recordTypeId;
             // set test id values
             if (accountTmplBySupplyChainType.containsKey(supplyChainType)) {
                 for (

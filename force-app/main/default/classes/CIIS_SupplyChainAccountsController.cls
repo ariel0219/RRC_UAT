@@ -109,6 +109,7 @@ public with sharing class CIIS_SupplyChainAccountsController {
                 whereClauseSuffix
             );
             result = Database.query(soql);
+            system.debug('result ' + soql);
         } catch (Exception e) {
             throw new AuraHandledException(e.getMessage());
         }

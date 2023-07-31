@@ -13,7 +13,7 @@
  * 1.1      06/06/2022      Sebastian Wittenstein   Altered query to include child inspection records to support finding most recent matching type/subtype
  * 1.2      02/14/2023      Sebastian Wittenstein   Added CIIS specific logic to modify query string.
  **/
-global class IETRS_InspScheduleBatch implements Database.Batchable<SObject>, Database.Stateful {
+global class IETRS_InspScheduleBatch implements Database.Batchable<SObject> {
     global IETRS_InspSchedConfig__c genRecord;
     global Map<String, List<IETRS_InspSchedConfig__c>> riskMap;
     global Map<Id, IETRS_Inspection__c> inspMap;
@@ -24,29 +24,19 @@ global class IETRS_InspScheduleBatch implements Database.Batchable<SObject>, Dat
 
     global IETRS_InspScheduleBatch(IETRS_InspSchedConfig__c configRec) {
         genRecord = configRec;
-        System.debug('xz IETRS_InspScheduleBatch.CTOR building riskMap');
         riskMap = IETRS_InspScheduleServices.buildRiskMap();
-        System.debug('xz IETRS_InspScheduleBatch.CTOR riskMap size: '+ riskMap.size());
-
-        System.debug('xz IETRS_InspScheduleBatch.CTOR building schedMap');
         schedMap = IETRS_InspScheduleServices.buildScheduleMap(genRecord.Id);
-        System.debug('xz IETRS_InspScheduleBatch.CTOR schedMap size: ' + schedMap.size());
-
-        System.debug('xz IETRS_InspScheduleBatch.CTOR building getExcludedOrgs');
         excludedOrgs = IETRS_InspScheduleServices.getExcludedOrgs();
-        System.debug('xz IETRS_InspScheduleBatch.CTOR getExcludedOrgs size: ' + excludedOrgs.size());
         errors = '';
     }
 
     global Database.QueryLocator start(Database.BatchableContext bc) {
-        System.debug('IETRS_InspScheduleBatch.start');
         List<String> recTypes = IETRS_InspScheduleServices.RECTYPES_REG_ENTITY;
-        String inspType = IETRS_InspScheduleServices.INSP_TYPE; //Standard
-        String isnpSubType = IETRS_InspScheduleServices.INSP_SUB_TYPE; //Comprehensive
+        String inspType = IETRS_InspScheduleServices.INSP_TYPE;
+        String isnpSubType = IETRS_InspScheduleServices.INSP_SUB_TYPE;
         Set<String> excludedJurisdictionTypes = IETRS_InspScheduleServices.EXCLUDED_JURISDICTION_TYPES;
-        Set<String> excludedStatuses = IETRS_InspScheduleServices.EXCLUDED_STATUSES; //Abandoned
-        String reType = IETRS_InspScheduleServices.RE_TYPE_MAP.get(genRecord.IETRS_Regulated_Entity_Type__c);
-        
+        Set<String> excludedStatuses = IETRS_InspScheduleServices.EXCLUDED_STATUSES;
+        List<String> reType = IETRS_InspScheduleServices.RE_TYPE_MAP.values();
         String busArea = genRecord.IETRS_Business_Area__c,
             acctQuery =
                 'SELECT Id, Name, RecordType.DeveloperName, Type, IETRS_Entity_Sub_Type__c, ' +
@@ -55,7 +45,7 @@ global class IETRS_InspScheduleBatch implements Database.Batchable<SObject>, Dat
                 'IETRS_Organization_Parent__c, IETRS_OrganizationofRegEntity__c, ' +
                 'IETRS_County__c, IETRS_District__c, IETRS_Region__c, IETRS_Status__c, IETRS_PHMSA_Inspection_Year__c, ' +
                 'IETRS_On_Offshore__c, IETRS_Latest_Inspection__r.IETRS_Inspection_Package__r.IETRS_Inspection_Sub_Type__c, ' +
-                 '(SELECT Id FROM Inspections__r ' +
+                '(SELECT Id FROM Inspections__r ' +
                     'WHERE IETRS_Inspection_Package__r.IETRS_Inspection_Type__c = \''+inspType+'\' ' +
                     'AND IETRS_Inspection_Package__r.IETRS_Inspection_Sub_Type__c = \''+isnpSubType+'\' ' +
                 'ORDER BY IETRS_Inspection_Package__r.IETRS_Begin_Date__c LIMIT 100)';
@@ -71,10 +61,9 @@ global class IETRS_InspScheduleBatch implements Database.Batchable<SObject>, Dat
             'AND IETRS_OrganizationofRegEntity__c NOT IN:excludedOrgs ' +
             'AND IETRS_Status__c NOT IN:excludedStatuses';
         if (busArea!=cI){
-            // reType ='PS Inspection - Gas Transmission Systems'; //test
             acctQuery += 
-                ' AND IETRS_Regulated_Entity_Business_Area__c = :busArea ';// +
-                //'AND IETRS_Allowed_Inspection_Record_Type__c = :reType';  //Non Critical Infrastructure Config will have null filed here, thus yields no result
+                ' AND IETRS_Regulated_Entity_Business_Area__c = :busArea ' +
+                'AND IETRS_Allowed_Inspection_Record_Type__c IN :reType';
         }
         if (busArea==cI) {
             acctQuery += 
@@ -92,14 +81,10 @@ global class IETRS_InspScheduleBatch implements Database.Batchable<SObject>, Dat
         if (acctQuery.length()>1500){
             System.debug(acctQuery.mid(1500, 500));
         }
-         if(test.isRunningTest()){
-             acctQuery = 'SELECT Id, Name, RecordType.DeveloperName, Type, IETRS_Entity_Sub_Type__c, IETRS_Allowed_Inspection_Record_Type__c, IETRS_Regulated_Entity_Business_Area__c, Latest_Inspection_Date__c, IETRS_Latest_Inspection__c, IETRS_Organization_Parent__c, IETRS_OrganizationofRegEntity__c, IETRS_County__c, IETRS_District__c, IETRS_Region__c, IETRS_Status__c, IETRS_PHMSA_Inspection_Year__c,IETRS_On_Offshore__c, IETRS_Latest_Inspection__r.IETRS_Inspection_Package__r.IETRS_Inspection_Sub_Type__c,(SELECT Id FROM Inspections__r WHERE IETRS_Inspection_Package__r.IETRS_Inspection_Type__c =\''+inspType+'\' '+'  AND IETRS_Inspection_Package__r.IETRS_Inspection_Sub_Type__c = \''+isnpSubType+'\' ' +'ORDER BY IETRS_Inspection_Package__r.IETRS_Begin_Date__c LIMIT 100)FROM Account';
-         }
         return Database.getQueryLocator(acctQuery);
     }
 
     global void execute(Database.BatchableContext bc, List<SObject> records) {
-        System.debug('xz IETRS_InspScheduleBatch.execute, SObject records size: ' + records.size());
         List<IETRS_InspSchedule__c> schedules = new List<IETRS_InspSchedule__c>();
         Map<Id, Account> regEntMap = IETRS_InspScheduleServices.buildRegEntityMap(
             records
@@ -118,10 +103,6 @@ global class IETRS_InspScheduleBatch implements Database.Batchable<SObject>, Dat
                 }
             }
 
-            System.debug('xz IETRS_InspScheduleBatch before build RegEntSdule, this.Config.id: ' + genRecord);
-            System.debug('xz IETRS_InspScheduleBatch before build RegEntSdule, this.RegEntityId(Account): ' + regEntity.Id);
-
-
             // Build schedule for this R.E. account
             IETRS_InspSchedule__c sched = IETRS_InspScheduleServices.buildRegEntSchedule(
                 genRecord,
@@ -138,11 +119,10 @@ global class IETRS_InspScheduleBatch implements Database.Batchable<SObject>, Dat
 
         // Upsert schedule records
         try {
-            system.debug('schedules ' + schedules);
             upsert schedules;
         } catch (Exception ex) {
             System.debug(
-                'schedules Error: ' + 
+                'Error: ' + 
                 ex.getMessage() + 
                 ' @ ' + 
                 ex.getLineNumber()
@@ -152,7 +132,6 @@ global class IETRS_InspScheduleBatch implements Database.Batchable<SObject>, Dat
     }
 
     global void finish(Database.BatchableContext bc) {
-        
         AsyncApexJob job = [
             SELECT 
                 Id, 

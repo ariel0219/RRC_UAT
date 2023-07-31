@@ -5,7 +5,7 @@ Id batchJobId = Database.executeBatch(batchJob, 100);
 public with sharing class CIIS_Generate_SB3MAP_Letters implements Database.Batchable <sObject> {
     @InvocableMethod(label = 'Run My Batch')
     public static void runMyBatch(List<String> lst) {
-        Database.executeBatch(new CIIS_Generate_SB3MAP_Letters(), 100);
+        Database.executeBatch(new CIIS_Generate_SB3MAP_Letters(), 5);
     }
     
     public final String query = 'SELECT Id FROM CIIS_Supply_Chain_Connection__c WHERE Id NOT IN (Select CIIS_Supply_Chain_Connection__c from CIIS_Supply_Chain_Letter__c WHERE CIIS_Document_Name__c = \'MAP Letter\') AND CIIS_Status__c IN (\'Confirmed\', \'Pending\', \'Delinquent\')';

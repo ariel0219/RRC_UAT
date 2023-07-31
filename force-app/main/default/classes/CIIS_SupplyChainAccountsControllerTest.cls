@@ -10,6 +10,7 @@ private class CIIS_SupplyChainAccountsControllerTest {
             testFactory.getNewSupplyChainAccountInstances(
                 'Power Plant',
                 org.Id,
+                Schema.SObjectType.Account.getRecordTypeInfosByName().get('Regulated Entity - PP').getRecordTypeId(),
                 2
             )
         );
@@ -17,6 +18,7 @@ private class CIIS_SupplyChainAccountsControllerTest {
             testFactory.getNewSupplyChainAccountInstances(
                 'Gas Processing Facility',
                 org.Id,
+                Schema.SObjectType.Account.getRecordTypeInfosByName().get('Regulated Entity - PS').getRecordTypeId(),
                 2
             )
         );
@@ -161,5 +163,12 @@ private class CIIS_SupplyChainAccountsControllerTest {
             itFailed,
             'It should have failed to initialize a bad supply chain type'
         );
+    }
+    
+    @IsTest
+    static void getCountyTest1(){
+        IETRS_County__c countyc = new IETRS_County__c(IETRS_County_Code__c = '093', IETRS_Oil_Gas_County_Code__c = '185');
+        Insert countyc;
+        CIIS_SupplyChainAccountsController.getCounty('185');
     }
 }

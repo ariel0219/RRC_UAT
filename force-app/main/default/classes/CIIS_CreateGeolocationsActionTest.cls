@@ -33,12 +33,12 @@ private class CIIS_CreateGeolocationsActionTest {
         CIIS_CreateGeolocationsAction.Request request = new CIIS_CreateGeolocationsAction.Request();
         request.facilityGeolocations = facilityGeolocations;
         requests.add(request);
-
         // When... Create geolocations based on requests
         Test.startTest();
         CIIS_CreateGeolocationsAction.execute(requests);
         Test.stopTest();
-
+		facilityGeolocation.accountName = 'Test';
+        String test = facilityGeolocation.nameAndCoordinates;
         // Then... Verify the geolocations are created correctly
         List<CIIS_Geolocations__c> geolocations = [
             SELECT

@@ -158,6 +158,7 @@ export default class CiisSelectPipelineSegment extends LightningElement {
     @track _selectedSegmentWithDetails = [];
     @track isPanelOpen = true;
     @track error;
+    @track disableSearch;
     wireDefaultSegmentValues = {};
     @track markers = [];
     pipelineStatusOptions = pipelineStatusOptions;
@@ -287,6 +288,7 @@ export default class CiisSelectPipelineSegment extends LightningElement {
                 <strong>Commodity Details:</strong> ${feature.attributes.COMMODITY1}<br />
                 <strong>System Name:</strong> ${feature.attributes.SYS_NM}<br />
                 <strong>Subsystem Name:</strong> ${feature.attributes.SUBSYS_NM}<br />
+                <strong>PLS System Name:</strong> ${feature.attributes.PLS_SYSNM}<br />
                 <strong>Diameter:</strong> ${feature.attributes.DIAMETER}<br />
                 <strong>P5 Number:</strong> ${feature.attributes.P5_NUM}<br />
                 <strong>T4 Permit:</strong> ${feature.attributes.T4PERMIT}<br />
@@ -541,6 +543,7 @@ export default class CiisSelectPipelineSegment extends LightningElement {
             filterValue = filterValue.toString().padStart(5, '0'); 
         console.log(filterName, filterValue);
         this[filterName] = filterValue;
+        this.handleSearchDisable();
     }
 
     handleSearchClick() {
@@ -557,9 +560,15 @@ export default class CiisSelectPipelineSegment extends LightningElement {
         this.pipesSystemName = null;
         this.pipelineStatus = null;
         this.pipelineId = null;
+        this.disableSearch = true;
 
     }
-
+    handleSearchDisable(){
+        if ((this.t4PermitNumber != null && this.t4PermitNumber != '') && (this.gasCommodity != null && this.gasCommodity != ''))
+            this.disableSearch = false;
+        else
+            this.disableSearch = true;
+    }
     async search(searchByReceiverLocation) {
         this.isLoading = true;
         this.selectedSegmentValue = null;
