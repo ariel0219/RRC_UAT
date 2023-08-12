@@ -10,7 +10,6 @@ public class ConvertFileToAttachment {
 
         public String OriginalFileName;
         
-
     }
 
     @invocableMethod(label='Convert Files to Attachements')
@@ -47,7 +46,7 @@ public class ConvertFileToAttachment {
 
         }
 
-        return new List<String>{ 'Error: No record found' };
+        return new List<String>{ 'Error: No record found'};
 
     }
 

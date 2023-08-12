@@ -18,15 +18,8 @@ global class IETRS_InspApprovalsBatch implements Database.Batchable<SObject> {
     private final List<IETRS_InspSchedule__c> inspSchedule;
 
     global IETRS_InspApprovalsBatch(Id configId, String action) {
-        System.debug('Approval/Unapproval configId: ' + configId);
-        System.debug('Approval/Unapproval action: ' + action);
         configRecordId = configId;
         approvalAction = action;
-
-        inspSchedule = 
-                        [SELECT Id
-                         FROM IETRS_InspSchedule__c 
-                         WHERE IETRS_Inspection_Schedule_Config__c = :configRecordId];
     }
 
     global Database.QueryLocator start(Database.BatchableContext bc) {
@@ -39,14 +32,21 @@ global class IETRS_InspApprovalsBatch implements Database.Batchable<SObject> {
     global void execute(Database.BatchableContext bc, List<IETRS_InspSchedule__c> records) {
         // Update approval on each schedule record
         List<IETRS_InspSchedule__c> updates = new List<IETRS_InspSchedule__c>();
+        if(approvalAction == 'Unapprove'){
+            for(IETRS_InspSchedule__c rec : records) {
+                delete rec;
+            }
+
+            return;
+        }
         for(IETRS_InspSchedule__c rec : records) {  
             switch on approvalAction {
                 when 'Approve' {
                     rec.IETRS_Approved__c = true;
                 }
-                when 'Unapprove' {
-                    rec.IETRS_Approved__c = false;
-                }
+                //when 'Unapprove' {
+                //    rec.IETRS_Approved__c = false;
+                //}
                 when else {
                     
                 }
@@ -57,6 +57,17 @@ global class IETRS_InspApprovalsBatch implements Database.Batchable<SObject> {
     }
 
     global void finish(Database.BatchableContext bc) {
+        try{
+            IETRS_InspSchedConfig__c configRec = 
+            [SELECT Id, IETRS_Status__c 
+            FROM IETRS_InspSchedConfig__c 
+            WHERE Id = :configRecordId LIMIT 1];
+            
+            delete configRec;
+        } catch(Exception e) {
+
+        }
+       
         // Update IETRS_Status__c on config record
         try {
             IETRS_InspSchedConfig__c configRec = 
@@ -67,14 +78,6 @@ global class IETRS_InspApprovalsBatch implements Database.Batchable<SObject> {
             switch on approvalAction {
                 when 'Approve' {
                     configRec.IETRS_Status__c = 'Approved';
-                }
-                when 'Unapprove' {
-                    configRec.IETRS_Status__c = 'Generated';
-                    System.debug('deleting inspection schedules. 4407');
-                    System.debug('quantity of scchedule deleting task size: ' + inspSchedule.size());
-                    delete inspSchedule;
-
-                    delete configRec;
                 }
                 when else {
                     configRec.IETRS_Status__c = '';

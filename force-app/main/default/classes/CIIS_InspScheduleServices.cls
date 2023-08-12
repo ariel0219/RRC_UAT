@@ -32,7 +32,7 @@
     public static Boolean checkRiskFactor(RiskFactorRequest rFR) {
         String code = rFR.risk.IETRS_Priority_Code__c,
                operator = rFR.risk.IETRS_Condition_Operator__c;
-        System.debug('4407 checkingRiskFactor the priority code is: ' + code);
+        System.debug('checkingRiskFactor the priority code is: ' + code);
         Decimal value1 = rFR.risk.IETRS_Value_One__c, 
                 value2 = rFR.risk.IETRS_Value_Two__c;
         if(!Test.isRunningTest()){
@@ -47,40 +47,46 @@
                 }
             }
             when 'Control Center'{
-                    if(rFR.regEntity.CIIS_Direct_Serve__c && rfr.risk.IETRS_Priority__c == '1'){
+                    if(rFR.regEntity.CIIS_Direct_Serve__c != null &&
+                       rFR.regEntity.CIIS_Direct_Serve__c && 
+                       rfr.risk.IETRS_Priority__c == '1'&&
+                       rFR.regEntity.Type =='Control Center'){
                         
                         return true;
                     }
-                    else if(!rFR.regEntity.CIIS_Direct_Serve__c && rfr.risk.IETRS_Priority__c == '2'){
-                        return true;
-                    }
+                  
                 }
             when 'Meter Station'{
-                    if(rFR.regEntity.CIIS_Direct_Serve__c && rfr.risk.IETRS_Priority__c == '1'){
+                
+                    if(rFR.regEntity.CIIS_Direct_Serve__c != null &&
+                       rFR.regEntity.CIIS_Direct_Serve__c &&
+                       rfr.risk.IETRS_Priority__c == '1'&&
+                       rFR.regEntity.Type =='Meter Station'){
                         return true;
                     }
-                    else if(!rFR.regEntity.CIIS_Direct_Serve__c && rfr.risk.IETRS_Priority__c == '2'){
-                        return true;
-                    }
+                  
+                    
                 }
             when 'Regulator Station'{
-                    if(rFR.regEntity.CIIS_Direct_Serve__c && rfr.risk.IETRS_Priority__c == '1'){
+                    if(rFR.regEntity.CIIS_Direct_Serve__c != null &&
+                       rFR.regEntity.CIIS_Direct_Serve__c && 
+                       rfr.risk.IETRS_Priority__c == '1' &&
+                       rFR.regEntity.Type =='Regulator Station'){
                         return true;
                     }
-                    else if(!rFR.regEntity.CIIS_Direct_Serve__c && rfr.risk.IETRS_Priority__c == '2'){
-                        return true;
-                    }
+             
                 }
             when 'Natural Gas Liquid Storage'{
-                    if(rfr.risk.IETRS_Priority__c == '2'){
+                    if(rfr.risk.IETRS_Priority__c == '2'&&
+                       rFR.regEntity.Type =='Natural Gas Liquid Storage'){
+                           
                         return true;
                     }   
                 }
             when 'Storage' {
                 if (
                     rFR.risk.IETRS_Priority__c == '1' &&
-                    rFR.regEntity.Type == 'Storage'
-                ) {
+                    rFR.regEntity.Type == 'Storage') {
                     return true;
                 }
             }
@@ -89,11 +95,8 @@
                     rFR.regEntity.CIIS_Direct_Serve__c != null &&
                     rFR.regEntity.CIIS_Direct_Serve__c && 
                     rFR.risk.IETRS_Priority__c == '1' &&
-                    (
-                        rFR.regEntity.Type == 'Transmission' ||
-                        rFR.regEntity.Type == 'Distribution'
-                    )
-                ) {
+                    rFR.regEntity.Type == 'Transmission') {
+                    
                     return true;
                 }
             }
@@ -104,16 +107,17 @@
                     rFR.risk.IETRS_Priority__c == '1' &&
                     (
                         rFR.regEntity.Type == 'Lease' ||
-                        rFR.regEntity.Type == 'Well' ||
-                        rFR.regEntity.Type == 'Permitted Field'
+                        rFR.regEntity.Type == 'Well' 
+           
                     )
                 ) {
                     return rFR.regEntity.CIIS_Reg_Entity_MCF_day__c > value1;
                 }
             }
             when 'Indirect Compressor' {
-                if(
+                if( rFR.regEntity.CIIS_Direct_Serve__c != null &&
                     rFR.risk.IETRS_Priority__c == '2' &&
+                    (rFR.regEntity.CIIS_Direct_Serve__c ||!rFR.regEntity.CIIS_Direct_Serve__c) &&
                     rFR.regEntity.Type == 'Compressor Station'
                 ) {
                     return true;
@@ -137,16 +141,35 @@
                     rFR.regEntity.CIIS_Reg_Entity_MCF_day__c != null &&
                     operator == OP_BETWEEN &&
                     rFR.risk.IETRS_Priority__c == '2' &&
-                    (
-                        rFR.regEntity.Type == 'Lease' ||
-                        rFR.regEntity.Type == 'Well' ||
-                        rFR.regEntity.Type == 'Permitted Field' ||
-                        rFR.regEntity.Type == 'Gathering'
-                    )
+                    (rFR.regEntity.Type == 'Lease' || rFR.regEntity.Type == 'Well')
                 ) {
                     return 
                         rFR.regEntity.CIIS_Reg_Entity_MCF_day__c >= value1 && 
                         rFR.regEntity.CIIS_Reg_Entity_MCF_day__c <= value2;
+                }
+            }
+            when 'Lease > 500 mcf/day' {
+                if (
+                    rFR.regEntity.CIIS_Reg_Entity_MCF_day__c != null &&
+                    operator == OP_GREATER_THAN &&
+                    rFR.risk.IETRS_Priority__c == '3' &&
+                    (
+                        rFR.regEntity.Type == 'Lease' 
+                    )
+                ) {
+                    return rFR.regEntity.CIIS_Reg_Entity_MCF_day__c > value1;
+                }
+            }
+            when 'Lease > 250 mcf/day' {
+                if (
+                    rFR.regEntity.CIIS_Reg_Entity_MCF_day__c != null &&
+                    operator == OP_GREATER_THAN &&
+                    rFR.risk.IETRS_Priority__c == '3' &&
+                    (
+                        rFR.regEntity.Type == 'Well' 
+                    )
+                ) {
+                    return rFR.regEntity.CIIS_Reg_Entity_MCF_day__c > value1;
                 }
             }
             when 'UIC Commercial' {

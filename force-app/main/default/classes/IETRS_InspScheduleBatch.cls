@@ -51,7 +51,7 @@ global class IETRS_InspScheduleBatch implements Database.Batchable<SObject> {
                 'ORDER BY IETRS_Inspection_Package__r.IETRS_Begin_Date__c LIMIT 100)';
         if (busArea==cI) {
             acctQuery += 
-                ', CIIS_Commercial_Disposal__c, CIIS_Direct_Serve__c, CIIS_Reg_Entity_MCF_day__c, CIIS_Meets_CID__c ';
+                ', CIIS_Commercial_Disposal__c, CIIS_Direct_Serve__c, CIIS_Reg_Entity_MCF_day__c, CIIS_Meets_CID__c, CIIS_On_Map__c ';
         }
         acctQuery += 
             'FROM Account ' +
@@ -68,7 +68,8 @@ global class IETRS_InspScheduleBatch implements Database.Batchable<SObject> {
         if (busArea==cI) {
             acctQuery += 
                 ' AND CIIS_Meets_CID__c = true ' +
-                'AND IETRS_Intra_Interstate__c != \'Interstate\'';
+                'AND IETRS_Intra_Interstate__c != \'Interstate\' ' +
+                'AND CIIS_On_Map__c = true';
         }
 
         System.debug(acctQuery.left(500));
