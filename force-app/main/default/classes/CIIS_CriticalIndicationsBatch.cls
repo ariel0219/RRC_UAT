@@ -71,13 +71,7 @@ public class CIIS_CriticalIndicationsBatch implements Database.Batchable<Sobject
     }    
     public void finish(Database.BatchableContext bc){   
         if(errorOccured != ''){
-            Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
-            email.setSubject('Error occured in Critical Indication Batch');
-            email.setHtmlBody(errorOccured);
-            email.setToAddresses(new List<String>{ 'vishwanathdilip.kodgire@cgi.com' , 'nicholas.levingston@cgi.com'});
-            email.setSaveAsActivity(false);
-            // Send the email
-            Messaging.SendEmailResult[] results = Messaging.sendEmail(new List<Messaging.SingleEmailMessage>{ email });
+          
         }
     } 
 }

@@ -13,12 +13,15 @@ public class IETRS_StaffAssignmentTriggerHandler{
         }
     }
     
-    public static void checkFirstChairAvailibilityforUpdate(List<IETRS_Case_Staff_Assignment__c> newList, List<IETRS_Case_Staff_Assignment__c> oldList, Map<Id,IETRS_Case_Staff_Assignment__c> newMap, Map<Id,IETRS_Case_Staff_Assignment__c> oldMap){
+   public static void checkFirstChairAvailibilityforUpdate(List<IETRS_Case_Staff_Assignment__c> newList, List<IETRS_Case_Staff_Assignment__c> oldList, Map<Id,IETRS_Case_Staff_Assignment__c> newMap, Map<Id,IETRS_Case_Staff_Assignment__c> oldMap){
         String strFirstChair = 'First Chair';
         Set<Id> setCaseIds = new Set<Id>();
         for(IETRS_Case_Staff_Assignment__c objStaffAssign: newList){
             if(objStaffAssign.IETRS_First_Second_Chair__c == strFirstChair && newMap.get(objStaffAssign.Id).IETRS_First_Second_Chair__c != oldMap.get(objStaffAssign.Id).IETRS_First_Second_Chair__c){
-                setCaseIds.add(objStaffAssign.IETRS_Case__c);
+                
+                    setCaseIds.add(objStaffAssign.IETRS_Case__c);
+                
+                
             }
         }
       
@@ -27,18 +30,28 @@ public class IETRS_StaffAssignmentTriggerHandler{
         }
     }
     
-    public static void checkAvailibilityofFirstStaff(Set<Id> setCaseIds, List<IETRS_Case_Staff_Assignment__c> newList, String strFirstChair){
+   public static void checkAvailibilityofFirstStaff(Set<Id> setCaseIds, List<IETRS_Case_Staff_Assignment__c> newList, String strFirstChair){
         Set<Id> setCaseswithFirstChair = new Set<Id>();
-        List<IETRS_Case_Staff_Assignment__c> lstStaffAssignments = new List<IETRS_Case_Staff_Assignment__c>([Select Id,IETRS_Case__c from IETRS_Case_Staff_Assignment__c where IETRS_Case__c IN: setCaseIds and IETRS_First_Second_Chair__c =: strFirstChair]);
+        Boolean ifAssignedFirstChairExists = false;
+        List<IETRS_Case_Staff_Assignment__c> lstStaffAssignments = new List<IETRS_Case_Staff_Assignment__c>([Select Id,IETRS_Case__c,IETRS_Currently_Assigned__c from IETRS_Case_Staff_Assignment__c where IETRS_Case__c IN: setCaseIds and IETRS_First_Second_Chair__c =: strFirstChair]);
         if(!lstStaffAssignments.isEmpty()){
+          for(IETRS_Case_Staff_Assignment__c existingObjStaffAssignment: lstStaffAssignments) {
+            if(existingObjStaffAssignment.IETRS_Currently_Assigned__c == true) {
+              ifAssignedFirstChairExists = true;
+              if(newList[0].IETRS_Currently_Assigned__c == true && ifAssignedFirstChairExists == true) {
+                newList[0].addError('There is a First Chair already assigned');
+              }
+            }
+          }
+          /* Deprecated
             for(IETRS_Case_Staff_Assignment__c objStaffAssignment: lstStaffAssignments){
                 setCaseswithFirstChair.add(objStaffAssignment.IETRS_Case__c);
             }
             for(IETRS_Case_Staff_Assignment__c objNewStaffAssign : newList){
                 if(setCaseswithFirstChair.contains(objNewStaffAssign.IETRS_Case__c)){
-                    objNewStaffAssign.addError('First chair already assigned');
+                    //objNewStaffAssign.addError('First chair already assigned');
                 }
-            }
+            } */
         }
+      }
     }
-}

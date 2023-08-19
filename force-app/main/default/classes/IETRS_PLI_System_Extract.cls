@@ -12,6 +12,7 @@
  * 3.0      09/09/2020      Kevin Lu                Removed padding from System Id
  * 3.1      06/14/2021      Sebastian Wittenstein   Added null handling for acct.IETRS_Total_Miles__c
  * 3.2		07/14/2021		Forrest Chang			Added TAC Regulated Gathering Gathering
+ * 3.3		08/16/2023		Sybile Groome			Updated System ID to use System ID or Regulated Entity Auto ID instead of Account ID, updated SOQL for fields
 **/
 global class IETRS_PLI_System_Extract implements Database.Batchable<sObject>, Database.AllowsCallouts {
     global Database.QueryLocator start(Database.BatchableContext bc) {
@@ -21,100 +22,45 @@ global class IETRS_PLI_System_Extract implements Database.Batchable<sObject>, Da
 
         /* 
         Formatted Query
-        Select
-            IETRS_Account_ID__c
-            ,IETRS_OrganizationofRegEntity__r.IETRS_P5_Number__c
-            ,Parent.IETRS_Account_ID__c
-            ,Name
-            ,IETRS_Entity_Code__c
-            ,IETRS_Jurisdiction__c 
-                --Jurisdictional = J
-                --Non-jurisdictional = N
-                --Interstate = I
-                --Odorization = O
-				--TAC Regulated Gathering = G
-            ,IETRS_Intra_Interstate__c
-            ,IETRS_Status__c
-            ,IETRS_T4_Permit__c
-            ,IETRS_Total_Miles__c
-            From
-            Account
+        Select IETRS_Account_ID__c, IETRS_System_ID__c, IETRS_Regulated_Entity_Auto_ID__c, IETRS_OrganizationofRegEntity__r.IETRS_P5_Number__c, Name,
+               Parent.IETRS_Account_ID__c, IETRS_Entity_Code__c, IETRS_Intra_Interstate__c, IETRS_Status__c, IETRS_T4_Permit__c, IETRS_Total_Miles__c,
+               IETRS_Jurisdiction__c 
+                  --Jurisdictional = J, Non-jurisdictional = N, Interstate = I, Odorization = O, TAC Regulated Gathering = G
+        From Account
         Where
             RecordType.Name = 'Regulated Entity - PS'
             And IETRS_Status__c In ('Active', 'Idle', 'Abandoned')
             And IETRS_Jurisdiction__c != Null
-            And IETRS_Entity_Code__c In (
-                'A-Off Shore - Liquid'
-                ,'B-Apartments'
-                ,'C-Anhydrous Ammonia'
-                ,'D-Distribution'
-                ,'F-Non Jurisdictional Gathering, Production'
-                ,'G-Gas Gathering'
-                ,'H-Housing Authority'
-                ,'I-LPG Distribution'
-                ,'K-Carbon Dioxide'
-                ,'L-Condensate, Crude Oil (Gathering)'
-                ,'M-Municipal Distribution'
-                ,'O-Crude Transmission'
-                ,'P-Hazardous Liquid Products (Gasoline, Diesel, etc.)'
-                ,'Q-Highly Volatile Liquids (Propane, Ethane, etc.)'
-                ,'R-Rural Extension (Distribution)'
-                ,'S-Gas Transmission for Municipal Supply'
-                ,'T-Gas Transmission'
-                ,'U-Underground Storage (Liquid)'
-                ,'V-Underground Storage (Gas)'
-                ,'W-Mobile Home Park'
-                ,'X-Liquified Natural Gas'
-                ,'Z-Off Shore - Gas'
-            )
-            And IETRS_Product_Sub_Class__c In (
-                'Natural'
-                ,'LPG'
-                ,'Hydrogen'
-                ,'LNG'
-                ,'Others'
-                ,'Crude'
-                ,'Non-HVL'
-                ,'HVL'
-                ,'Carbon Dioxide'
-                ,'Anhydrous Ammonia'
-            )
-            And IETRS_Entity_Sub_Type__c In (
-                'Private Main System'
-                ,'Private Rural Extension'
-                ,'Municipal'
-                ,'LPG'
-                ,'Apartment'
-                ,'Housing Authority'
-                ,'Mobile Home Park'
-                ,'State Facilities'
-                ,'Transmission'
-                ,'Direct Sale'
-                ,'Municipal Supply'
-                ,'Regulated'
-                ,'Non-Regulated'
-                ,'Aboveground'
-                ,'Belowground'
-            )
+            And IETRS_Entity_Code__c In ( 'A-Off Shore - Liquid', 'B-Apartments', 'C-Anhydrous Ammonia', 'D-Distribution', 'F-Non Jurisdictional Gathering, Production',
+                                          'G-Gas Gathering', 'H-Housing Authority', 'I-LPG Distribution', 'K-Carbon Dioxide', 'L-Condensate, Crude Oil (Gathering)',
+                                          'M-Municipal Distribution', 'O-Crude Transmission', 'P-Hazardous Liquid Products (Gasoline, Diesel, etc.)',
+                                          'Q-Highly Volatile Liquids (Propane, Ethane, etc.)', 'R-Rural Extension (Distribution)', 'S-Gas Transmission for Municipal Supply',
+                                          'T-Gas Transmission', 'U-Underground Storage (Liquid)', 'V-Underground Storage (Gas)', 'W-Mobile Home Park', 
+                                          'X-Liquified Natural Gas', 'Z-Off Shore - Gas' )
+            And IETRS_Product_Sub_Class__c In ( 'Natural', 'LPG', 'Hydrogen', 'LNG', 'Others', 'Crude', 'Non-HVL', 'HVL', 'Carbon Dioxide', 'Anhydrous Ammonia' )
+            And IETRS_Entity_Sub_Type__c In ( 'Aboveground', 'Apartment', 'Belowground', 'Direct Sale', 'Housing Authority', 'LPG', 'Mobile Home Park', 'Municipal', 
+                                              'Municipal Supply', 'Non-Regulated', 'Private Main System', 'Private Rural Extension', 'Regulated',  
+                                              'State Facilities', 'Transmission')
             And IETRS_OrganizationofRegEntity__r.IETRS_P5_Number__c != Null
             And IETRS_OrganizationofRegEntity__r.IETRS_P5_Number__c != '000000'
             And IETRS_OrganizationofRegEntity__r.IETRS_Company_Id__c != Null
-            And IETRS_OrganizationofRegEntity__c In (
-                Select AccountId
-                From Contact
-                Where IETRS_Contact_Type__c In ('Company Representative', 'TPD Representative')
-            )
+            And IETRS_OrganizationofRegEntity__c In ( Select AccountId
+                                                      From Contact
+                                                      Where IETRS_Contact_Type__c In ('Company Representative', 'TPD Representative')
+                                                    )
         */
-
-        String strQuery = 'Select IETRS_Account_ID__c ,IETRS_OrganizationofRegEntity__r.IETRS_P5_Number__c,IETRS_Total_Miles__c,Parent.IETRS_Account_ID__c ,Name ,IETRS_Entity_Code__c ,IETRS_Jurisdiction__c  ,IETRS_Intra_Interstate__c ,IETRS_Status__c ,IETRS_T4_Permit__c  From Account Where RecordType.Name = \'Regulated Entity - PS\' And IETRS_Status__c In (\'Active\', \'Idle\', \'Abandoned\') And IETRS_Jurisdiction__c != Null And IETRS_Entity_Code__c In ( \'A-Off Shore - Liquid\' ,\'B-Apartments\' ,\'C-Anhydrous Ammonia\' ,\'D-Distribution\' ,\'F-Non Jurisdictional Gathering, Production\' ,\'G-Gas Gathering\' ,\'H-Housing Authority\' ,\'I-LPG Distribution\' ,\'K-Carbon Dioxide\' ,\'L-Condensate, Crude Oil (Gathering)\' ,\'M-Municipal Distribution\' ,\'O-Crude Transmission\' ,\'P-Hazardous Liquid Products (Gasoline, Diesel, etc.)\' ,\'Q-Highly Volatile Liquids (Propane, Ethane, etc.)\' ,\'R-Rural Extension (Distribution)\' ,\'S-Gas Transmission for Municipal Supply\' ,\'T-Gas Transmission\' ,\'U-Underground Storage (Liquid)\' ,\'V-Underground Storage (Gas)\' ,\'W-Mobile Home Park\' ,\'X-Liquified Natural Gas\' ,\'Z-Off Shore - Gas\' ) And IETRS_Product_Sub_Class__c In ( \'Natural\' ,\'LPG\' ,\'Hydrogen\' ,\'LNG\' ,\'Others\' ,\'Crude\' ,\'Non-HVL\' ,\'HVL\' ,\'Carbon Dioxide\' ,\'Anhydrous Ammonia\' ) And IETRS_Entity_Sub_Type__c In ( \'Private Main System\' ,\'Private Rural Extension\' ,\'Municipal\' ,\'LPG\' ,\'Apartment\' ,\'Housing Authority\' ,\'Mobile Home Park\' ,\'State Facilities\' ,\'Transmission\' ,\'Direct Sale\' ,\'Municipal Supply\' ,\'Regulated\' ,\'Non-Regulated\' ,\'Aboveground\' ,\'Belowground\' ) And IETRS_OrganizationofRegEntity__r.IETRS_P5_Number__c != Null And IETRS_OrganizationofRegEntity__r.IETRS_P5_Number__c != \'000000\' And IETRS_OrganizationofRegEntity__r.IETRS_Company_Id__c != Null And IETRS_OrganizationofRegEntity__c In ( Select AccountId From Contact Where IETRS_Contact_Type__c In (\'Company Representative\', \'TPD Representative\') )';
+		/*20230816 Sybile Groome: Added IETRS_System_ID__c and IETRS_Regulated_Entity_Auto_ID__c fields to SOQL in below line*/
+        String strQuery = 'Select IETRS_Account_ID__c,IETRS_System_ID__c,IETRS_Regulated_Entity_Auto_ID__c,IETRS_OrganizationofRegEntity__r.IETRS_P5_Number__c,IETRS_Total_Miles__c,Parent.IETRS_Account_ID__c ,Name ,IETRS_Entity_Code__c ,IETRS_Jurisdiction__c  ,IETRS_Intra_Interstate__c ,IETRS_Status__c ,IETRS_T4_Permit__c  From Account Where RecordType.Name = \'Regulated Entity - PS\' And IETRS_Status__c In (\'Active\', \'Idle\', \'Abandoned\') And IETRS_Jurisdiction__c != Null And IETRS_Entity_Code__c In ( \'A-Off Shore - Liquid\' ,\'B-Apartments\' ,\'C-Anhydrous Ammonia\' ,\'D-Distribution\' ,\'F-Non Jurisdictional Gathering, Production\' ,\'G-Gas Gathering\' ,\'H-Housing Authority\' ,\'I-LPG Distribution\' ,\'K-Carbon Dioxide\' ,\'L-Condensate, Crude Oil (Gathering)\' ,\'M-Municipal Distribution\' ,\'O-Crude Transmission\' ,\'P-Hazardous Liquid Products (Gasoline, Diesel, etc.)\' ,\'Q-Highly Volatile Liquids (Propane, Ethane, etc.)\' ,\'R-Rural Extension (Distribution)\' ,\'S-Gas Transmission for Municipal Supply\' ,\'T-Gas Transmission\' ,\'U-Underground Storage (Liquid)\' ,\'V-Underground Storage (Gas)\' ,\'W-Mobile Home Park\' ,\'X-Liquified Natural Gas\' ,\'Z-Off Shore - Gas\' ) And IETRS_Product_Sub_Class__c In ( \'Natural\' ,\'LPG\' ,\'Hydrogen\' ,\'LNG\' ,\'Others\' ,\'Crude\' ,\'Non-HVL\' ,\'HVL\' ,\'Carbon Dioxide\' ,\'Anhydrous Ammonia\' ) And IETRS_Entity_Sub_Type__c In ( \'Private Main System\' ,\'Private Rural Extension\' ,\'Municipal\' ,\'LPG\' ,\'Apartment\' ,\'Housing Authority\' ,\'Mobile Home Park\' ,\'State Facilities\' ,\'Transmission\' ,\'Direct Sale\' ,\'Municipal Supply\' ,\'Regulated\' ,\'Non-Regulated\' ,\'Aboveground\' ,\'Belowground\' ) And IETRS_OrganizationofRegEntity__r.IETRS_P5_Number__c != Null And IETRS_OrganizationofRegEntity__r.IETRS_P5_Number__c != \'000000\' And IETRS_OrganizationofRegEntity__r.IETRS_Company_Id__c != Null And IETRS_OrganizationofRegEntity__c In ( Select AccountId From Contact Where IETRS_Contact_Type__c In (\'Company Representative\', \'TPD Representative\') )';
         return Database.getQueryLocator(strQuery);
     }
 
     global void execute(Database.BatchableContext bc, List<Account> scope) {
         List<IETRS_PLI_Extract_System__c> lstExtract = new List<IETRS_PLI_Extract_System__c>();
         for(Account acct : scope) {
+            /*20230816 Sybile Groome: SystemID previously set as in below line, now set to System ID or Regulated Entity Auto ID
+              IETRS_LDR_System_Id__c = acct.IETRS_Account_ID__c*/
             IETRS_PLI_Extract_System__c extract = new IETRS_PLI_Extract_System__c(
-                IETRS_LDR_System_Id__c = acct.IETRS_Account_ID__c,
+                IETRS_LDR_System_Id__c = (String.isBlank(acct.IETRS_System_ID__c)) ? acct.IETRS_Regulated_Entity_Auto_ID__c: acct.IETRS_System_ID__c,
                 IETRS_LDR_Operator_Number__c = acct.IETRS_OrganizationofRegEntity__r.IETRS_P5_Number__c.leftPad(6, '0'),
                 IETRS_LDR_Unit_Reps_Number__c = acct.Parent.IETRS_Account_ID__c.leftPad(5, '0'),
                 IETRS_System_Name__c = acct.Name.left(50).rightPad(50, ' '),
